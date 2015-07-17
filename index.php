@@ -40,7 +40,7 @@
 <body onload="$('#main-search').focus();">
 <div id="rachel">
 Rachel
-<div id="ip">http://<?php echo gethostbyname(gethostname()); ?>/</div>
+<div align="right" id="ip"><b>Server IP</b> </br><? echo $_SERVER["SERVER_ADDR"]; ?></div>
 </div>
 
 <div class="haut cf">
