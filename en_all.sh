@@ -2,9 +2,6 @@ sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/ebooks-en modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/hesperian_health modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/iicba modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/infonet modules/
-#uncomment below if not using KA-Lite
-#sudo rsync -av sudo rsync://dev.worldpossible.org/rachelmods/kaos-en modules/
-#sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/khan_health modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/math_expression modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/medline_plus modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/musictheory modules/
@@ -13,8 +10,6 @@ sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/powertyping module
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/practical_action modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/scratch modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/understanding_algebra modules/
-#uncomment below if not using kiwix Wikipedia
-#sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/wikipedia_for_schools modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/ck12 modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/windows_apps modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/PhET modules/
