@@ -16,6 +16,11 @@ sudo mv contentshell/* ./
 
 sudo mkdir rachel/modules
 
-./en_all.sh
+sudo mv en_all.sh modules
+
+cd modules
 
 sudo chmod 775 ./en_all.sh
+
+./en_all.sh
+
