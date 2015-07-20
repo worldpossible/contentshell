@@ -1,23 +1,23 @@
-rsync -avz rsync://dev.worldpossible.org/rachelmods/ebooks-en ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/hesperian_health ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/iicba ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/infonet ./media/RACHEL/rachel/modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/ebooks-en modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/hesperian_health modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/iicba modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/infonet modules/
 #uncomment below if not using KA-Lite
-#rsync -av rsync://dev.worldpossible.org/rachelmods/kaos-en ./media/RACHEL/rachel/modules/
-#rsync -avz rsync://dev.worldpossible.org/rachelmods/khan_health ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/math_expression ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/medline_plus ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/musictheory ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/olpc ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/powertyping ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/practical_action ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/scratch ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/understanding_algebra ./media/RACHEL/rachel/modules/
+#sudo rsync -av sudo rsync://dev.worldpossible.org/rachelmods/kaos-en modules/
+#sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/khan_health modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/math_expression modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/medline_plus modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/musictheory modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/olpc modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/powertyping modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/practical_action modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/scratch modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/understanding_algebra modules/
 #uncomment below if not using kiwix Wikipedia
-#rsync -avz rsync://dev.worldpossible.org/rachelmods/wikipedia_for_schools ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/ck12 ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/windows_apps ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/PhET ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/TED ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/radiolab ./media/RACHEL/rachel/modules/
-rsync -avz rsync://dev.worldpossible.org/rachelmods/sphider_plus.sql ./media/RACHEL/rachel/modules/
+#sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/wikipedia_for_schools modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/ck12 modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/windows_apps modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/PhET modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/TED modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/radiolab modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/sphider_plus.sql modules/
