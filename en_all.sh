@@ -15,6 +15,7 @@ sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/scratch modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/understanding_algebra modules/
 #uncomment below if not using kiwix Wikipedia
 #sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/wikipedia_for_schools modules/
+sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/ck12 modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/windows_apps modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/PhET modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/TED modules/
