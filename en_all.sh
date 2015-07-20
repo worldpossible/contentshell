@@ -16,3 +16,4 @@ sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/PhET modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/TED modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/radiolab modules/
 sudo rsync -avz sudo rsync://dev.worldpossible.org/rachelmods/sphider_plus.sql modules/ 
+
