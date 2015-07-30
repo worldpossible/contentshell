@@ -17,7 +17,7 @@ sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/understanding_algebra .
 sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/wikipedia_for_schools ./
 #sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/wiki_en ./
 sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/ck12 ./
-#sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/windows_apps ./
+sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/windows_apps ./
 sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/PhET ./
 sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/TED ./
 sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/radiolab ./
