@@ -5,7 +5,7 @@ sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/infonet ./
 #uncomment below if not using KA-Lite
 #sudo rsync -av sudo rsync://dev.worldpossible.org/rachelmods/kaos-en ./
 #sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/khan_health ./
-sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/ka-lite ./
+sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/ka-lite /media/RACHEL/rachel/modules/
 sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/math_expression ./
 sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/medline_plus ./
 sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/musictheory ./
