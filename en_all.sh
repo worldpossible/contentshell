@@ -45,3 +45,5 @@ sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/radiolab /media/RACHEL/
 
 sudo rsync -avz rsync://dev.worldpossible.org/rachelmods/sphider_plus.sql /media/RACHEL/rachel/modules/
 
+rsync -avz rsync://dev.worldpossible.org/rachelmods/GCF /media/RACHEL/rachel/modules/
+
