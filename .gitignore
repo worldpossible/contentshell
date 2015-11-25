@@ -1,0 +1,6 @@
+# the database should be generated at
+# build time based on the modules directory
+# - this is done by opening the admin.php
+# page and "saving". If you don't, the
+# modules will show up in alphabetical order.
+admin.sqlite
