@@ -5,9 +5,24 @@
 <title>RACHEL - HOME</title>
 <link rel="stylesheet" href="css/normalize-1.1.3.css">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.min.css">
 <!--[if IE]><script type="text/javascript" src="css3-multi-column.min.js"></script><![endif]-->
 <script src="js/jquery-1.10.2.min.js"></script>
 <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
+<script>
+    // this sets the autocomplete handler for each module's text input field
+    $(document).ready( function () {
+        $(":text").each( function () {
+            var myid = $(this).attr("id");
+            if (myid) {
+                var moddir = myid.replace(/_search$/, "");
+                $("#"+myid).autocomplete({
+                        source: "modules/"+moddir+"/search/suggest.php",
+                });
+            }
+        });
+    });
+</script>
 </head>
 
 <body>
@@ -17,7 +32,7 @@
     <?php
         # some notes to prevent future regression:
         # the PHP suggested gethostbyname(gethostname())
-        # brings back the unhelpful 128.0.0.1 on RPi systems,
+        # brings back the unhelpful 127.0.0.1 on RPi systems,
         # as well as slowing down some Windows installations
         # with a DNS lookup. $_SERVER["SERVER_ADDR"] will just
         # display what's in the user's address bar, so also
@@ -88,13 +103,9 @@
         } catch (Exception $ex) { }
 
 # catch (Exception $ex) {
-
 #            echo "<h2>" . $ex->getMessage() . "</h2>" .
-
 #                 "You may need to change permissions on the RACHEL " .
-
 #                 "root directory using: chmod 777";
-
 #        }
 
         # custom sorting function in common.php
@@ -103,8 +114,9 @@
         # whether or not we were able to get anything
         # from the DB, we show what we found in the filesystem
         foreach (array_values($fsmods) as $mod) {
-            if ($mod['hidden']) { continue; }
+            if ($mod['hidden'] || $mod['nohtmlf']) { continue; }
             $dir  = $mod['dir'];
+            $moddir  = $mod['moddir'];
             include "$mod[dir]/index.htmlf";
         }
 
