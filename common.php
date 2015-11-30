@@ -59,41 +59,19 @@ function getmods_fs() {
 #-------------------------------------------
 function getmods_db() {
 
-    try {
-        $db = new SQLite3("admin.sqlite");
-    } catch (Exception $ex) {
-        echo "<h2>" . $ex->getMessage() . "</h2>" .
-             "<h3>You may need to change permissions on the RACHEL " .
-             "root directory using: chmod 777</h3>";
-    }
+    $db = getdb();
+    $dbmods = array();
 
     # opening the DB worked
-    if (!isset($ex)) {
-
-        # in case this is the first time
-        $db->query("
-            CREATE TABLE IF NOT EXISTS modules (
-                module_id INTEGER PRIMARY KEY,
-                moddir    VARCHAR(255),
-                title     VARCHAR(255),
-                position  INTEGER,
-                hidden    INTEGER
-            )
-        ");
-
-        # get that db module list, and populate fsmods with
-        # the position info from the database
+    if ($db) {
+        # get that db module list
         $rv = $db->query("SELECT * FROM modules");
-        $dbmods = array();
         while ($row = $rv->fetchArray()) {
             $dbmods[$row['moddir']] = $row;
-            if (isset($fsmods[$row['moddir']])) {
-                $fsmods[$row['moddir']]['position'] = $row['position'];
-                $fsmods[$row['moddir']]['hidden'] = $row['hidden'];
-            }
         }
-
     }
+
+    return $dbmods;
 
 }
 
@@ -102,14 +80,21 @@ function getmods_db() {
 #-------------------------------------------
 function getdb() {
 
-    $db = new SQLite3("admin.sqlite");
+    try {
+        $db = new SQLite3("admin.sqlite");
+    } catch (Exception $ex) {
+#        echo "<h2>" . $ex->getMessage() . "</h2>" .
+#             "<h3>You may need to change permissions on the RACHEL " .
+#             "root directory using: chmod 777</h3>";
+        return null;
+    }
 
     # in case this is the first time
     # - a bit wasteful to do this every time
     # but it saves errors in the log if the
     # db file gets lost and people don't
     # go to admin.php to re-initialize it
-    $db->query("
+    $db->exec("
         CREATE TABLE IF NOT EXISTS modules (
             module_id INTEGER PRIMARY KEY,
             moddir    VARCHAR(255),

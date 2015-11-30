@@ -11,6 +11,9 @@ if (!( isset($_SERVER['PHP_AUTH_USER'])
     header('WWW-Authenticate: Basic realm="RACHEL Admin"');
     header('HTTP/1.0 401 Unauthorized');
     echo 'You need permission to view this page.';
+# even thoug it works to send html (with a redirect) instead of text,
+# this apparently breaks login: credentials don't stick until you
+# get re-logged out without the redirect
 #    echo '<html><head><title>You need permission to view this page</title>';
 #    echo '</head>';
 #    echo '<meta http-equiv="refresh" content="2;URL=index.php"></head>';
@@ -18,12 +21,19 @@ if (!( isset($_SERVER['PHP_AUTH_USER'])
     exit;
 }
 
-# if we've got a list of moddirs, we update the DB to
-# reflect that ordering
+# If we've got a list of moddirs, we update the DB to
+# reflect that ordering. This all takes place as an AJAX
+# request, and the success/failure is reflected in the
+# "Save" button on the page.
 if (isset($_GET['moddirs'])) {
+    # if we don't do this, even caught db problems
+    # will print to the browser (as a "200 OK"), breaking
+    # our ability to signal failure
+    ini_set('display_errors', '0');
     $position = 1;
     try {
-        $db = new SQLite3("admin.sqlite");
+        $db = getdb();
+        if (!$db) { throw new Exception($db->lastErrorMsg); }
         # figure out which modules to hide
         $hidden= array();
         foreach (explode(",", $_GET['hidden']) as $moddir) {
@@ -33,22 +43,23 @@ if (isset($_GET['moddirs'])) {
         foreach (explode(",", $_GET['moddirs']) as $moddir) {
             $moddir = $db->escapeString($moddir);
             if (isset($hidden[$moddir])) { $is_hidden = 1; } else { $is_hidden = 0; }
-            $rv = $db->query(
+            $rv = $db->exec(
                 "UPDATE modules SET position = '$position', hidden = '$is_hidden'" .
                 " WHERE moddir = '$moddir'"
             );
-            if (!$rv) { throw new Exception('Query Failed'); }
+            if (!$rv) { throw new Exception($db->lastErrorMsg()); }
             ++$position;
         }
     } catch (Exception $ex) {
+        error_log($ex);
         header("HTTP/1.1 500 Internal Server Error");    
         exit;
     }
     header("HTTP/1.1 200 OK");    
+    exit;
 }
 
-?>
-<!DOCTYPE html>
+?><!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -70,6 +81,9 @@ if (isset($_GET['moddirs'])) {
     }
     #sortable li span { position: absolute; margin-left: -1.3em; }
     #sortable .checkbox { position: absolute; right: 10px; top: 5px; font-size: small; color: gray; }
+    .error { border: 1px solid #c00; background: #fee; color: #c00; padding: 10px; }
+    .error h2, .error h3 { margin: 0 0 10px 0; }
+    .error p { margin: 0 }
 </style>
 <script src="js/jquery-1.10.2.min.js"></script>
 <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
@@ -108,7 +122,7 @@ if (isset($_GET['moddirs'])) {
                 $("button").html("&#10004; Saved");
             },
             error: function() {
-                $("button").css("color", "red");
+                $("button").css("color", "#c00");
                 $("button").html("X Not Saved - Internal Error");
             }
         });
@@ -130,115 +144,110 @@ $basedir = "modules";
 # if there's no modules directory, we can't do anything
 if (is_dir($basedir)) {
 
-    $fsmods = getmods_fs();
-
-    # next we get a list of all modules in the database,
-    # initializing things as needed
-    try {
-        $db = new SQLite3("admin.sqlite");
-    } catch (Exception $ex) {
-        echo "<h2>" . $ex->getMessage() . "</h2>" .
-             "<h3>You may need to change permissions on the RACHEL " .
-             "root directory using: chmod 777</h3>";
+    # at this point, checking the db is just informational
+    # -- and we warn about it at the top - but later we
+    # will try to actually read/write to the DB and we
+    # will need to check this before doing those
+    $db = getdb();
+    if (!$db) {
+        echo "<div class=\"error\">\n";
+        echo "<h2>Couldn't Open Database</h2>\n";
+        echo "<h3>You probably need to <tt>chmod 777</tt>\n";
+        echo "the web root directory</h3>\n";
+        echo "<p>Until you do, saving the sort order and hiding modules\n";
+        echo "will not work.<br>Everything in the modules directory will show\n";
+        echo "up in alphabetical order\n</p></div>";
+    } else {
+        # we do a test write so we can signal problems to the user
+        $rv = $db->exec("CREATE TABLE writetest (col INTEGER)");
+        if (!$rv) {
+            echo "<div class=\"error\">\n";
+            echo "<h2>Couldn't Write To Database</h2>\n";
+            echo "<h3>You probably need to <tt>chmod 666 admin.sqlite</tt>\n";
+            echo "and <tt>chmod 777</tt> the web root directory</h3>\n";
+            echo "<p>Until you do, saving the sort order and hiding modules\n";
+            echo "will not work.<br>Everything in the modules directory will show\n";
+            echo "up in alphabetical order\n</p></div>";
+        } else {
+           $db->exec("DROP TABLE writetest"); 
+        }
     }
 
-    # opening the DB worked
-    if (!isset($ex)) {
+    $fsmods = getmods_fs();
+    $dbmods = getmods_db();
 
-        # in case this is the first time
-        $db->query("
-            CREATE TABLE IF NOT EXISTS modules (
-                module_id INTEGER PRIMARY KEY,
-                moddir    VARCHAR(255),
-                title     VARCHAR(255),
-                position  INTEGER,
-                hidden    INTEGER
-            )
-        ");
-
-        # get that db module list, and populate fsmods with
-        # the position info from the database
-        $rv = $db->query("SELECT * FROM modules");
-        $dbmods = array();
-        #echo "<p>Found in DB:</p><ul>";
-        while ($row = $rv->fetchArray()) {
-            $dbmods[$row['moddir']] = $row;
-            if (isset($fsmods[$row['moddir']])) {
-                $fsmods[$row['moddir']]['position'] = $row['position'];
-                $fsmods[$row['moddir']]['hidden'] = $row['hidden'];
-            }
-            #echo "<li> $row[moddir] - $row[position]</li>";
+    foreach (array_keys($dbmods) as $moddir) {
+        if (isset($fsmods[$moddir])) {
+            $fsmods[$moddir]['position'] = $dbmods[$moddir]['position'];
+            $fsmods[$moddir]['hidden'] = $dbmods[$moddir]['hidden'];
         }
-        #echo "</ul>";
+    }
 
-        # sorting function in the common.php module
-        uasort($fsmods, 'bypos');
+    # sorting function in the common.php module
+    uasort($fsmods, 'bypos');
 
-        # display the sortable list
-        $disabled = " disabled";
-        $found_nohtmlf = false;
-        echo "<p>Found in /modules/:</p><ul id=\"sortable\">";
+    # display the sortable list
+    $disabled = " disabled";
+    $found_nohtmlf = false;
+    echo "<p>Found in /modules/:</p><ul id=\"sortable\">";
+    foreach (array_keys($fsmods) as $moddir) {
+        if ($fsmods[$moddir]['nohtmlf']) {
+            $found_nohtmlf = true;
+            continue;
+        }
+        echo "<li id=\"$moddir\" class=\"ui-state-default\">";
+        if ($fsmods[$moddir]['hidden']) {
+            $checked = " checked";
+        } else {
+            $checked = "";
+        }
+        echo "<span class=\"checkbox\"><input type=\"checkbox\" id=\"$moddir-hidden\"$checked> ";
+        echo "<label for=\"$moddir-hidden\">hide</label></span>";
+        echo "<span class=\"ui-icon ui-icon-arrowthick-2-n-s\"></span>";
+        echo "$moddir - " . $fsmods[$moddir]['title'];
+        if ($fsmods[$moddir]['position'] < 1) {
+            echo " <small style=\"color: green;\">(new)</small>";
+            $disabled = "";
+        }
+        echo "</li>";
+    }
+    echo "</ul>";
+    
+    echo "<button onclick=\"saveState();\"$disabled>Save Changes</button>";
+
+    if ($found_nohtmlf) {
+        echo "<h3>The following modules were ignored because they had no index.htmlf</h3><ul>";
         foreach (array_keys($fsmods) as $moddir) {
             if ($fsmods[$moddir]['nohtmlf']) {
-                $found_nohtmlf = true;
-                continue;
+                echo "<li> $moddir </li>";
             }
-            echo "<li id=\"$moddir\" class=\"ui-state-default\">";
-            if ($fsmods[$moddir]['hidden']) {
-                $checked = " checked";
-            } else {
-                $checked = "";
-            }
-            echo "<span class=\"checkbox\"><input type=\"checkbox\" id=\"$moddir-hidden\"$checked> ";
-            echo "<label for=\"$moddir-hidden\">hide</label></span>";
-            echo "<span class=\"ui-icon ui-icon-arrowthick-2-n-s\"></span>";
-            echo "$moddir - " . $fsmods[$moddir]['title'];
-            if ($fsmods[$moddir]['position'] < 1) {
-                echo " <small style=\"color: green;\">(new)</small>";
-                $disabled = "";
-            }
-            echo "</li>";
         }
-        echo "</ul>";
-        
-        echo "<button onclick=\"saveState();\"$disabled>Save Changes</button>";
+    }
+    echo "</ul>";
 
-        if ($found_nohtmlf) {
-            echo "<h3>The following modules were ignored because they had no index.htmlf</h3><ul>";
-            foreach (array_keys($fsmods) as $moddir) {
-                if ($fsmods[$moddir]['nohtmlf']) {
-                    echo "<li> $moddir </li>";
-                }
-            }
-        }
-        echo "</ul>";
+    # we update the db with whatever we've seen in the filesystem
+    if ($db) {
 
         # insert anything we found in the fs that wasn't in the db
-        #echo "<p>Added to DB:</p><ul>";
         foreach (array_keys($fsmods) as $moddir) {
             if (!isset($dbmods[$moddir])) {
                 $db_moddir =   $db->escapeString($moddir);
                 $db_title  =   $db->escapeString($fsmods[$moddir]['title']);
                 $db_position = $db->escapeString($fsmods[$moddir]['position']);
-                $db->query(
+                $db->exec(
                     "INSERT into modules (moddir, title, position, hidden) " .
                     "VALUES ('$db_moddir', '$db_title', '$db_position', '0')"
                 );
-                #echo "<li> $moddir</li>";
             }
         }
-        #echo "</ul>";
+
         # delete anything from the db that wasn't in the fs
-        #echo "<p>Removed from DB:</p><ul>";
         foreach (array_keys($dbmods) as $moddir) {
             if (!isset($fsmods[$moddir])) {
                 $db_moddir =   $db->escapeString($moddir);
-                $db->query("DELETE FROM modules WHERE moddir = '$db_moddir'");
-                #echo "<li> $moddir</li>";
+                $db->exec("DELETE FROM modules WHERE moddir = '$db_moddir'");
             }
         }
-        #echo "</ul>";
-
 
     }
 

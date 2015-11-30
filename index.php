@@ -80,33 +80,21 @@
     
     $fsmods = getmods_fs();
 
+    # if there were any modules found in the filesystem
     if ($fsmods) {
 
-        # next we go to the database
-        try {
+        # get a list from the databases (where the sorting
+        # and visibility is stored)
+        $dbmods = getmods_db();
 
-            $db = getdb();
-
-            # find the sort order and visibility state
-            $rv = $db->query("SELECT * FROM modules");
-            if ($rv) {
-                $dbmods = array();
-                while ($row = $rv->fetchArray()) {
-                    $dbmods[$row['moddir']] = $row;
-                    if (isset($fsmods[$row['moddir']])) {
-                        $fsmods[$row['moddir']]['position'] = $row['position'];
-                        $fsmods[$row['moddir']]['hidden'] = $row['hidden'];
-                    }
-                }
+        # populate the module list from the filesystem 
+        # with the visibility/sorting info from the database
+        foreach (array_keys($dbmods) as $moddir) {
+            if (isset($fsmods[$moddir])) {
+                $fsmods[$moddir]['position'] = $dbmods[$moddir]['position'];
+                $fsmods[$moddir]['hidden'] = $dbmods[$moddir]['hidden'];
             }
-
-        } catch (Exception $ex) { }
-
-# catch (Exception $ex) {
-#            echo "<h2>" . $ex->getMessage() . "</h2>" .
-#                 "You may need to change permissions on the RACHEL " .
-#                 "root directory using: chmod 777";
-#        }
+        }
 
         # custom sorting function in common.php
         uasort($fsmods, 'bypos');
