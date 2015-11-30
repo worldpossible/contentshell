@@ -1,0 +1,10 @@
+<div class="indexmodule">
+
+    <a href="<?php echo $dir ?>/index.html"><img src="<?php echo $dir ?>/nope.png" alt="Test Module 2"></a>
+
+    <h2><a href="<?php echo $dir ?>/index.html">Test Module 2</a></h2>
+
+    <p>This module is just for testing</p>
+
+</div>
+
