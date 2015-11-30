@@ -83,9 +83,6 @@ function getdb() {
     try {
         $db = new SQLite3("admin.sqlite");
     } catch (Exception $ex) {
-#        echo "<h2>" . $ex->getMessage() . "</h2>" .
-#             "<h3>You may need to change permissions on the RACHEL " .
-#             "root directory using: chmod 777</h3>";
         return null;
     }
 

@@ -189,41 +189,41 @@ if (is_dir($basedir)) {
     # display the sortable list
     $disabled = " disabled";
     $found_nohtmlf = false;
-    echo "<p>Found in /modules/:</p><ul id=\"sortable\">";
+    echo "<p>Found in /modules/:</p><ul id=\"sortable\">\n";
     foreach (array_keys($fsmods) as $moddir) {
         if ($fsmods[$moddir]['nohtmlf']) {
             $found_nohtmlf = true;
             continue;
         }
-        echo "<li id=\"$moddir\" class=\"ui-state-default\">";
+        echo "<li id=\"$moddir\" class=\"ui-state-default\">\n";
         if ($fsmods[$moddir]['hidden']) {
             $checked = " checked";
         } else {
             $checked = "";
         }
-        echo "<span class=\"checkbox\"><input type=\"checkbox\" id=\"$moddir-hidden\"$checked> ";
-        echo "<label for=\"$moddir-hidden\">hide</label></span>";
-        echo "<span class=\"ui-icon ui-icon-arrowthick-2-n-s\"></span>";
-        echo "$moddir - " . $fsmods[$moddir]['title'];
+        echo "\t<span class=\"checkbox\"><input type=\"checkbox\" id=\"$moddir-hidden\"$checked>\n";
+        echo "\t<label for=\"$moddir-hidden\">hide</label></span>\n";
+        echo "\t<span class=\"ui-icon ui-icon-arrowthick-2-n-s\"></span>\n";
+        echo "\t$moddir - " . $fsmods[$moddir]['title'];
         if ($fsmods[$moddir]['position'] < 1) {
-            echo " <small style=\"color: green;\">(new)</small>";
+            echo "<small style=\"color: green;\">(new)</small>\n";
             $disabled = "";
         }
-        echo "</li>";
+        echo "</li>\n";
     }
-    echo "</ul>";
+    echo "</ul>\n";
     
-    echo "<button onclick=\"saveState();\"$disabled>Save Changes</button>";
+    echo "<button onclick=\"saveState();\"$disabled>Save Changes</button>\n";
 
     if ($found_nohtmlf) {
-        echo "<h3>The following modules were ignored because they had no index.htmlf</h3><ul>";
+        echo "<h3>The following modules were ignored because they had no index.htmlf</h3><ul>\n";
         foreach (array_keys($fsmods) as $moddir) {
             if ($fsmods[$moddir]['nohtmlf']) {
-                echo "<li> $moddir </li>";
+                echo "<li> $moddir </li>\n";
             }
         }
+        echo "</ul>\n";
     }
-    echo "</ul>";
 
     # we update the db with whatever we've seen in the filesystem
     if ($db) {
