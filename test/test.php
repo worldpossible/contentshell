@@ -11,47 +11,55 @@ echo "Starting tests...\n";
 
 init();
 
-echo str_pad("Testing index.php with no modules, no db", 60, ".");
+testmsg("Testing index.php with no modules, no db");
 $html = shell_exec("php index.php");
-if (preg_match("/<!DOCTYPE.+No modules found.+<\/html>/s", $html) == 1) {
-    pass();
-} else {
-    fail();
-}
+passfail(preg_match("/<!DOCTYPE.+No modules found.+<\/html>/s", $html) == 1);
 
-# try index.php two test modules, no db
+testmsg("Testing index.php with two modules, no db");
 rename("test/mod_one", "modules/mod_one") or error("Couldn't move 'mod_one'");
 rename("test/mod_two", "modules/mod_two") or error("Couldn't move 'mod_two'");
-echo str_pad("Testing index.php with two modules, no db", 60, ".");
 $html = shell_exec("php index.php");
-if (preg_match("/<!DOCTYPE.+Test Module 1.+Test Module 2.+<\/html>/s", $html) == 1) {
-    pass();
-} else {
-    fail();
-} 
+passfail(preg_match("/<!DOCTYPE.+Test Module 1.+Test Module 2.+<\/html>/s", $html) == 1);
 
-echo str_pad("Testing index.php created db", 60, ".");
-if (file_exists("admin.sqlite")) {
-    pass();
-} else {
-    fail();
-} 
+testmsg("Testing index.php created db");
+passfail(file_exists("admin.sqlite"));
 unlink("admin.sqlite") or error("Couldn't remove test db file");
 
-echo str_pad("Testing admin.php with two modules, no db", 60, ".");
+testmsg("Testing admin.php with two modules, no db");
 $html = shell_exec("PHP_AUTH_USER=root PHP_AUTH_PW=rachel php admin.php");
-if (preg_match("/<!DOCTYPE.+mod_one - Test Module 1.+new.+mod_two - Test Module 2.+new.+<\/html>/s", $html) == 1) {
-    pass();
-} else {
-    fail();
-}
+passfail(preg_match("/<!DOCTYPE.+mod_one - Test Module 1.+new.+mod_two - Test Module 2.+new.+<\/html>/s", $html) == 1);
 
-echo str_pad("Testing admin.php created db", 60, ".");
-if (file_exists("admin.sqlite")) {
-    pass();
-} else {
-    fail();
-} 
+testmsg("Testing admin.php created db");
+passfail(file_exists("admin.sqlite"));
+
+testmsg("Testing admin.php saving module orders");
+$html = shell_exec(
+    "PHP_AUTH_USER=root PHP_AUTH_PW=rachel " .
+    "php -e -r '\$_GET[\"moddirs\"] = \"mod_two,mod_one\"; " .
+    "include \"admin.php\";'"
+);
+passfail($html == "");
+
+testmsg("Testing admin.php reading saved module order");
+$html = shell_exec("PHP_AUTH_USER=root PHP_AUTH_PW=rachel php admin.php");
+passfail(preg_match("/<!DOCTYPE.+mod_two - Test Module 2.+mod_one - Test Module 1.+<\/html>/s", $html) == 1);
+
+testmsg("Testing index.php reading saved module order");
+$html = shell_exec("php index.php");
+passfail(preg_match("/<!DOCTYPE.+Test Module 2.+Test Module 1.+<\/html>/s", $html) == 1);
+
+testmsg("Testing admin.php hiding both modules");
+$html = shell_exec(
+    "PHP_AUTH_USER=root PHP_AUTH_PW=rachel " .
+    "php -e -r '\$_GET[\"moddirs\"] = \"mod_one,mod_two\"; " .
+    "\$_GET[\"hidden\"] = \"mod_one,mod_two\"; " .
+    "include \"admin.php\";'"
+);
+passfail($html == "");
+
+testmsg("Testing index.php reading all modules hidden");
+$html = shell_exec("php index.php");
+passfail(preg_match("/<!DOCTYPE.+No modules found.+<\/html>/s", $html) == 1);
 
 if ($fail == 0) {
     echo "All Tests Passed!\n";
@@ -75,6 +83,8 @@ function init() {
 function cleanup() {
 
     global $error;
+
+    echo "Cleaning up...\n";
 
     if (file_exists("modules.tmp")) {
         if (file_exists("modules/mod_one")) {
@@ -101,16 +111,15 @@ function cleanup() {
     exit;
 }
 
-function fail() {
-    global $fail;
-    ++$fail;
-    echo " FAIL\n";
-}
-
-function pass() {
-    global $pass;
-    ++$pass;
-    echo " PASS\n";
+function passfail($bool) {
+    global $pass, $fail;
+    if ($bool) {
+        ++$pass;
+        echo " PASS\n";
+    } else {
+        ++$fail;
+        echo " FAIL\n";
+    }
 }
 
 # this means there was an internal error
@@ -119,6 +128,10 @@ function error($msg) {
     global $error;
     ++$error;
     echo "$msg\n";
+}
+
+function testmsg($msg) {
+    echo str_pad($msg, 60, ".");
 }
 
 ?>

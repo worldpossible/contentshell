@@ -101,18 +101,21 @@
 
         # whether or not we were able to get anything
         # from the DB, we show what we found in the filesystem
+        $modcount = 0;
         foreach (array_values($fsmods) as $mod) {
             if ($mod['hidden'] || $mod['nohtmlf']) { continue; }
             $dir  = $mod['dir'];
             $moddir  = $mod['moddir'];
             include "$mod[dir]/index.htmlf";
+            ++$modcount;
         }
 
-    } else {
+    }
 
+    if ($modcount == 0) {
         echo "<h2>No modules found.</h2>\n";
-        echo "Please check your modules directory.\n";
-
+        echo "Please check there are modules in the modules directory,\n";
+        echo "and that they are not all hidden on the admin page.\n";
     }
 
 ?>
