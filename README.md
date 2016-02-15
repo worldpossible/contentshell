@@ -24,3 +24,6 @@ sudo chmod 775 ./en_all.sh
 
 ./en_all.sh
 
+# license
+
+Creative Commons - BY, SA, NC
