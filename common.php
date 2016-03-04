@@ -119,4 +119,82 @@ if (!isset($a['position'])) { $a['position'] = 0; }
     }
 }
 
+function availlang() {
+
+    $basedir = "lang";
+    $default_lang = "en";
+
+    # if there's no options, don't bother trying
+    # -- this actually means we'll render with blanks
+    # for all translated text -- fatal error?
+    if (!is_dir($basedir)) { return [ $default_lang ]; }
+
+    # first we get a list of all languages available (from the lang directory)
+    $available_languages = array();
+    $handle = opendir($basedir);
+    while ($moddir = readdir($handle)) {
+        if (preg_match("/^lang\.(..)\.php$/", $moddir, $matches)) {
+            array_push($available_languages, $matches[1]);
+        }
+    }
+
+    # if there's one option, return it
+    if (sizeof($available_languages) == 1) { return [ $available_languages[0] ]; }
+
+    return $available_languages;
+
+}
+
+#-------------------------------------------
+# figure out the preferred language for this user
+#-------------------------------------------
+function getlang() {
+
+    # we want the language codes as keys, not values
+    $available_languages = array_flip(availlang());
+    $langs;
+
+    # now we pull the languages from header
+    preg_match_all('~([\w-]+)(?:[^,\d]+([\d.]+))?~',
+        strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']), $matches, PREG_SET_ORDER);
+
+    #print("<h1>" . $_SERVER['HTTP_ACCEPT_LANGUAGE'] . "</h1>");
+
+    # this logic gets the qvalue for each language
+    foreach($matches as $match) {
+
+        list($a, $b) = explode('-', $match[1]) + array('', '');
+
+        $value = isset($match[2]) ? (float) $match[2] : 1.0;
+
+        if(isset($available_languages[$match[1]])) {
+            $langs[$match[1]] = $value;
+            continue;
+        }
+
+        # dialects (e.g. en-US) - don't overwrite if we've already got
+        # a match on base language
+        if(!isset($langs[$a]) && isset($available_languages[$a])) {
+            $langs[$a] = $value - 0.1;
+        }
+
+    }
+
+    # default to english if there's no match 
+    if (!is_array($langs)) {
+        return "en";
+    }
+
+    # order them by q weight
+    arsort($langs);
+
+    # return the first
+    return key($langs);
+
+}
+
+
+
+
+
 ?>
