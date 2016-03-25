@@ -65,7 +65,11 @@
         }
 
     ?>
-    <a href="admin.php" style="position: absolute; font-size: small; bottom: 6px; right: 8px; color: #999;"><?php echo $lang['admin'] ?></a>
+    <div style="position: absolute; font-size: small; bottom: 6px; right: 8px;">
+    <a href="admin.php" style="color: #999;"><?php echo $lang['admin'] ?></a> |
+    <a href="stats.php" style="color: #999;"><?php echo $lang['stats'] ?></a> |
+    <a href="version.php" style="color: #999;"><?php echo $lang['version'] ?></a>
+    </div>
     </div>
 </div>
 

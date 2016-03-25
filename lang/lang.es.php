@@ -9,6 +9,8 @@ $lang['home'] = 'Portada';
 $lang['about'] = 'Acerca';
 $lang['server-address'] = 'Dirección del Servidor';
 $lang['admin'] = 'Administración';
+$lang['stats'] = 'Estadísticas';
+$lang['version'] = 'Versión';
 $lang['months'] = [
     'Null', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
