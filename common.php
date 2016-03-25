@@ -16,8 +16,16 @@ function getmods_fs() {
     while ($moddir = readdir($handle)) {
         if (preg_match("/^\./", $moddir)) continue; // skip hidden files
         if (is_dir("$basedir/$moddir")) { // look in dirs only
-            if (file_exists("$basedir/$moddir/index.htmlf")) { // check for index fragment
-                $content = file_get_contents("$basedir/$moddir/index.htmlf");
+            if (file_exists("$basedir/$moddir/index.htmlf")) {
+                # old name - deprecated
+                $indexhtmlf = "$basedir/$moddir/index.htmlf";
+            } else {
+                # new name - less confusing, and
+                # will get syntax highlighting in editors
+                $indexhtmlf = "$basedir/$moddir/rachelmod.html";
+            }
+            if (file_exists($indexhtmlf)) { // check for index fragment
+                $content = file_get_contents($indexhtmlf);
                 preg_match("/<h2>(.+)<\/h2>/", $content, $match);
                 $title = "";
                 if (isset($match[1])) {
