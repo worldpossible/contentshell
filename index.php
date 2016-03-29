@@ -119,7 +119,7 @@
             } else {
                 # new name - less confusing, and
                 # will get syntax highlighting in editors
-                include "$mod[dir]/rachelmod.html";
+                include "$mod[dir]/rachel-index.php";
             }
             ++$modcount;
         }

@@ -22,7 +22,7 @@ function getmods_fs() {
             } else {
                 # new name - less confusing, and
                 # will get syntax highlighting in editors
-                $indexhtmlf = "$basedir/$moddir/rachelmod.html";
+                $indexhtmlf = "$basedir/$moddir/rachel-index.php";
             }
             if (file_exists($indexhtmlf)) { // check for index fragment
                 $content = file_get_contents($indexhtmlf);
