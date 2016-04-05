@@ -14,8 +14,11 @@ function getmods_fs() {
     $fsmods = array();
     $handle = opendir($basedir);
     while ($moddir = readdir($handle)) {
+
         if (preg_match("/^\./", $moddir)) continue; // skip hidden files
+
         if (is_dir("$basedir/$moddir")) { // look in dirs only
+
             if (file_exists("$basedir/$moddir/index.htmlf")) {
                 # old name - deprecated
                 $indexhtmlf = "$basedir/$moddir/index.htmlf";
@@ -24,15 +27,30 @@ function getmods_fs() {
                 # will get syntax highlighting in editors
                 $indexhtmlf = "$basedir/$moddir/rachel-index.php";
             }
+
             if (file_exists($indexhtmlf)) { // check for index fragment
+
                 $content = file_get_contents($indexhtmlf);
-                preg_match("/<h2>(.+)<\/h2>/", $content, $match);
+
+                # pull the title from the file
                 $title = "";
+                preg_match("/<h2>(.+)<\/h2>/", $content, $match);
                 if (isset($match[1])) {
-                    $title = preg_replace("/<?php.+?>/", "", $match[1]); // this removes and php from the title
-                    $title = preg_replace("/<.+?>/", "", $title); // this removes any html from the title
+                    // this removes any php from the title
+                    $title = preg_replace("/<?php.+?>/", "", $match[1]);
+                    // this removes any html from the title
+                    $title = preg_replace("/<.+?>/", "", $title);
                 }
-                if (!$title) { $title = $moddir; } // if we didn't get a title, use the moddir name
+                // if we didn't get a title, use the moddir name
+                if (!$title) { $title = $moddir; }
+
+                # pull the version from the file
+                $version = "";
+                preg_match("/version\s*=\s*([\d\.]+)/", $content, $match);
+                if (isset($match[1])) {
+                    $version = $match[1];
+                }
+
                 // save info about this module
                 $fsmods{ $moddir } = array(
                     'dir'      => "$basedir/$moddir",
@@ -41,6 +59,7 @@ function getmods_fs() {
                     'position' => 0,
                     'hidden'   => false,
                     'nohtmlf'  => false,
+                    'version'  => $version,
                 );
             } else {
                 # save info about this incomplete module
@@ -51,6 +70,7 @@ function getmods_fs() {
                     'position' => 0,
                     'hidden'   => true,
                     'nohtmlf'  => true,
+                    'version'  => "",
                 );
             }
         }
@@ -147,7 +167,9 @@ function availlang() {
     }
 
     # if there's one option, return it
-    if (sizeof($available_languages) == 1) { return [ $available_languages[0] ]; }
+    if (sizeof($available_languages) == 1) {
+        return [ $available_languages[0] ];
+    }
 
     return $available_languages;
 
@@ -200,9 +222,5 @@ function getlang() {
     return key($langs);
 
 }
-
-
-
-
 
 ?>
