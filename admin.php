@@ -57,6 +57,19 @@ if (isset($_GET['moddirs'])) {
     }
     header("HTTP/1.1 200 OK");    
     exit;
+
+# We also allow shutting down the server so as to avoid
+# damaging the SD/HD. This requires that www-data has
+# sudo access to /sbin/shutdown, which should be set up
+# automatically during rachelpiOS installation
+} else if (isset($_POST['shutdown'])) {
+    exec("sudo /sbin/shutdown now", $exec_out, $exec_err);
+    if ($exec_err) {
+        echo 'Unable to shutdown server.';
+    } else {
+        echo 'The server going down now.';
+    }
+    exit;
 }
 
 ?><!DOCTYPE html>
@@ -255,6 +268,21 @@ if (is_dir($basedir)) {
 
     echo "<h2>No module directory found.</h2>\n";
 
+}
+
+# Totally separate from module management, we also offer
+# a shutdown option for raspberry pi systems (which otherwise
+# might corrupt themselves when unplugged)
+if (1) { #file_exists("/usr/bin/raspi-config")) {
+    echo '
+        <div style="margin: 50px 0 50px 0; padding: 10px; border: 1px solid red; background: #fee;">
+        <form action="admin.php" method="post">
+        <input type=submit name="shutdown" value="Shutdown System" onclick="if (!confirm(\'Are you sure you want to shut down?\')) { return false; }">
+        </form>
+        <p>This will initiate a shutdown of the server. This is safer for the SD/HD than just unplugging.
+        To restart, you must unplug your system and plug it back in.</p>
+        </div>
+    ';
 }
 
 ?>
