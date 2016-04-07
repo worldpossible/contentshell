@@ -48,7 +48,7 @@
 <table>
 <tr><td>Hardware</td><td><?php echo $hardware ?></td></tr>
 <tr><td>OS</td><td><?php echo $os ?></td></tr>
-<tr><td>RACHEL Installer</td><td></td></tr>
+<tr><td>RACHEL Installer</td><td><?php passthru("cat /etc/rachelinstaller-version") ?></td></tr>
 <tr><td>KA Lite</td><td><?php passthru("cat /etc/kalite-version") ?></tr>
 <tr><td>Kiwix</td><td><?php passthru("cat /etc/kiwix-version") ?></td></tr>
 <tr><td>Content Shell</td><td>2016.04.07</td></tr>
