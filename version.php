@@ -17,10 +17,10 @@
 
     # this should work on debian variants
     foreach (array_values($output) as $line) {
-	if (preg_match("/PRETTY_NAME=\"(.+?)\"/", $line, $matches)) {
-	    $os = $matches[1];
-	    break;
-	}
+        if (preg_match("/PRETTY_NAME=\"(.+?)\"/", $line, $matches)) {
+            $os = $matches[1];
+            break;
+        }
     }
 
     # this should work on redhat variants
@@ -29,15 +29,29 @@
     # this works on remaining unix systems (i.e. Mac OS)
     if (!$os) { $os = exec("uname -srmp"); }
 
+    # this gets the hardware version on rpi systems
+    $hardware = "";
+    unset($output, $matches);
+    exec("dmesg | grep 'Machine model'", $output);
+    if (preg_match("/Machine model: (.+)/", $output[0], $matches)) {
+        $hardware = $matches[1];
+    } else {
+        exec("arch", $output);
+        if ($output) {
+            $hardware = $output[0];
+        }
+    }
+
 ?>
 
 <h1>RACHEL Version Info</h1>
 <table>
+<tr><td>Hardware</td><td><?php echo $hardware ?></td></tr>
 <tr><td>OS</td><td><?php echo $os ?></td></tr>
 <tr><td>RACHEL Installer</td><td></td></tr>
 <tr><td>KA Lite</td><td><?php passthru("cat /etc/kalite-version") ?></tr>
 <tr><td>Kiwix</td><td><?php passthru("cat /etc/kiwix-version") ?></td></tr>
-<tr><td>Content Shell</td><td></td></tr>
+<tr><td>Content Shell</td><td>2016.04.07</td></tr>
 
 <?php
     # get module info
