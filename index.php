@@ -11,7 +11,6 @@
 <link rel="stylesheet" href="css/normalize-1.1.3.css">
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.min.css">
-<!--[if IE]><script type="text/javascript" src="css3-multi-column.min.js"></script><![endif]-->
 <script src="js/jquery-1.10.2.min.js"></script>
 <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
 <script>
