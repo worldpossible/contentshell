@@ -12,3 +12,10 @@ rsync -Pavz rsync://dev.worldpossible.org/rachelmods/ap_didact_es /media/RACHEL/
 rsync -Pavz rsync://dev.worldpossible.org/rachelmods/cnbguatemala-es /media/RACHEL/rachel/modules/.
 rsync -Pavz rsync://dev.worldpossible.org/rachelmods/file_share-es /media/RACHEL/rachel/modules/.
 rsync -Pavz rsync://dev.worldpossible.org/rachelmods/kalite-es /media/RACHEL/rachel/modules/.
+rsync -Pavz rsync://dev.worldpossible.org/rachelmods/wikipedia-es /media/RACHEL/rachel/modules/.
+rsync -Pavz rsync://dev.worldpossible.org/rachelmods/educalab-es /media/RACHEL/rachel/modules/.
+rsync -Pavz rsync://dev.worldpossible.org/rachelmods/blockly_games-es /media/RACHEL/rachel/modules/.
+rsync -Pavz rsync://dev.worldpossible.org/rachelmods/educalab_es /media/RACHEL/rachel/modules/.
+rsync -Pavz rsync://dev.worldpossible.org/rachelmods/wikivoyage-es /media/RACHEL/rachel/modules/.
+
+##wikivoyage and wikipedia must be added to kiwix library
