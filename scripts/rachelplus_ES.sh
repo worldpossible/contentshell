@@ -9,6 +9,8 @@ rsync -Pavz rsync://dev.worldpossible.org/rachelmods/wikipedia-es /media/RACHEL/
 sudo cp /media/RACHEL/rachel/modules/wikipedia-es/rachel-index.php /media/RACHEL/rachel/modules/wikipedia-es/index.htmlf
 
 rsync -Pavz rsync://dev.worldpossible.org/rachelmods/ebooks-es /media/RACHEL/rachel/modules/.
+rsync -Pavz rsync://dev.worldpossible.org/rachelmods/windows_apps-es /media/RACHEL/rachel/modules/.
+
 rsync -Pavz rsync://dev.worldpossible.org/rachelmods/soluciones_es /media/RACHEL/rachel/modules/.
 rsync -Pavz rsync://dev.worldpossible.org/rachelmods/wikihow-es /media/RACHEL/rachel/modules/.
 rsync -Pavz rsync://dev.worldpossible.org/rachelmods/ap_didact_es /media/RACHEL/rachel/modules/.
@@ -28,6 +30,8 @@ rsync -Pavz rsync://dev.worldpossible.org/rachelmods/blockly_games-es /media/RAC
 rsync -Pavz rsync://dev.worldpossible.org/rachelmods/wikivoyage-es /media/RACHEL/rachel/modules/.
 /var/kiwix/bin/kiwix-manage /media/RACHEL/kiwix/data/library/library.xml  add /media/RACHEL/rachel/modules/wikivoyage-es/data/content/wikivoyage_es_all_2016-04.zim  --indexPath=/media/RACHEL/rachel/modules/wikivoyage-es/data/index/wikivoyage_es_all_2016-04.zim.idx
 sudo cp /media/RACHEL/rachel/modules/wikivoyage-es/rachel-index.php /media/RACHEL/rachel/modules/wikivoyage-es/index.htmlf
-rsync -Pavz rsync://dev.worldpossible.org/rachelmods/admin.es.cap.sqlite /media/RACHEL/rachel/admin.sqlite
+rsync -Pavz rsync://dev.worldpossible.org/rachelmods/extra-build-files/admin.es.cap.sqlite /media/RACHEL/rachel/admin.sqlite
 
+sudo rm -r /media/RACHEL/rachel/modules/educalab_es
+sudo rm -r /media/RACHEL/rachel/modules/fr_*
 ##wikivoyage and wikipedia must be added to kiwix library
