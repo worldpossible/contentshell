@@ -155,7 +155,7 @@ function availlang() {
     # if there's no options, don't bother trying
     # -- this actually means we'll render with blanks
     # for all translated text -- fatal error?
-    if (!is_dir($basedir)) { return [ $default_lang ]; }
+    if (!is_dir($basedir)) { return array( $default_lang ); }
 
     # first we get a list of all languages available (from the lang directory)
     $available_languages = array();
@@ -168,7 +168,7 @@ function availlang() {
 
     # if there's one option, return it
     if (sizeof($available_languages) == 1) {
-        return [ $available_languages[0] ];
+        return array( $available_languages[0] );
     }
 
     return $available_languages;

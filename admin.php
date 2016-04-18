@@ -273,7 +273,7 @@ if (is_dir($basedir)) {
 # Totally separate from module management, we also offer
 # a shutdown option for raspberry pi systems (which otherwise
 # might corrupt themselves when unplugged)
-if (1) { #file_exists("/usr/bin/raspi-config")) {
+if (file_exists("/usr/bin/raspi-config")) {
     echo '
         <div style="margin: 50px 0 50px 0; padding: 10px; border: 1px solid red; background: #fee;">
         <form action="admin.php" method="post">
