@@ -70,6 +70,14 @@ if (isset($_GET['moddirs'])) {
         echo 'The server going down now.';
     }
     exit;
+} else if (isset($_POST['reboot'])) {
+    exec("sudo /sbin/shutdown -r now", $exec_out, $exec_err);
+    if ($exec_err) {
+        echo 'Unable to reboot server.';
+    } else {
+        echo 'The server rebooting now.';
+    }
+    exit;
 }
 
 ?><!DOCTYPE html>
@@ -278,9 +286,10 @@ if (file_exists("/usr/bin/raspi-config")) {
         <div style="margin: 50px 0 50px 0; padding: 10px; border: 1px solid red; background: #fee;">
         <form action="admin.php" method="post">
         <input type=submit name="shutdown" value="Shutdown System" onclick="if (!confirm(\'Are you sure you want to shut down?\')) { return false; }">
+        <input type=submit name="reboot" value="Reboot System" onclick="if (!confirm(\'Are you sure you want to reboot?\')) { return false; }">
         </form>
-        <p>This will initiate a shutdown of the server. This is safer for the SD/HD than just unplugging.
-        To restart, you must unplug your system and plug it back in.</p>
+        <p>Shutting down here is safer for the SD/HD than simply unplugging the power.</p>
+        <p>If you shut down (as opposed to reboot), you will need to unplug your system and plug it back in to restart.</p>
         </div>
     ';
 }
