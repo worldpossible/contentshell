@@ -109,6 +109,7 @@ a:visited { color: #649; }
 .indexmodule .smallblurb {
     font-size: x-small;
     margin-left: 130px;
+    clear: both;
 }
 
 .indexmodule input[type="text"] { width: 20em; margin-left: 2px; }
