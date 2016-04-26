@@ -138,7 +138,6 @@
     <li><a href="index.php"><?php echo strtoupper($lang['home']) ?></a></li>
     <li><a href="about.html"><?php echo strtoupper($lang['about']) ?></a></li>
     </ul>
-    <div id="footer_right">RACHEL - <?php echo $lang['months'][11] ?> 2015</div>
 </div>
 
 </body>
