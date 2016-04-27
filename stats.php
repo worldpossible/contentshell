@@ -5,14 +5,21 @@
 #-------------------------------------------
 $maxlines = 10000;
 $rpi_logpath   = "/var/log/apache2/access.log";
+$osx_logpath   = "/var/log/apache2/access_log";
 $uwamp_logpath = "../bin/apache/logs/access.log";
-# XXX rachel plus log path?
+$plus_logpath = "/var/log/httpd/access_log";
 
 #-------------------------------------------
 # determine correct path
 #-------------------------------------------
-if (is_readable($rpi_logpath)) {
+if (is_readable($plus_logpath)) {
+    # must do this first as the rpi_logpath will
+    # work on the plus too - except it's blank
+    $alog = $plus_logpath;
+} else if (is_readable($rpi_logpath)) {
     $alog = $rpi_logpath;
+} else if (is_readable($osx_logpath)) {
+    $alog = $osx_logpath;
 } else if (is_readable($uwamp_logpath)) {
     $alog = $uwamp_logpath;
 }
@@ -127,11 +134,13 @@ function draw_stats() {
         
         # auto-descend into directories if there's only one item
         if (sizeof($stats) == 1) {
+            # PHP 5.3 compat - can't index off a function, need a temp var
+            $keys = array_keys($stats);
             # but not if the one thing is an html file
-            if (preg_match("/\.(html?|pdf|php)?/", array_keys($stats)[0])) {
+            if (preg_match("/\.(html?|pdf|php)?/", $keys[0])) {
                 break; 
             }
-            if (preg_match("/^not counted/", array_keys($stats)[0])) {
+            if (preg_match("/^not counted/", $keys[0])) {
                 break; 
             }
             # and not if it's too deep
@@ -139,7 +148,7 @@ function draw_stats() {
                 $out .= "<h1>ERROR descending nested directories</h1>\n";
                 break;
             }
-            $module .= "/" . array_keys($stats)[0];
+            $module .= "/" . $keys[0];
             $modmatch = preg_quote($module, "/");
             $dispmod = preg_replace("/\/modules\//", "", $module);
             $dispmod = preg_replace("/\/+/", "/", $dispmod);
