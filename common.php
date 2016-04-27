@@ -19,18 +19,19 @@ function getmods_fs() {
 
         if (is_dir("$basedir/$moddir")) { // look in dirs only
 
-            if (file_exists("$basedir/$moddir/index.htmlf")) {
-                # old name - deprecated
-                $indexhtmlf = "$basedir/$moddir/index.htmlf";
-            } else {
+            $fragment = "";
+            if (file_exists("$basedir/$moddir/rachel-index.php")) {
                 # new name - less confusing, and
                 # will get syntax highlighting in editors
-                $indexhtmlf = "$basedir/$moddir/rachel-index.php";
+                $fragment = "$basedir/$moddir/rachel-index.php";
+            } else if (file_exists("$basedir/$moddir/index.htmlf")) {
+                # old name - deprecated
+                $fragment = "$basedir/$moddir/index.htmlf";
             }
 
-            if (file_exists($indexhtmlf)) { // check for index fragment
+            if ($fragment) { // check for index fragment
 
-                $content = file_get_contents($indexhtmlf);
+                $content = file_get_contents($fragment);
 
                 # pull the title from the file
                 $title = "";

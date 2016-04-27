@@ -112,13 +112,13 @@
             if ($mod['hidden'] || $mod['nohtmlf']) { continue; }
             $dir  = $mod['dir'];
             $moddir  = $mod['moddir'];
-            if (file_exists("$mod[dir]/index.htmlf")) {
-                # old name - deprecated
-                include "$mod[dir]/index.htmlf";
-            } else {
+            if (file_exists("$mod[dir]/rachel-index.php")) {
                 # new name - less confusing, and
                 # will get syntax highlighting in editors
                 include "$mod[dir]/rachel-index.php";
+            } else if (file_exists("$mod[dir]/index.htmlf")) {
+                # old name - deprecated
+                include "$mod[dir]/index.htmlf";
             }
             ++$modcount;
         }
