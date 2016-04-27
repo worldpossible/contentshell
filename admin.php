@@ -4,9 +4,9 @@ require_once("common.php");
 
 # perform a cheap version of basic auth
 if (!( isset($_SERVER['PHP_AUTH_USER'])
-    && $_SERVER['PHP_AUTH_USER'] == "root"
+    && $_SERVER['PHP_AUTH_USER'] == "admin"
     && isset($_SERVER['PHP_AUTH_PW'])
-    && $_SERVER['PHP_AUTH_PW'] == "rachel")
+    && $_SERVER['PHP_AUTH_PW'] == "Rachel+1")
 ) {
     header('WWW-Authenticate: Basic realm="RACHEL Admin"');
     header('HTTP/1.0 401 Unauthorized');
