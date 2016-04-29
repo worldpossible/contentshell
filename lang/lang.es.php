@@ -11,10 +11,10 @@ $lang['server-address'] = 'Dirección del Servidor';
 $lang['admin'] = 'Administración';
 $lang['stats'] = 'Estadísticas';
 $lang['version'] = 'Versión';
-$lang['months'] = [
+$lang['months'] = array(
     'Null', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-];
+);
 $lang['languages'] = 'Idiomas';
 
 $lang['no-mods-error'] = "<h2>No se encontraron módulos.</h2>\n"
