@@ -128,7 +128,7 @@ if (isset($_GET['moddirs'])) {
         $("button").html("Saving...");
         $("button").prop("disabled", true);
         var ordered = $("#sortable").sortable("toArray");
-        var hidden = [];
+        var hidden = array();
         for (var i = 0; i < ordered.length; ++i) {
             if ($("#"+ordered[i]+"-hidden").prop("checked")) {
                 hidden.push(ordered[i]);
