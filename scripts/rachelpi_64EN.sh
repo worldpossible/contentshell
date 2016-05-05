@@ -20,3 +20,4 @@ sudo rsync -Pavz rsync://dev.worldpossible.org/rachelmods/en-wikiversity /var/ww
 sudo rsync -Pavz rsync://dev.worldpossible.org/rachelmods/en-wikivoyage /var/www/modules
 sudo rsync -Pavz rsync://dev.worldpossible.org/rachelmods/en-wiktionary /var/www/modules
 sudo rsync -Pavz rsync://dev.worldpossible.org/rachelmods/fr-windows_apps /var/www/modules
+sudo rsync -Pavz rsync://dev.worldpossible.org/rachelmods/en-worldmap /var/www/modules
