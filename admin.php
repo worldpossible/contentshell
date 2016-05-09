@@ -1,6 +1,8 @@
 <?php
 
 require_once("common.php");
+$preflang = getlang();
+require_once("lang/lang.$preflang.php");
 
 # perform a cheap version of basic auth
 if (!( isset($_SERVER['PHP_AUTH_USER'])
@@ -65,23 +67,66 @@ if (isset($_GET['moddirs'])) {
 } else if (isset($_POST['shutdown'])) {
     exec("sudo /sbin/shutdown now", $exec_out, $exec_err);
     if ($exec_err) {
-        echo 'Unable to shutdown server.';
+        echo $lang['shutdown_failed'];
     } else {
-        echo 'The server going down now.';
+        echo $lang['restart_ok'];
     }
     exit;
 } else if (isset($_POST['reboot'])) {
     exec("sudo /sbin/shutdown -r now", $exec_out, $exec_err);
     if ($exec_err) {
-        echo 'Unable to reboot server.';
+        echo $lang['restart_failed'];
     } else {
-        echo 'The server rebooting now.';
+        echo $lang['restart_ok'];
     }
     exit;
+
+# the admin can set a default language for the system
+} else if (isset($_GET['lang'])) {
+
+    $db = getdb();
+    # if (!$db) { throw new Exception($db->lastErrorMsg); }
+    # do all this error stuff below with exceptions so we
+    # can easily check for this one too...
+
+    $queries = array(
+        "CREATE TABLE IF NOT EXISTS settings ( key VARCHAR(255), val VARCHAR(255) )",
+        "CREATE UNIQUE INDEX IF NOT EXISTS key ON settings (key)",
+        "DELETE FROM settings WHERE key = 'lang'"
+    );
+        error_log("ho");
+    if ($_GET['lang'] != "default") {
+        error_log("huh");
+        $cleanlang = $db->escapeString($_GET['lang']);
+        error_log("on");
+        array_push($queries, "INSERT INTO settings VALUES ('lang', '$cleanlang')");
+        error_log("no");
+    }    
+        error_log("you");
+
+    $error = 0;
+    foreach ($queries as $query) {
+        error_log($query);
+        $rv = $db->exec($query);
+        if (!$rv) {
+            $error = 1;
+            break;
+        }
+    }
+
+    if ($error) {
+        error_log($db->lastErrorMsg());
+        header("HTTP/1.1 500 Internal Server Error");    
+        exit;
+    } else {
+        header("HTTP/1.1 200 OK");    
+        exit;
+    }
+
 }
 
 ?><!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo $preflang ?>">
 <head>
 <meta charset="utf-8">
 <title>RACHEL Admin</title>
@@ -109,24 +154,40 @@ if (isset($_GET['moddirs'])) {
 <script src="js/jquery-1.10.2.min.js"></script>
 <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
 <script>
+
+    // onload
     $(function() {
-        $( "#sortable" ).sortable({
+
+        // detect changes to sorting and hiding
+        $("#sortable").sortable({
             change: function(event, ui) {
-                $("button").css("color", "");
-                $("button").html("Save Changes");
-                $("button").prop("disabled", false);
+                $("#modbut").css("color", "");
+                $("#modbut").html("<?php echo $lang['save_changes'] ?>");
+                $("#modbut").prop("disabled", false);
             }
         });
-        $( "#sortable" ).disableSelection();
         $(":checkbox").change( function() {
-                $("button").css("color", "");
-                $("button").html("Save Changes");
-                $("button").prop("disabled", false);
+                $("#modbut").css("color", "");
+                $("#modbut").html("<?php echo $lang['save_changes'] ?>");
+                $("#modbut").prop("disabled", false);
         });
+// not needed?
+//        $("#sortable").disableSelection();
+
+        // detect changes to the language
+        $("#langsel").change( function() {
+                $("#langbut").css("color", "");
+                $("#langbut").html("<?php echo $lang['save_changes'] ?>");
+                $("#langbut").prop("disabled", false);
+        });
+        $("#langbut").prop("disabled", true);
+
     });
-    function saveState() {
-        $("button").html("Saving...");
-        $("button").prop("disabled", true);
+
+    // button click calls this to save the module order & hiding
+    function saveModState() {
+        $("#modbut").html("Saving...");
+        $("#modbut").prop("disabled", true);
         var ordered = $("#sortable").sortable("toArray");
         var hidden = [];
         for (var i = 0; i < ordered.length; ++i) {
@@ -139,24 +200,47 @@ if (isset($_GET['moddirs'])) {
             url: "admin.php?moddirs=" + ordered.join(",")
                 + "&hidden=" + hidden.join(","),
             success: function() {
-                $("button").css("color", "green");
-                $("button").html("&#10004; Saved");
+                $("#modbut").css("color", "green");
+                $("#modbut").html("&#10004; <?php echo $lang['saved'] ?>");
             },
             error: function() {
-                $("button").css("color", "#c00");
-                $("button").html("X Not Saved - Internal Error");
+                $("#modbut").css("color", "#c00");
+                $("#modbut").html("X <?php echo $lang['not_saved_error'] ?>");
             }
         });
     }
+
+    // button click calls this to save the language selection
+    // hacky!!! can't we make this and the above into one function?
+    function saveLangState() {
+        $("#langbut").html("Saving...");
+        $("#langbut").prop("disabled", true);
+        //alert( $("#langsel").val() );
+        $.ajax({
+            url: "admin.php?lang=" + $("#langsel").val(),
+            success: function() {
+                $("#langbut").css("color", "green");
+                $("#langbut").html("&#10004; <?php echo $lang['saved'] ?>");
+                // it's nice if it actually changes the language (almost) right away
+                var rand = Math.floor(Math.random()*1000000) // or it won't really refresh
+                setTimeout("window.location.href = 'admin.php?" + rand + "#lang'", 500);
+            },
+            error: function() {
+                $("#langbut").css("color", "#c00");
+                $("#langbut").html("X <?php echo $lang['not_saved_error'] ?>");
+            }
+        });
+    }
+
 </script>
 </head>
 <body>
 
 <div style="float: right;">
-<a href="index.php">index</a> &bull;
-<a href="<?php echo "http://x:x@$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]" ?>">logout</a>
+<a href="index.php"><?php echo $lang['home'] ?></a> &bull;
+<a href="<?php echo "http://x:x@$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]" ?>"><?php echo $lang['logout'] ?></a>
 </div>
-<h1>RACHEL Admin</h1>
+<h1>RACHEL <?php echo $lang['admin'] ?></h1>
 
 <?php
 
@@ -210,7 +294,7 @@ if (is_dir($basedir)) {
     # display the sortable list
     $disabled = " disabled";
     $found_nohtmlf = false;
-    echo "<p>Found in /modules/:</p><ul id=\"sortable\">\n";
+    echo "<p>$lang[found_in] /modules/:</p><ul id=\"sortable\">\n";
     foreach (array_keys($fsmods) as $moddir) {
         if ($fsmods[$moddir]['nohtmlf']) {
             $found_nohtmlf = true;
@@ -223,7 +307,7 @@ if (is_dir($basedir)) {
             $checked = "";
         }
         echo "\t<span class=\"checkbox\"><input type=\"checkbox\" id=\"$moddir-hidden\"$checked>\n";
-        echo "\t<label for=\"$moddir-hidden\">hide</label></span>\n";
+        echo "\t<label for=\"$moddir-hidden\">$lang[hide]</label></span>\n";
         echo "\t<span class=\"ui-icon ui-icon-arrowthick-2-n-s\"></span>\n";
         echo "\t$moddir - " . $fsmods[$moddir]['title'];
         if ($fsmods[$moddir]['position'] < 1) {
@@ -234,7 +318,7 @@ if (is_dir($basedir)) {
     }
     echo "</ul>\n";
     
-    echo "<button onclick=\"saveState();\"$disabled>Save Changes</button>\n";
+    echo "<button id='modbut' onclick=\"saveModState();\"$disabled>" . $lang['save_changes'] . "</button>\n";
 
     if ($found_nohtmlf) {
         echo "<h3>The following modules were ignored because they had no index.htmlf</h3><ul>\n";
@@ -274,24 +358,59 @@ if (is_dir($basedir)) {
 
 } else {
 
-    echo "<h2>No module directory found.</h2>\n";
+    echo "<h2>$lang[no_moddir_found]</h2>\n";
 
 }
+
+echo "
+    <div style='margin: 50px 0 50px 0; padding: 10px; border: 1px solid lightgray; background: #eee;'>
+    <a name='lang'></a>
+    <h3 style='margin: 0 0 10px 0;'>$lang[set_lang]</h3>
+
+    <p>$lang[set_lang_blurb_1]</p>
+
+    <select id='langsel'>
+    <option value='default'>$lang[use_browser]</option>
+";
+
+
+if ($db) {
+    # get that db module list
+    $rv = $db->query("SELECT val FROM settings WHERE key = 'lang' LIMIT 1");
+    if ($rv) {
+        $rv = $rv->fetchArray();
+        $dblang = $rv['val'];
+    }
+}
+foreach (available_langs() as $alang) {
+    $selected = "";
+    if ($alang == $dblang) {
+        $selected = " selected";
+    }
+    echo "<option value='$alang'$selected>$lang[force] $alang</option>";
+}
+
+echo "
+    </select>
+    <button id='langbut' onclick='saveLangState();'>$lang[save_changes]</button>
+    <p><b>$lang[set_lang_blurb_2]</b></p>
+    </div>
+";
 
 # Totally separate from module management, we also offer
 # a shutdown option for raspberry pi systems (which otherwise
 # might corrupt themselves when unplugged)
-if (file_exists("/usr/bin/raspi-config")) {
-    echo '
-        <div style="margin: 50px 0 50px 0; padding: 10px; border: 1px solid red; background: #fee;">
-        <form action="admin.php" method="post">
-        <input type=submit name="shutdown" value="Shutdown System" onclick="if (!confirm(\'Are you sure you want to shut down?\')) { return false; }">
-        <input type=submit name="reboot" value="Reboot System" onclick="if (!confirm(\'Are you sure you want to reboot?\')) { return false; }">
+if (file_exists("/usr/bin/raspi-config") ||
+    file_exists("/etc/fake-raspi-config")) { # for testing on non-raspi systems
+    echo "
+        <div style='margin: 50px 0 50px 0; padding: 10px; border: 1px solid red; background: #fee;'>
+        <form action='admin.php' method='post'>
+        <input type='submit' name='shutdown' value='$lang[shutdown_system]' onclick=\"if (!confirm('$lang[confirm_shutdown]')) { return false; }\">
+        <input type='submit' name='reboot' value='$lang[restart_system]' onclick=\"if (!confirm('$lang[confirm_restart]')) { return false; }\">
         </form>
-        <p>Shutting down here is safer for the SD/HD than simply unplugging the power.</p>
-        <p>If you shut down (as opposed to reboot), you will need to unplug your system and plug it back in to restart.</p>
+        $lang[shutdown_blurb]
         </div>
-    ';
+    ";
 }
 
 ?>

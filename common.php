@@ -148,7 +148,7 @@ if (!isset($a['position'])) { $a['position'] = 0; }
     }
 }
 
-function availlang() {
+function available_langs() {
 
     $basedir = "lang";
     $default_lang = "en";
@@ -159,31 +159,31 @@ function availlang() {
     if (!is_dir($basedir)) { return array( $default_lang ); }
 
     # first we get a list of all languages available (from the lang directory)
-    $available_languages = array();
+    $available_langs = array();
     $handle = opendir($basedir);
     while ($moddir = readdir($handle)) {
         if (preg_match("/^lang\.(..)\.php$/", $moddir, $matches)) {
-            array_push($available_languages, $matches[1]);
+            array_push($available_langs, $matches[1]);
         }
     }
 
     # if there's one option, return it
-    if (sizeof($available_languages) == 1) {
-        return array( $available_languages[0] );
+    if (sizeof($available_langs) == 1) {
+        return array( $available_langs[0] );
     }
 
-    return $available_languages;
+    return $available_langs;
 
 }
 
-#-------------------------------------------
-# figure out the preferred language for this user
-#-------------------------------------------
-function getlang() {
+# This function returns the language preferred by the
+# browser - out of the available languages. If the browser
+# wants a language we don't have, we just return "en".
+function browser_lang() {
 
     # we want the language codes as keys, not values
-    $available_languages = array_flip(availlang());
-    $langs;
+    $available_langs = array_flip(available_langs());
+    $browser_langs;
 
     # now we pull the languages from header
     preg_match_all('~([\w-]+)(?:[^,\d]+([\d.]+))?~',
@@ -198,29 +198,55 @@ function getlang() {
 
         $value = isset($match[2]) ? (float) $match[2] : 1.0;
 
-        if(isset($available_languages[$match[1]])) {
-            $langs[$match[1]] = $value;
+        if(isset($available_langs[$match[1]])) {
+            $browser_langs[$match[1]] = $value;
             continue;
         }
 
         # dialects (e.g. en-US) - don't overwrite if we've already got
         # a match on base language
-        if(!isset($langs[$a]) && isset($available_languages[$a])) {
-            $langs[$a] = $value - 0.1;
+        if(!isset($browser_langs[$a]) && isset($available_langs[$a])) {
+            $browser_langs[$a] = $value - 0.1;
         }
 
     }
 
     # default to english if there's no match 
-    if (!is_array($langs)) {
+    if (!is_array($browser_langs)) {
         return "en";
     }
 
     # order them by q weight
-    arsort($langs);
+    arsort($browser_langs);
 
     # return the first
-    return key($langs);
+    return key($browser_langs);
+
+}
+
+#-------------------------------------------
+# there's several things that can affect which langauge
+# gets displayed - this function figures all that out
+#-------------------------------------------
+function getlang() {
+
+    # user session setting is the highest priority
+
+    # next we check the admin setting
+    $db = getdb();
+    if ($db) {
+        $rv = $db->query("SELECT val FROM settings WHERE key = 'lang'");
+        if ($rv) {
+            $row = $rv->fetchArray();
+            # should we check whether this is a valid, available lang?
+            # it always should be if the user uses the admin interface
+            # (and doesn't delete any language files)
+            if ($row['val']) { return $row['val']; }
+        }
+    }
+
+    # if there was no user or admin setting use the browser's request
+    return browser_lang();
 
 }
 
