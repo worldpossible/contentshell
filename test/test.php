@@ -39,8 +39,6 @@ $html = shell_exec(
     "include \"admin.php\";'"
 );
 passfail($html == "");
-#file_put_contents("tmp.html", $html);
-#exit;
 
 testmsg("Testing admin.php reading saved module order");
 $html = shell_exec("PHP_AUTH_USER=admin  PHP_AUTH_PW=Rachel+1 php admin.php");
@@ -63,14 +61,37 @@ testmsg("Testing index.php reading all modules hidden");
 $html = shell_exec("php index.php");
 passfail(preg_match("/<!DOCTYPE.+No modules found.+<\/html>/s", $html) == 1);
 
-testmsg("Testing admin.php change language");
+testmsg("Testing admin.php changing language");
 $html = shell_exec(
     "PHP_AUTH_USER=admin  PHP_AUTH_PW=Rachel+1 " .
     "php -e -r '\$_GET[\"lang\"] = \"es\"; " .
     "include \"admin.php\";'"
 );
 passfail($html == "");
-file_put_contents("tmp.html", $html);
+
+testmsg("Testing admin.php reading changed language");
+$html = shell_exec("PHP_AUTH_USER=admin  PHP_AUTH_PW=Rachel+1 php admin.php");
+passfail(preg_match("/<!DOCTYPE.+html lang=\"es\".+option value='es' selected.+<\/html>/s", $html) == 1);
+
+testmsg("Testing index.php reading changed language");
+$html = shell_exec("php index.php");
+passfail(preg_match("/<!DOCTYPE.+html lang=\"es\".+option value='es' selected.+<\/html>/s", $html) == 1);
+
+# Note: since we can't see headers from the CLI, we can't really test that the
+# cookie is set right, but we just check that the script didn't indcate an error
+testmsg("Testing index.php changing language cookie");
+$html = shell_exec(
+    "php -e -r '\$_GET[\"lang\"] = \"fr\"; " .
+    "include \"index.php\";'"
+);
+passfail($html == "");
+
+testmsg("Testing index.php reading language cookie");
+$html = shell_exec(
+    "php -e -r '\$_COOKIE[\"rachel-lang\"] = \"fr\"; " .
+    "include \"index.php\";'"
+);
+passfail(preg_match("/<!DOCTYPE.+html lang=\"fr\".+option value='fr' selected.+<\/html>/s", $html) == 1);
 
 if ($fail == 0) {
     echo "All Tests Passed!\n";
