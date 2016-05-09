@@ -1,17 +1,12 @@
 <?php
-    error_log("hi");
     if ($_GET['lang']) {
-    error_log("ho");
         # set session cookie and refresh page
         setcookie("rachel-lang", $_GET['lang']);
-    error_log("foo");
         error_log("Location: http://$_SERVER[HTTP_HOST]" . strtok($_SERVER["REQUEST_URI"],'?'));
         header("Location: http://$_SERVER[HTTP_HOST]" . strtok($_SERVER["REQUEST_URI"],'?'));
-    error_log("bar");
         exit();
     }
 
-    error_log("baz");
     require_once("common.php");
     $preflang = getlang();
     require_once("lang/lang.$preflang.php");
