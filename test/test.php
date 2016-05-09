@@ -63,6 +63,15 @@ testmsg("Testing index.php reading all modules hidden");
 $html = shell_exec("php index.php");
 passfail(preg_match("/<!DOCTYPE.+No modules found.+<\/html>/s", $html) == 1);
 
+testmsg("Testing admin.php change language");
+$html = shell_exec(
+    "PHP_AUTH_USER=admin  PHP_AUTH_PW=Rachel+1 " .
+    "php -e -r '\$_GET[\"lang\"] = \"es\"; " .
+    "include \"admin.php\";'"
+);
+passfail($html == "");
+file_put_contents("tmp.html", $html);
+
 if ($fail == 0) {
     echo "All Tests Passed!\n";
 } else {
