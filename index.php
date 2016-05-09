@@ -43,7 +43,7 @@
         # not useful - using ifconfig/ipconfig is probably
         # the way to go, but may require some tweaking
 
-        echo "<b>" . $lang['server-address'] . "</b><br>\n";
+        echo "<b>" . $lang['server_address'] . "</b><br>\n";
         if (preg_match("/^win/i", PHP_OS)) {
             # under windows it's ipconfig
             $output = shell_exec("ipconfig");
@@ -126,7 +126,7 @@
     }
 
     if ($modcount == 0) {
-        echo $lang['no-mods-error'];
+        echo $lang['no_mods_error'];
     }
 
 ?>
