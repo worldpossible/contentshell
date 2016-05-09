@@ -2,7 +2,6 @@
     if ($_GET['lang']) {
         # set session cookie and refresh page
         setcookie("rachel-lang", $_GET['lang']);
-        error_log("Location: http://$_SERVER[HTTP_HOST]" . strtok($_SERVER["REQUEST_URI"],'?'));
         header("Location: http://$_SERVER[HTTP_HOST]" . strtok($_SERVER["REQUEST_URI"],'?'));
         exit();
     }

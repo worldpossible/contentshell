@@ -94,19 +94,13 @@ if (isset($_GET['moddirs'])) {
         "CREATE UNIQUE INDEX IF NOT EXISTS key ON settings (key)",
         "DELETE FROM settings WHERE key = 'lang'"
     );
-        error_log("ho");
     if ($_GET['lang'] != "default") {
-        error_log("huh");
         $cleanlang = $db->escapeString($_GET['lang']);
-        error_log("on");
         array_push($queries, "INSERT INTO settings VALUES ('lang', '$cleanlang')");
-        error_log("no");
     }    
-        error_log("you");
 
     $error = 0;
     foreach ($queries as $query) {
-        error_log($query);
         $rv = $db->exec($query);
         if (!$rv) {
             $error = 1;
