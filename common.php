@@ -231,6 +231,9 @@ function browser_lang() {
 function getlang() {
 
     # user session setting is the highest priority
+    if(isset($_COOKIE['rachel-lang'])) {
+        return $_COOKIE['rachel-lang'];
+    }
 
     # next we check the admin setting
     $db = getdb();

@@ -26,6 +26,7 @@ $lang['no_mods_error'] = "<h2>Aucun module trouvé.</h2>\n"
     . "S'il vous plaît vérifier il existe des modules\n"
     . "dans le répertoire des modules, et qu'ils ne sont pas\n"
     . "tous caché sur la page d'administration.\n";
+$lang['set'] = "Choisir";
 
 # for admin.php
 $lang['found_in'] = "Trouvé dans";

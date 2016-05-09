@@ -25,6 +25,7 @@ $lang['languages'] = 'Languages';
 $lang['no_mods_error'] = "<h2>No modules found.</h2>\n"
     . "Please check there are modules in the modules directory,\n"
     . "and that they are not all hidden on the admin page.\n";
+$lang['set'] = "Set";
 
 # for admin.php
 $lang['found_in'] = "Found in";
