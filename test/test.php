@@ -32,13 +32,15 @@ passfail(preg_match("/<!DOCTYPE.+mod_one - Test Module 1.+new.+mod_two - Test Mo
 testmsg("Testing admin.php created db");
 passfail(file_exists("admin.sqlite"));
 
-testmsg("Testing admin.php saving module orders");
+testmsg("Testing admin.php saving module order");
 $html = shell_exec(
     "PHP_AUTH_USER=admin  PHP_AUTH_PW=Rachel+1 " .
     "php -e -r '\$_GET[\"moddirs\"] = \"mod_two,mod_one\"; " .
     "include \"admin.php\";'"
 );
 passfail($html == "");
+#file_put_contents("tmp.html", $html);
+#exit;
 
 testmsg("Testing admin.php reading saved module order");
 $html = shell_exec("PHP_AUTH_USER=admin  PHP_AUTH_PW=Rachel+1 php admin.php");
