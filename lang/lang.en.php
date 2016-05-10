@@ -25,7 +25,6 @@ $lang['languages'] = 'Languages';
 $lang['no_mods_error'] = "<h2>No modules found.</h2>\n"
     . "Please check there are modules in the modules directory,\n"
     . "and that they are not all hidden on the admin page.\n";
-$lang['set'] = "Set";
 
 # for admin.php
 $lang['found_in'] = "Found in";
@@ -45,11 +44,5 @@ $lang['shutdown_ok'] = "The server is shutting down now.";
 $lang['restart_ok'] = "The server is restarting down now.";
 $lang['shutdown_failed'] = "Unable to shutdown server.";
 $lang['restart_failed'] = "Unable to restart server.";
-$lang['set_lang'] = "Set Interface Language";
-$lang['set_lang_blurb_1'] = "This setting allows you to override browser language settings for all users. By default RACHEL will use whatever language the browser is set to.";
-$lang['set_lang_blurb_2'] = "NOTE: this does not change the content language, just the system text, like the top navigation and this page.";
-$lang['use_browser'] = "Use Browser Setting (default)";
-$lang['force'] = "Force";
-
 
 ?>

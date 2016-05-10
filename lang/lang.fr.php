@@ -26,7 +26,6 @@ $lang['no_mods_error'] = "<h2>Aucun module trouvé.</h2>\n"
     . "S'il vous plaît vérifier il existe des modules\n"
     . "dans le répertoire des modules, et qu'ils ne sont pas\n"
     . "tous caché sur la page d'administration.\n";
-$lang['set'] = "Choisir";
 
 # for admin.php
 $lang['found_in'] = "Trouvé dans";
@@ -46,10 +45,5 @@ $lang['shutdown_ok'] = "Le serveur est en cours d'arrêt maintenant.";
 $lang['restart_ok'] = "Le serveur redémarre jusqu'à maintenant.";
 $lang['shutdown_failed'] = "Impossible de serveur d'arrêt.";
 $lang['restart_failed'] = "Impossible de redémarrer le serveur.";
-$lang['set_lang'] = "Choisissez la langue d'interface";
-$lang['set_lang_blurb_1'] = "Ce réglage vous permet de remplacer les paramètres de langue du navigateur pour tous les utilisateurs. Par défaut RACHEL utilisera la langue que le navigateur est configuré pour.";
-$lang['set_lang_blurb_2'] = "REMARQUE: cela ne change pas la langue du contenu, tout le texte du système, comme la navigation en haut et cette page.";
-$lang['use_browser'] = "Utilisation Réglage Navigateur (par défaut)";
-$lang['force'] = "Obliger";
 
 ?>

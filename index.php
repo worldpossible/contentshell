@@ -1,15 +1,7 @@
 <?php
-    if ($_GET['lang']) {
-        # set session cookie and refresh page
-        setcookie("rachel-lang", $_GET['lang']);
-        header("Location: http://$_SERVER[HTTP_HOST]" . strtok($_SERVER["REQUEST_URI"],'?'));
-        exit();
-    }
-
     require_once("common.php");
     $preflang = getlang();
     require_once("lang/lang.$preflang.php");
-
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $preflang ?>">
@@ -33,18 +25,6 @@
                 });
             }
         });
-
-        // detect changes to the language
-        $("#langsel").change( function() {
-                $("#langbut").css("color", "");
-                $("#langbut").html("<?php echo $lang['set'] ?>");
-                $("#langbut").prop("disabled", false);
-        });
-        $("#langbut").prop("disabled", true);
-        $("#langbut").click( function() {
-            window.location.href = '<?php echo $_SERVER["REQUEST_URI"] ?>' + '?lang=' + $("#langsel").val();
-        });
-
     });
 </script>
 </head>
@@ -158,23 +138,6 @@
     <li><a href="index.php"><?php echo strtoupper($lang['home']) ?></a></li>
     <li><a href="about.html"><?php echo strtoupper($lang['about']) ?></a></li>
     </ul>
-    <div style="position: absolute; bottom: 6px; right: 8px; color: #fff;">
-    <?php echo $lang['languages'] ?>
-    <select id="langsel">
-
-    <?php
-    foreach (available_langs() as $alang) {
-        $selected = "";
-        if ($alang == $preflang) {
-            $selected = " selected";
-        }
-        echo "<option value='$alang'$selected>$alang</option>";
-    }
-    ?>
-
-    </select>
-    <button id="langbut"><?php echo $lang['set'] ?></button>
-    </div>
 </div>
 
 </body>

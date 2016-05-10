@@ -81,42 +81,6 @@ if (isset($_GET['moddirs'])) {
     }
     exit;
 
-# the admin can set a default language for the system
-} else if (isset($_GET['lang'])) {
-
-    $db = getdb();
-    # if (!$db) { throw new Exception($db->lastErrorMsg); }
-    # do all this error stuff below with exceptions so we
-    # can easily check for this one too...
-
-    $queries = array(
-        "CREATE TABLE IF NOT EXISTS settings ( key VARCHAR(255), val VARCHAR(255) )",
-        "CREATE UNIQUE INDEX IF NOT EXISTS key ON settings (key)",
-        "DELETE FROM settings WHERE key = 'lang'"
-    );
-    if ($_GET['lang'] != "default") {
-        $cleanlang = $db->escapeString($_GET['lang']);
-        array_push($queries, "INSERT INTO settings VALUES ('lang', '$cleanlang')");
-    }    
-
-    $error = 0;
-    foreach ($queries as $query) {
-        $rv = $db->exec($query);
-        if (!$rv) {
-            $error = 1;
-            break;
-        }
-    }
-
-    if ($error) {
-        error_log($db->lastErrorMsg());
-        header("HTTP/1.1 500 Internal Server Error");    
-        exit;
-    } else {
-        header("HTTP/1.1 200 OK");    
-        exit;
-    }
-
 }
 
 ?><!DOCTYPE html>
@@ -165,16 +129,8 @@ if (isset($_GET['moddirs'])) {
                 $("#modbut").html("<?php echo $lang['save_changes'] ?>");
                 $("#modbut").prop("disabled", false);
         });
-// not needed?
+// not needed? check a few browsers...
 //        $("#sortable").disableSelection();
-
-        // detect changes to the language
-        $("#langsel").change( function() {
-                $("#langbut").css("color", "");
-                $("#langbut").html("<?php echo $lang['save_changes'] ?>");
-                $("#langbut").prop("disabled", false);
-        });
-        $("#langbut").prop("disabled", true);
 
     });
 
@@ -200,28 +156,6 @@ if (isset($_GET['moddirs'])) {
             error: function() {
                 $("#modbut").css("color", "#c00");
                 $("#modbut").html("X <?php echo $lang['not_saved_error'] ?>");
-            }
-        });
-    }
-
-    // button click calls this to save the language selection
-    // hacky!!! can't we make this and the above into one function?
-    function saveLangState() {
-        $("#langbut").html("Saving...");
-        $("#langbut").prop("disabled", true);
-        //alert( $("#langsel").val() );
-        $.ajax({
-            url: "admin.php?lang=" + $("#langsel").val(),
-            success: function() {
-                $("#langbut").css("color", "green");
-                $("#langbut").html("&#10004; <?php echo $lang['saved'] ?>");
-                // it's nice if it actually changes the language (almost) right away
-                var rand = Math.floor(Math.random()*1000000) // or it won't really refresh
-                setTimeout("window.location.href = 'admin.php?" + rand + "#lang'", 500);
-            },
-            error: function() {
-                $("#langbut").css("color", "#c00");
-                $("#langbut").html("X <?php echo $lang['not_saved_error'] ?>");
             }
         });
     }
@@ -355,41 +289,6 @@ if (is_dir($basedir)) {
     echo "<h2>$lang[no_moddir_found]</h2>\n";
 
 }
-
-echo "
-    <div style='margin: 50px 0 50px 0; padding: 10px; border: 1px solid lightgray; background: #eee;'>
-    <a name='lang'></a>
-    <h3 style='margin: 0 0 10px 0;'>$lang[set_lang]</h3>
-
-    <p>$lang[set_lang_blurb_1]</p>
-
-    <select id='langsel'>
-    <option value='default'>$lang[use_browser]</option>
-";
-
-
-if ($db) {
-    # get that db module list
-    $rv = $db->query("SELECT val FROM settings WHERE key = 'lang' LIMIT 1");
-    if ($rv) {
-        $rv = $rv->fetchArray();
-        $dblang = $rv['val'];
-    }
-}
-foreach (available_langs() as $alang) {
-    $selected = "";
-    if ($alang == $dblang) {
-        $selected = " selected";
-    }
-    echo "<option value='$alang'$selected>$lang[force] $alang</option>";
-}
-
-echo "
-    </select>
-    <button id='langbut' onclick='saveLangState();'>$lang[save_changes]</button>
-    <p><b>$lang[set_lang_blurb_2]</b></p>
-    </div>
-";
 
 # Totally separate from module management, we also offer
 # a shutdown option for raspberry pi systems (which otherwise

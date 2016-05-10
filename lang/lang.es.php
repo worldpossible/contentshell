@@ -25,7 +25,6 @@ $lang['languages'] = 'Idiomas';
 $lang['no_mods_error'] = "<h2>No se encontraron módulos.</h2>\n"
     . "Por favor, compruebe que no son módulos en el directorio de módulos,\n"
     . "y que no se esconden en la página de administración.\n";
-$lang['set'] = "Escoger";
 
 # for admin.php
 $lang['found_in'] = "Se encuentra en";
@@ -45,10 +44,5 @@ $lang['shutdown_ok'] = "El servidor está cerrando ahora.";
 $lang['restart_ok'] = "El servidor está reiniciando ahora.";
 $lang['shutdown_failed'] = "No se puede cerrar el servidor.";
 $lang['restart_failed'] = "No es posible reiniciar el servidor.";
-$lang['set_lang'] = "Elige Idioma de la Interfaz";
-$lang['set_lang_blurb_1'] = "Esta configuración le permite anular la configuración de idioma del navegador para todos los usuarios. Por defecto RACHEL utilizará el idioma que el navegador está configurado para.";
-$lang['set_lang_blurb_2'] = "NOTA: esto no cambia el idioma del contenido, sólo el texto del sistema, como la navegación superior y esta página.";
-$lang['use_browser'] = "Ajuste el uso del navegador (por defecto)";
-$lang['force'] = "Obligar";
 
 ?>

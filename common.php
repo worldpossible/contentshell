@@ -227,29 +227,9 @@ function browser_lang() {
 #-------------------------------------------
 # there's several things that can affect which langauge
 # gets displayed - this function figures all that out
+# (actually there's not any more, so this is very simple)
 #-------------------------------------------
 function getlang() {
-
-    # user session setting is the highest priority
-    if(isset($_COOKIE['rachel-lang'])) {
-        return $_COOKIE['rachel-lang'];
-    }
-
-    # next we check the admin setting
-    $db = getdb();
-    if ($db) {
-        $rv = $db->query("SELECT 1 FROM sqlite_master WHERE type='table' AND name='settings'");
-        if ($rv && $rv->fetchArray()) {
-            $rv = $db->query("SELECT val FROM settings WHERE key = 'lang'");
-            if ($rv) {
-                $row = $rv->fetchArray();
-                # should we check whether this is a valid, available lang?
-                # it always should be if the user uses the admin interface
-                # (and doesn't delete any language files)
-                if ($row['val']) { return $row['val']; }
-            }
-        }
-    }
 
     # if there was no user or admin setting use the browser's request
     return browser_lang();
