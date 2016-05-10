@@ -108,6 +108,10 @@ if (isset($_GET['moddirs'])) {
     .error { border: 1px solid #c00; background: #fee; color: #c00; padding: 10px; }
     .error h2, .error h3 { margin: 0 0 10px 0; }
     .error p { margin: 0 }
+    #ip {
+        float: right;
+        margin: 10px 10px;
+    }
 </style>
 <script src="js/jquery-1.10.2.min.js"></script>
 <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
@@ -167,6 +171,38 @@ if (isset($_GET['moddirs'])) {
 <div style="float: right;">
 <a href="index.php"><?php echo $lang['home'] ?></a> &bull;
 <a href="<?php echo "http://x:x@$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]" ?>"><?php echo $lang['logout'] ?></a>
+<p>
+    <?php
+        # some notes to prevent future regression:
+        # the PHP suggested gethostbyname(gethostname())
+        # brings back the unhelpful 127.0.0.1 on RPi systems,
+        # as well as slowing down some Windows installations
+        # with a DNS lookup. $_SERVER["SERVER_ADDR"] will just
+        # display what's in the user's address bar, so also
+        # not useful - using ifconfig/ipconfig is the way to go,
+        # but requires system-specific tweaking
+        echo "<b>" . $lang['server_address'] . "</b><br>\n";
+        if (preg_match("/^win/i", PHP_OS)) {
+            # under windows it's ipconfig
+            $output = shell_exec("ipconfig");
+            preg_match("/IPv4 Address.+?: (.+)/", $output, $match);
+            if (isset($match[1])) { echo "$match[1]<br>\n"; }
+        } else if (preg_match("/^darwin/i", PHP_OS)) {
+            # OSX is unix, but it's a little different
+            exec("/sbin/ifconfig", $output);
+            preg_match("/en0.+?inet (.+?) /", join("", $output), $match);
+            if (isset($match[1])) { echo "$match[1]<br>\n"; }
+        } else {
+            # most likely linux based - so ifconfig should work
+            exec("/sbin/ifconfig", $output);
+            preg_match("/eth0.+?inet addr:(.+?) /", join("", $output), $match);
+            if (isset($match[1])) { echo "LAN: $match[1]<br>\n"; }
+            preg_match("/wlan0.+?inet addr:(.+?) /", join("", $output), $match);
+            if (isset($match[1])) { echo "WIFI: $match[1]<br>\n"; }
+        }
+
+    ?>
+</p>
 </div>
 <h1>RACHEL <?php echo $lang['admin'] ?></h1>
 
@@ -239,7 +275,7 @@ if (is_dir($basedir)) {
         echo "\t<span class=\"ui-icon ui-icon-arrowthick-2-n-s\"></span>\n";
         echo "\t$moddir - " . $fsmods[$moddir]['title'];
         if ($fsmods[$moddir]['position'] < 1) {
-            echo "<small style=\"color: green;\">(new)</small>\n";
+            echo " <small style=\"color: green;\">(new)</small>\n";
             $disabled = "";
         }
         echo "</li>\n";

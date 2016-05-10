@@ -30,45 +30,11 @@
 </head>
 
 <body>
-<div id="rachel" style="position: relative;">
-    Rachel
-    <div id="ip">
-    <?php
-        # some notes to prevent future regression:
-        # the PHP suggested gethostbyname(gethostname())
-        # brings back the unhelpful 127.0.0.1 on RPi systems,
-        # as well as slowing down some Windows installations
-        # with a DNS lookup. $_SERVER["SERVER_ADDR"] will just
-        # display what's in the user's address bar, so also
-        # not useful - using ifconfig/ipconfig is probably
-        # the way to go, but may require some tweaking
-
-        echo "<b>" . $lang['server_address'] . "</b><br>\n";
-        if (preg_match("/^win/i", PHP_OS)) {
-            # under windows it's ipconfig
-            $output = shell_exec("ipconfig");
-            preg_match("/IPv4 Address.+?: (.+)/", $output, $match);
-            if (isset($match[1])) { echo "$match[1]<br>\n"; }
-        } else if (preg_match("/^darwin/i", PHP_OS)) {
-            # OSX is unix, but it's a little different
-            exec("/sbin/ifconfig", $output);
-            preg_match("/en0.+?inet (.+?) /", join("", $output), $match);
-            if (isset($match[1])) { echo "$match[1]<br>\n"; }
-        } else {
-            # most likely linux based - so ifconfig should work
-            exec("/sbin/ifconfig", $output);
-            preg_match("/eth0.+?inet addr:(.+?) /", join("", $output), $match);
-            if (isset($match[1])) { echo "LAN: $match[1]<br>\n"; }
-            preg_match("/wlan0.+?inet addr:(.+?) /", join("", $output), $match);
-            if (isset($match[1])) { echo "WIFI: $match[1]<br>\n"; }
-        }
-
-    ?>
-    <div style="position: absolute; font-size: small; bottom: 6px; right: 8px;">
-    <a href="admin.php" style="color: #999;"><?php echo $lang['admin'] ?></a> |
-    <a href="stats.php" style="color: #999;"><?php echo $lang['stats'] ?></a> |
-    <a href="version.php" style="color: #999;"><?php echo $lang['version'] ?></a>
-    </div>
+<div id="rachel">
+    <div id="adminnav">
+    <a href="admin.php"><?php echo $lang['admin'] ?></a> |
+    <a href="stats.php"><?php echo $lang['stats'] ?></a> |
+    <a href="version.php"><?php echo $lang['version'] ?></a>
     </div>
 </div>
 
@@ -77,7 +43,6 @@
     <li><a href="index.php"><?php echo strtoupper($lang['home']) ?></a></li>
     <li><a href="about.html"><?php echo strtoupper($lang['about']) ?></a></li>
     </ul>
-    
 </div>
 
 <div id="content">
