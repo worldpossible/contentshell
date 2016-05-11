@@ -236,4 +236,60 @@ function getlang() {
 
 }
 
+function authorized() {
+
+    # special case
+    if ($_SERVER['PHP_CLI_TESTING']) {
+        return true;
+    }
+
+    # if we've got a good cookie, return true
+    if (isset($_COOKIE['rachel-auth']) && $_COOKIE['rachel-auth'] == "admin") {
+        return true;
+
+    # if we've got good user/pass, issue cookie
+    } else if ($_POST['user'] == "admin" && $_POST['pass'] == "Rachel+1") {
+        setcookie("rachel-auth", "admin");
+        header(
+            "Location: //$_SERVER[HTTP_HOST]"
+            . strtok($_SERVER["REQUEST_URI"],'?')
+        );
+
+    # if we've got nothing or bad user/pass, show login page
+    } else {
+        $indexurl = dirname($_SERVER["REQUEST_URI"]);
+        print <<<EOT
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Login</title>
+  </head>
+  <body bgcolor="#cccccc">
+    <center>
+    <h1>Admin Login</h1>
+    <p><a href="$indexurl">&larr; back</a></p>
+    <form method="POST">
+    <table cellpadding="10">
+    <tr><td>User</td><td><input name="user"></td></tr>
+    <tr><td>Pass</td><td><input name="pass" type="password"></td></tr>
+    <tr><td colspan="2" align="right"><input type="submit" value="Log In"></td></tr>
+    </table>
+    </center>
+    </form>
+  </body>
+</html>
+EOT;
+    }
+
+}
+
+function clearcookie() {
+    setcookie("rachel-auth", "");
+    header(
+        "Location: //$_SERVER[HTTP_HOST]/"
+        . dirname($_SERVER["REQUEST_URI"])
+    );
+}
+
 ?>

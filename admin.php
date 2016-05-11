@@ -4,24 +4,9 @@ require_once("common.php");
 $preflang = getlang();
 require_once("lang/lang.$preflang.php");
 
-# perform a cheap version of basic auth
-if (!( isset($_SERVER['PHP_AUTH_USER'])
-    && $_SERVER['PHP_AUTH_USER'] == "admin"
-    && isset($_SERVER['PHP_AUTH_PW'])
-    && $_SERVER['PHP_AUTH_PW'] == "Rachel+1")
-) {
-    header('WWW-Authenticate: Basic realm="RACHEL Admin"');
-    header('HTTP/1.0 401 Unauthorized');
-    echo 'You need permission to view this page.';
-# even thoug it works to send html (with a redirect) instead of text,
-# this apparently breaks login: credentials don't stick until you
-# get re-logged out without the redirect
-#    echo '<html><head><title>You need permission to view this page</title>';
-#    echo '</head>';
-#    echo '<meta http-equiv="refresh" content="2;URL=index.php"></head>';
-#    echo '<body>You need permission to view this page.</body></html>';
-    exit;
-}
+# cookie-based authorization
+if (!authorized()) { exit(); }
+if (isset($_GET['logout'])) { clearcookie(); }
 
 # If we've got a list of moddirs, we update the DB to
 # reflect that ordering. This all takes place as an AJAX
@@ -170,7 +155,7 @@ if (isset($_GET['moddirs'])) {
 
 <div style="float: right;">
 <a href="index.php"><?php echo $lang['home'] ?></a> &bull;
-<a href="<?php echo "http://x:x@$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]" ?>"><?php echo $lang['logout'] ?></a>
+<a href="admin.php?logout=1"><?php echo $lang['logout'] ?></a>
 <p>
     <?php
         # some notes to prevent future regression:
