@@ -13,18 +13,22 @@
 
 <?php
     
-    exec("cat /etc/*-release", $output);
-
     # this should work on debian variants
-    foreach (array_values($output) as $line) {
-        if (preg_match("/PRETTY_NAME=\"(.+?)\"/", $line, $matches)) {
+    foreach (glob("/etc/*-release") as $filename) {
+        $filecont = file_get_contents($filename);
+        if (preg_match("/PRETTY_NAME=\"(.+?)\"/", $filecont, $matches)) {
             $os = $matches[1];
             break;
         }
     }
 
     # this should work on redhat variants
-    if (!$os) { $os = $output[0]; }
+    if (!$os) {
+        foreach (glob("/etc/*-release") as $filename) {
+            $os = file_get_contents($filename);
+            break;
+        }
+    }
 
     # this works on remaining unix systems (i.e. Mac OS)
     if (!$os) { $os = exec("uname -srmp"); }
@@ -33,7 +37,7 @@
     $hardware = "";
     unset($output, $matches);
     exec("dmesg | grep 'Machine model'", $output);
-    if (preg_match("/Machine model: (.+)/", $output[0], $matches)) {
+    if (isset($output[0]) && preg_match("/Machine model: (.+)/", $output[0], $matches)) {
         $hardware = $matches[1];
     } else {
         exec("arch", $output);
@@ -42,15 +46,30 @@
         }
     }
 
+    $rachel_installer_version = "?";
+    if (file_exists("/etc/rachelinstaller-version")) {
+        $rachel_installer_version = file_get_contents("/etc/rachelinstaller-version");
+    }
+
+    $kalite_version = "?";
+    if (file_exists("/etc/kalite-version")) {
+        $kalite_version = file_get_contents("/etc/kalite-version");
+    }
+
+    $kiwix_version = "?";
+    if (file_exists("/etc/kiwix-version")) {
+        $kiwix_version = file_get_contents("/kiwix-version");
+    }
+
 ?>
 
 <h1>RACHEL Version Info</h1>
 <table>
 <tr><td>Hardware</td><td><?php echo $hardware ?></td></tr>
 <tr><td>OS</td><td><?php echo $os ?></td></tr>
-<tr><td>RACHEL Installer</td><td><?php passthru("cat /etc/rachelinstaller-version") ?></td></tr>
-<tr><td>KA Lite</td><td><?php passthru("cat /etc/kalite-version") ?></tr>
-<tr><td>Kiwix</td><td><?php passthru("cat /etc/kiwix-version") ?></td></tr>
+<tr><td>RACHEL Installer</td><td><?php echo $rachel_installer_version ?></td></tr>
+<tr><td>KA Lite</td><td><?php echo $kalite_version ?></tr>
+<tr><td>Kiwix</td><td><?php echo $kiwix_version ?></td></tr>
 <tr><td>Content Shell</td><td>2016.04.07</td></tr>
 
 <?php
