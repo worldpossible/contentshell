@@ -31,5 +31,6 @@ sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-oya /media/RACHEL/ra
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-law_library /media/RACHEL/rachel/modules/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-fantastic_phonics /media/RACHEL/rachel/modules/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-wikipedia /media/RACHEL/rachel/modules/.
+sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-TED /media/RACHEL/rachel/modules/.
 sudo mkdir /media/RACHEL/kacontent
 echo "you must move ka-lite content from /media/RACHEL/rachel/modules/en-kalite/content/* to /media/RACHEL/kacontent/. "
