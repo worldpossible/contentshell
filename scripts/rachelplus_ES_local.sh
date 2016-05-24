@@ -19,4 +19,4 @@ sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/es-wikipedia /media/RAC
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/es-wikivoyage /media/RACHEL/rachel/modules/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/es-wiktionary /media/RACHEL/rachel/modules/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/es-windows_apps /media/RACHEL/rachel/modules/.
-
+echo "you must move ka-lite content from /media/RACHEL/rachel/modules/en-kalite/content/* to /media/RACHEL/kacontent/. " 
