@@ -33,3 +33,4 @@ sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-wikipedia /media/RAC
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-TED /media/RACHEL/rachel/modules/.
 sudo mkdir /media/RACHEL/kacontent
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-kalite/content/* /media/RACHEL/kacontent/.
+rsync -avy rsync://192.168.1.74/rachelmods/modules/en-kalite/content_khan_en.sqlite /root/.kalite/database/.
