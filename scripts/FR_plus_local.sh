@@ -18,3 +18,4 @@ sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/fr-kalite/content/* /me
 rsync -avy rsync://192.168.1.74/rachelmods/modules/fr-kalite/content_khan_fr.sqlite /root/.kalite/database/.
 sudo rsync -Pavz --exclude content* rsync://192.168.1.74/rachelmods/modules/fr-kalite /media/RACHEL/rachel/modules/.
 
+#don't forget to download language pack for kalite fr
