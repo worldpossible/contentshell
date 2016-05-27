@@ -15,3 +15,6 @@ sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/fr-wikivoyage /media/RA
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/fr-wiktionary /media/RACHEL/rachel/modules/.
 sudo mkdir /media/RACHEL/kacontent
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/fr-kalite/content/* /media/RACHEL/kacontent/.
+rsync -avy rsync://192.168.1.74/rachelmods/modules/fr-kalite/content_khan_fr.sqlite /root/.kalite/database/.
+sudo rsync -Pavz --exclude content* rsync://192.168.1.74/rachelmods/modules/fr-kalite /media/RACHEL/rachel/modules/.
+
