@@ -18,4 +18,7 @@ sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/fr-kalite/content/* /me
 rsync -avy rsync://192.168.1.74/rachelmods/modules/fr-kalite/content_khan_fr.sqlite /root/.kalite/database/.
 sudo rsync -Pavz --exclude content* rsync://192.168.1.74/rachelmods/modules/fr-kalite /media/RACHEL/rachel/modules/.
 
+rsync -avy rsync://192.168.1.74/rachelmods/admin.* /media/RACHEL/rachel/.
+sudo cp /media/RACHEL/rachel/admin.frcap.sqlite /media/RACHEL/rachel/admin.sqlite
+
 #don't forget to download language pack for kalite fr
