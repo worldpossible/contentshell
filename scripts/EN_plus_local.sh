@@ -39,3 +39,4 @@ sudo cp /media/RACHEL/rachel/admin.encap.sqlite /media/RACHEL/rachel/admin.sqlit
 sudo mkdir /media/RACHEL/kiwix/data
 sudo mkdir /media/RACHEL/kiwix/data/library
 sudo touch /media/RACHEL/kiwix/data/library/library.xml
+sudo echo "install kiwix!!!!"
