@@ -40,5 +40,5 @@ sudo mkdir /media/RACHEL/kiwix
 sudo mkdir /media/RACHEL/kiwix/data
 sudo mkdir /media/RACHEL/kiwix/data/library
 sudo touch /media/RACHEL/kiwix/data/library/library.xml
-sudo echo 'update script, update content shell'
+sudo echo 'update script, update content shell - options 11, 7'
 
