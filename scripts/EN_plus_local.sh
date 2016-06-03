@@ -36,3 +36,6 @@ sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-kalite/content/* /me
 rsync -avy rsync://192.168.1.74/rachelmods/modules/en-kalite/content_khan_en.sqlite /root/.kalite/database/.
 sudo rsync -avy rsync://192.168.1.74/rachelmods/admin.* /media/RACHEL/rachel/.
 sudo cp /media/RACHEL/rachel/admin.encap.sqlite /media/RACHEL/rachel/admin.sqlite
+sudo mkdir /media/RACHEL/kiwix/data
+sudo mkdir /media/RACHEL/kiwix/data/library
+sudo touch /media/RACHEL/kiwix/data/library/library.xml
