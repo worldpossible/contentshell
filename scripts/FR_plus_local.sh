@@ -21,4 +21,6 @@ sudo rsync -Pavz --exclude content* rsync://192.168.1.74/rachelmods/modules/fr-k
 rsync -avy rsync://192.168.1.74/rachelmods/admin.* /media/RACHEL/rachel/.
 sudo cp /media/RACHEL/rachel/admin.frcap.sqlite /media/RACHEL/rachel/admin.sqlite
 
+sudo kalite manage retrievecontentpack download fr
+
 #don't forget to download language pack for kalite fr
