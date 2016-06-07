@@ -42,5 +42,6 @@ sudo mkdir /media/RACHEL/kiwix/data/library
 sudo touch /media/RACHEL/kiwix/data/library/library.xml
 sudo rm -r /media/RACHEL/rachel/modules/local_conten*
 sudo rm -r /media/RACHEL/rachel/modules/ka-lit*
+sudo kalite manage retrievecontentpack download en
 sudo echo 'update script, update content shell - options 11, 7'
 
