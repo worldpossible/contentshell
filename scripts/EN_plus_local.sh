@@ -5,6 +5,7 @@ sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-GCF2015 /media/RACHE
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-ebooks /media/RACHEL/rachel/modules/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-hesperian_health /media/RACHEL/rachel/modules/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-infonet /media/RACHEL/rachel/modules/.
+sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-local_content /media/RACHEL/rachel/modules/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-math_expression /media/RACHEL/rachel/modules/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-asst_medical /media/RACHEL/rachel/modules/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-medline_plus /media/RACHEL/rachel/modules/.
