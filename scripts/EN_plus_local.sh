@@ -30,14 +30,13 @@ sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-oya /media/RACHEL/ra
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-law_library /media/RACHEL/rachel/modules/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-fantastic_phonics /media/RACHEL/rachel/modules/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-wikipedia /media/RACHEL/rachel/modules/.
-rsync -Pavz rsync://dev.worldpossible.org/rachelmods/en-kalite/rachel-index.php /media/RACHEL/rachel/modules/en-kalite/.
-rsync -Pavz rsync://dev.worldpossible.org/rachelmods/en-kalite/index.htmlf /media/RACHEL/rachel/modules/en-kalite/.
 sudo mkdir /media/RACHEL/rachel/modules/en-TED
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-TED/ted.png /media/RACHEL/rachel/modules/en-TED/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-TED/rachel-index.php /media/RACHEL/rachel/modules/en-TED/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-TED/TED2* /media/RACHEL/rachel/modules/en-TED/.
 sudo mkdir /media/RACHEL/kacontent
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-kalite/content/* /media/RACHEL/kacontent/.
+sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-kalite/subtitles/en /root/.kalite/httpsrv/static/srt/.
 rsync -avy rsync://192.168.1.74/rachelmods/modules/en-kalite/content_khan_en.sqlite /root/.kalite/database/.
 sudo rsync -avy rsync://192.168.1.74/rachelmods/admin.* /media/RACHEL/rachel/.
 sudo cp /media/RACHEL/rachel/admin.encap.sqlite /media/RACHEL/rachel/admin.sqlite
@@ -47,7 +46,6 @@ sudo mkdir /media/RACHEL/kiwix/data/library
 sudo touch /media/RACHEL/kiwix/data/library/library.xml
 sudo rm -r /media/RACHEL/rachel/modules/local_conten*
 sudo rm -r /media/RACHEL/rachel/modules/ka-lit*
-sudo kalite manage retrievecontentpack download en
 sudo echo 'update script, update content shell - options 11, 7'
 
 
