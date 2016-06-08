@@ -35,6 +35,9 @@ sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-TED/ted.png /media/R
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-TED/rachel-index.php /media/RACHEL/rachel/modules/en-TED/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-TED/TED2* /media/RACHEL/rachel/modules/en-TED/.
 sudo mkdir /media/RACHEL/kacontent
+sudo mkdir /media/RACHEL/rachel/modules/en-kalite
+sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-kalite/rachel-index.php /media/RACHEL/modules/en-kalite/.
+sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-kalite/ka.png /media/RACHEL/modules/en-kalite/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-kalite/content/* /media/RACHEL/kacontent/.
 sudo rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-kalite/subtitles/en /root/.kalite/httpsrv/static/srt/.
 rsync -avy rsync://192.168.1.74/rachelmods/modules/en-kalite/content_khan_en.sqlite /root/.kalite/database/.
