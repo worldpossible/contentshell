@@ -186,8 +186,13 @@ function browser_lang() {
     $browser_langs;
 
     # now we pull the languages from header
-    preg_match_all('~([\w-]+)(?:[^,\d]+([\d.]+))?~',
-        strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']), $matches, PREG_SET_ORDER);
+    if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+        preg_match_all('~([\w-]+)(?:[^,\d]+([\d.]+))?~',
+            strtolower($_SERVER['HTTP_ACCEPT_LANGUAGE']), $matches, PREG_SET_ORDER);
+    } else {
+        # bad robot (probably) -- fake it to avoid errors
+        $matches = array(array('en','en'));
+    }
 
     #print("<h1>" . $_SERVER['HTTP_ACCEPT_LANGUAGE'] . "</h1>");
 
