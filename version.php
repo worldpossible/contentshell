@@ -67,10 +67,10 @@
 <table>
 <tr><td>Hardware</td><td><?php echo $hardware ?></td></tr>
 <tr><td>OS</td><td><?php echo $os ?></td></tr>
-<tr><td>RACHEL Installer</td><td><?php echo $rachel_installer_version ?></td></tr>
-<tr><td>KA Lite</td><td><?php echo $kalite_version ?></tr>
-<tr><td>Kiwix</td><td><?php echo $kiwix_version ?></td></tr>
-<tr><td>Content Shell</td><td>2016.04.07</td></tr>
+<tr><td>RACHEL Installer</td><td><?php echo $rachel_installer_version ?>*</td></tr>
+<tr><td>KA Lite</td><td><?php echo $kalite_version ?>*</tr>
+<tr><td>Kiwix</td><td><?php echo $kiwix_version ?>*</td></tr>
+<tr><td>Content Shell</td><td>2016.04.07*</td></tr>
 
 <?php
     # get module info
@@ -82,8 +82,11 @@
 
 </table>
 
-<p style="margin-top: 40px;">Note: these were the versions at the time of install. If you have modified
-your installation they may be out of date.</p>
+<ul style="margin-top: 40px;">
+<li>A blank indicates the item predates versioning.</li>
+<li>A ? indicates the version could not be determined, and perhaps the item is not actually installed</li>
+<li>A * indicates the version number was recorded at installation; if you have modified your installation this info may be out of date</li>
+</ul>
 
   </body>
 </html>
