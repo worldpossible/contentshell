@@ -57,7 +57,7 @@ a:visited { color: #649; }
     float: left;
 }
 
-.indexmodule p { margin: 5px 0 0 0; clear: right; }
+.indexmodule p { margin: 5px 0 0 130px; clear: right; }
 .indexmodule h2 { margin: 0; }
 
 .indexmodule form {
@@ -70,10 +70,9 @@ a:visited { color: #649; }
 }
 
 .indexmodule ul {
-    float: left;  /* float keeps ul from flowing under thumbnail,  */
     width: 808px; /* defining max available width keeps float from */
                   /* squishing multiple columns too closely */
-    margin: 10px 0 10px 0;
+    margin: 10px 0 10px 130px;
     font-size: small; 
     list-style-type: none;
     padding: 0;
