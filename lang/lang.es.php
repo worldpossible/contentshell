@@ -47,8 +47,8 @@ $lang['restart_failed'] = "No es posible reiniciar el servidor.";
 
 # for captiveportal-redirect.php
 $lang['welcome_to_rachel'] = "Bienvenido a RACHEL";
-$lang['worlds_best_edu_cont'] = "Mejor contenido educativo del mundo";
-$lang['for_people_wo_int'] = "para las personas sin internet";
+$lang['worlds_best_edu_cont'] = "La mejor colección de materiales educativos del mundo";
+$lang['for_people_wo_int'] = "cuando no haya acceso a Internet";
 $lang['click_here_to_start'] = "Haz click aquí para comenzar";
 $lang['brought_to_you_by'] = "Traído a usted por";
 
