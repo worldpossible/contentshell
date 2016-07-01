@@ -29,7 +29,7 @@ if (is_readable($plus_logpath)) {
 #-------------------------------------------
 if (isset($alog)) { # if we can read the access log
 
-    $elog = preg_replace("/access.log/", "error.log", $alog);
+    $elog = preg_replace("/access(.)log/", "error$1log", $alog);
 
     if (isset($_GET['dl_alog'])) {
         header("content-type: text/plain");
