@@ -45,4 +45,11 @@ $lang['restart_ok'] = "The server is restarting down now.";
 $lang['shutdown_failed'] = "Unable to shutdown server.";
 $lang['restart_failed'] = "Unable to restart server.";
 
+# for captiveportal-redirect.php
+$lang['welcome_to_rachel'] = "Welcome to RACHEL";
+$lang['worlds_best_edu_cont'] = "The world's best educational content";
+$lang['for_people_wo_int'] = "for people without internet";
+$lang['click_here_to_start'] = "Click here to start";
+$lang['brought_to_you_by'] = "Brought to you by";
+
 ?>

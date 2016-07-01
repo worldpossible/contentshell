@@ -46,4 +46,11 @@ $lang['restart_ok'] = "Le serveur redémarre jusqu'à maintenant.";
 $lang['shutdown_failed'] = "Impossible de serveur d'arrêt.";
 $lang['restart_failed'] = "Impossible de redémarrer le serveur.";
 
+# for captiveportal-redirect.php
+$lang['welcome_to_rachel'] = "Bienvenue à RACHEL";
+$lang['worlds_best_edu_cont'] = "Meilleur contenu éducatif au monde";
+$lang['for_people_wo_int'] = "pour les personnes sans internet";
+$lang['click_here_to_start'] = "Cliquez ici pour commencer";
+$lang['brought_to_you_by'] = "Présenté par";
+
 ?>

@@ -45,4 +45,11 @@ $lang['restart_ok'] = "El servidor está reiniciando ahora.";
 $lang['shutdown_failed'] = "No se puede cerrar el servidor.";
 $lang['restart_failed'] = "No es posible reiniciar el servidor.";
 
+# for captiveportal-redirect.php
+$lang['welcome_to_rachel'] = "Bienvenido a RACHEL";
+$lang['worlds_best_edu_cont'] = "Mejor contenido educativo del mundo";
+$lang['for_people_wo_int'] = "para las personas sin internet";
+$lang['click_here_to_start'] = "Haz click aquí para comenzar";
+$lang['brought_to_you_by'] = "Traído a usted por";
+
 ?>
