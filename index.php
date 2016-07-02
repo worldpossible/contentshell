@@ -27,6 +27,7 @@
         });
     });
 </script>
+<base target="content">
 </head>
 
 <body>
@@ -40,8 +41,8 @@
 
 <div class="menubar cf">
     <ul>
-    <li><a href="index.php"><?php echo strtoupper($lang['home']) ?></a></li>
-    <li><a href="about.html"><?php echo strtoupper($lang['about']) ?></a></li>
+    <li><a href="index.php" target="_self"><?php echo strtoupper($lang['home']) ?></a></li>
+    <li><a href="about.html" target="_self"><?php echo strtoupper($lang['about']) ?></a></li>
     </ul>
 </div>
 
@@ -100,8 +101,8 @@
 
 <div class="menubar cf" style="margin-bottom: 80px; position: relative;">
     <ul>
-    <li><a href="index.php"><?php echo strtoupper($lang['home']) ?></a></li>
-    <li><a href="about.html"><?php echo strtoupper($lang['about']) ?></a></li>
+    <li><a href="index.php" target="_self"><?php echo strtoupper($lang['home']) ?></a></li>
+    <li><a href="about.html" target="_self"><?php echo strtoupper($lang['about']) ?></a></li>
     </ul>
 </div>
 
