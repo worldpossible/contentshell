@@ -26,6 +26,7 @@ if (isset($_GET['moddirs'])) {
         foreach (explode(",", $_GET['hidden']) as $moddir) {
             $hidden[$moddir] = 1;
         }
+        $db->exec("BEGIN");
         # go to the DB and set the new order and new hidden state
         foreach (explode(",", $_GET['moddirs']) as $moddir) {
             $moddir = $db->escapeString($moddir);
@@ -38,10 +39,12 @@ if (isset($_GET['moddirs'])) {
             ++$position;
         }
     } catch (Exception $ex) {
+        $db->exec("ROLLBACK");
         error_log($ex);
         header("HTTP/1.1 500 Internal Server Error");    
         exit;
     }
+    $db->exec("COMMIT");
     header("HTTP/1.1 200 OK");    
     exit;
 
