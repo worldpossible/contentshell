@@ -244,7 +244,7 @@ function getlang() {
 function authorized() {
 
     # special case
-    if ($_SERVER['PHP_CLI_TESTING']) {
+    if (isset($_SERVER['PHP_CLI_TESTING'])) {
         return true;
     }
 
@@ -253,7 +253,8 @@ function authorized() {
         return true;
 
     # if we've got good user/pass, issue cookie
-    } else if ($_POST['user'] == "admin" && $_POST['pass'] == "Rachel+1") {
+    } else if (isset($_POST['user']) && isset($_POST['pass']) &&
+            $_POST['user'] == "admin" && $_POST['pass'] == "Rachel+1") {
         setcookie("rachel-auth", "admin");
         header(
             "Location: //$_SERVER[HTTP_HOST]"
