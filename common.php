@@ -254,7 +254,7 @@ function authorized() {
 
     # if we've got good user/pass, issue cookie
     } else if (isset($_POST['user']) && isset($_POST['pass']) &&
-            $_POST['user'] == "admin" && $_POST['pass'] == "Rachel+1") {
+            $_POST['user'] == "admin" && md5($_POST['pass']) == "d54f4a435aca0ed313c2a7a0b9914d78") {
         setcookie("rachel-auth", "admin");
         header(
             "Location: //$_SERVER[HTTP_HOST]"
