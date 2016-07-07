@@ -21,10 +21,10 @@ rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-PhET /media/RACHEL/rachel
 rsync -Pav  rsync://192.168.1.74/rachelmods/modules/en-radiolab /media/RACHEL/rachel/modules/
 rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-powertyping /media/RACHEL/rachel/modules/
 rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-iicba /media/RACHEL/rachel/modules/
-rsync -Pav  rsync://192.168.1.74/rachelmods/modules/en-wikibooks /media/RACHEL/rachel/modules/
+#rsync -Pav  rsync://192.168.1.74/rachelmods/modules/en-wikibooks /media/RACHEL/rachel/modules/
 rsync -Pav  rsync://192.168.1.74/rachelmods/modules/en-wikipedia_for_schools /media/RACHEL/rachel/modules/
-rsync -Pav  rsync://192.168.1.74/rachelmods/modules/en-wikisource /media/RACHEL/rachel/modules/
-rsync -Pav  rsync://192.168.1.74/rachelmods/modules/en-wikiversity /media/RACHEL/rachel/modules/
+#rsync -Pav  rsync://192.168.1.74/rachelmods/modules/en-wikisource /media/RACHEL/rachel/modules/
+#rsync -Pav  rsync://192.168.1.74/rachelmods/modules/en-wikiversity /media/RACHEL/rachel/modules/
 rsync -Pav  rsync://192.168.1.74/rachelmods/modules/en-wikivoyage /media/RACHEL/rachel/modules/
 rsync -Pav  rsync://192.168.1.74/rachelmods/modules/en-wiktionary /media/RACHEL/rachel/modules/
 rsync -Pavz rsync://192.168.1.74/rachelmods/modules/en-windows_apps /media/RACHEL/rachel/modules/

@@ -21,10 +21,10 @@ rsync -Pavz rsync://dev.worldpossible.org/rachelmods/en-PhET /media/RACHEL/rache
 rsync -Pav  rsync://dev.worldpossible.org/rachelmods/en-radiolab /media/RACHEL/rachel/modules/
 rsync -Pavz rsync://dev.worldpossible.org/rachelmods/en-powertyping /media/RACHEL/rachel/modules/
 rsync -Pavz rsync://dev.worldpossible.org/rachelmods/en-iicba /media/RACHEL/rachel/modules/
-rsync -Pav  rsync://dev.worldpossible.org/rachelmods/en-wikibooks /media/RACHEL/rachel/modules/
+#rsync -Pav  rsync://dev.worldpossible.org/rachelmods/en-wikibooks /media/RACHEL/rachel/modules/
 rsync -Pav  rsync://dev.worldpossible.org/rachelmods/en-wikipedia_for_schools /media/RACHEL/rachel/modules/
-rsync -Pav  rsync://dev.worldpossible.org/rachelmods/en-wikisource /media/RACHEL/rachel/modules/
-rsync -Pav  rsync://dev.worldpossible.org/rachelmods/en-wikiversity /media/RACHEL/rachel/modules/
+#rsync -Pav  rsync://dev.worldpossible.org/rachelmods/en-wikisource /media/RACHEL/rachel/modules/
+#rsync -Pav  rsync://dev.worldpossible.org/rachelmods/en-wikiversity /media/RACHEL/rachel/modules/
 rsync -Pav  rsync://dev.worldpossible.org/rachelmods/en-wikivoyage /media/RACHEL/rachel/modules/
 rsync -Pav  rsync://dev.worldpossible.org/rachelmods/en-wiktionary /media/RACHEL/rachel/modules/
 rsync -Pavz rsync://dev.worldpossible.org/rachelmods/en-windows_apps /media/RACHEL/rachel/modules/
