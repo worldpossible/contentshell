@@ -59,7 +59,7 @@ function getmods_fs() {
                     'title'    => $title,
                     'position' => 0,
                     'hidden'   => false,
-                    'nohtmlf'  => false,
+                    'fragment' => $fragment,
                     'version'  => $version,
                 );
             } else {
@@ -70,7 +70,7 @@ function getmods_fs() {
                     'title'    => $moddir,
                     'position' => 0,
                     'hidden'   => true,
-                    'nohtmlf'  => true,
+                    'fragment'  => false,
                     'version'  => "",
                 );
             }

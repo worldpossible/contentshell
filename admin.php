@@ -23,8 +23,10 @@ if (isset($_GET['moddirs'])) {
         if (!$db) { throw new Exception($db->lastErrorMsg); }
         # figure out which modules to hide
         $hidden= array();
-        foreach (explode(",", $_GET['hidden']) as $moddir) {
-            $hidden[$moddir] = 1;
+        if (isset($_GET['hidden'])) {
+            foreach (explode(",", $_GET['hidden']) as $moddir) {
+                $hidden[$moddir] = 1;
+            }
         }
         $db->exec("BEGIN");
         # go to the DB and set the new order and new hidden state
@@ -245,11 +247,11 @@ if (is_dir($basedir)) {
 
     # display the sortable list
     $disabled = " disabled";
-    $found_nohtmlf = false;
+    $nofragment = false;
     echo "<p>$lang[found_in] /modules/:</p><ul id=\"sortable\">\n";
     foreach (array_keys($fsmods) as $moddir) {
-        if ($fsmods[$moddir]['nohtmlf']) {
-            $found_nohtmlf = true;
+        if (!$fsmods[$moddir]['fragment']) {
+            $nofragment = true;
             continue;
         }
         echo "<li id=\"$moddir\" class=\"ui-state-default\">\n";
@@ -272,10 +274,10 @@ if (is_dir($basedir)) {
     
     echo "<button id='modbut' onclick=\"saveModState();\"$disabled>" . $lang['save_changes'] . "</button>\n";
 
-    if ($found_nohtmlf) {
+    if ($nofragment) {
         echo "<h3>The following modules were ignored because they had no index.htmlf</h3><ul>\n";
         foreach (array_keys($fsmods) as $moddir) {
-            if ($fsmods[$moddir]['nohtmlf']) {
+            if (!$fsmods[$moddir]['fragment']) {
                 echo "<li> $moddir </li>\n";
             }
         }

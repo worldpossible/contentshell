@@ -50,6 +50,8 @@
 
 <?php
 
+    $modcount = 0;
+
     $fsmods = getmods_fs();
 
     # if there were any modules found in the filesystem
@@ -73,19 +75,11 @@
 
         # whether or not we were able to get anything
         # from the DB, we show what we found in the filesystem
-        $modcount = 0;
         foreach (array_values($fsmods) as $mod) {
-            if ($mod['hidden'] || $mod['nohtmlf']) { continue; }
+            if ($mod['hidden'] || !$mod['fragment']) { continue; }
             $dir  = $mod['dir'];
             $moddir  = $mod['moddir'];
-            if (file_exists("$mod[dir]/rachel-index.php")) {
-                # new name - less confusing, and
-                # will get syntax highlighting in editors
-                include "$mod[dir]/rachel-index.php";
-            } else if (file_exists("$mod[dir]/index.htmlf")) {
-                # old name - deprecated
-                include "$mod[dir]/index.htmlf";
-            }
+            include $mod['fragment'];
             ++$modcount;
         }
 
