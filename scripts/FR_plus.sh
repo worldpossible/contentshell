@@ -10,9 +10,9 @@ fi
 
 # files that are already highly compressed (zim, videos) will probably
 # transfer faster without the -z option (which uses zip compression)
-rsync -Pav  rsync://$1/rachelmods/fr-kalite /media/RACHEL/rachel/modules/
-rsync -Pav  rsync://$1/rachelmods/fr-wikipedia /media/RACHEL/rachel/modules/
-rsync -Pav  rsync://$1/rachelmods/fr-wikivoyage /media/RACHEL/rachel/modules/
-rsync -Pav  rsync://$1/rachelmods/fr-wiktionary /media/RACHEL/rachel/modules/
-rsync -Pavz rsync://$1/rachelmods/fr-ebooksgratuits /media/RACHEL/rachel/modules/
-rsync -Pavz rsync://$1/rachelmods/fr-haitifutur /media/RACHEL/rachel/modules/
+rsync -a  rsync://$1/rachelmods/fr-kalite /media/RACHEL/rachel/modules/
+rsync -a  rsync://$1/rachelmods/fr-wikipedia /media/RACHEL/rachel/modules/
+rsync -a  rsync://$1/rachelmods/fr-wikivoyage /media/RACHEL/rachel/modules/
+rsync -a  rsync://$1/rachelmods/fr-wiktionary /media/RACHEL/rachel/modules/
+rsync -az rsync://$1/rachelmods/fr-ebooksgratuits /media/RACHEL/rachel/modules/
+rsync -az rsync://$1/rachelmods/fr-haitifutur /media/RACHEL/rachel/modules/
