@@ -20,7 +20,6 @@ rsync -avz rsync://$1/rachelmods/en-hesperian_health /media/RACHEL/rachel/module
 rsync -avz rsync://$1/rachelmods/en-infonet /media/RACHEL/rachel/modules/
 rsync -avz rsync://$1/rachelmods/en-local_content /media/RACHEL/rachel/modules/
 rsync -avz rsync://$1/rachelmods/en-math_expression /media/RACHEL/rachel/modules/
-rsync -avz rsync://$1/rachelmods/en-asst_medical /media/RACHEL/rachel/modules/
 rsync -avz rsync://$1/rachelmods/en-medline_plus /media/RACHEL/rachel/modules/
 rsync -avz rsync://$1/rachelmods/en-scratch /media/RACHEL/rachel/modules/
 rsync -avz rsync://$1/rachelmods/en-musictheory /media/RACHEL/rachel/modules/
