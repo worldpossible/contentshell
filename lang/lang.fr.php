@@ -10,9 +10,11 @@
 $lang = array();
  
 # index.php
+$lang['langcode'] = 'fr';
 $lang['home'] = 'Accueil';
 $lang['about'] = 'À propos';
 $lang['server_address'] = 'Adresse du Serveur';
+$lang['main'] = 'Principal';
 $lang['admin'] = 'Administrateur';
 $lang['stats'] = 'Stats';
 $lang['version'] = 'Version';
@@ -28,12 +30,18 @@ $lang['no_mods_error'] = "<h2>Aucun module trouvé.</h2>\n"
     . "tous caché sur la page d'administration.\n";
 
 # for admin.php
+$lang['user'] = "Nom d’utilisateur";
+$lang['pass'] = "Mot de passe";
+$lang['next'] = "Suivant";
+$lang['back'] = "Retour";
+$lang['cancel'] = "Annuler";
 $lang['found_in'] = "Trouvé dans";
 $lang['hide'] = "cacher";
 $lang['save_changes'] = "Sauvegarder";
 $lang['saved'] = "Sauvegardés";
 $lang['not_saved_error'] = "Non enregistré - Erreur interne";
-$lang['logout'] = "se déconnecter";
+$lang['login'] = "Se connecter";
+$lang['logout'] = "Se déconnecter";
 $lang['no_moddir_found'] = "Aucun répertoire de module trouvé.";
 $lang['shutdown_system'] = "Système d'arrêt";
 $lang['confirm_shutdown'] = "Êtes-vous sûr de vouloir arrêter?";
@@ -45,6 +53,7 @@ $lang['shutdown_ok'] = "Le serveur est en cours d'arrêt maintenant.";
 $lang['restart_ok'] = "Le serveur redémarre jusqu'à maintenant.";
 $lang['shutdown_failed'] = "Impossible de serveur d'arrêt.";
 $lang['restart_failed'] = "Impossible de redémarrer le serveur.";
+$lang['admin_instructions'] = "Vous pouvez afficher, masquer modules ici, ou modifier l'ordre en les faisant glisser. <br> Assurez-vous de cliquer sur \"Sauvegarder\" au bas de la page.";
 
 # for captiveportal-redirect.php
 $lang['welcome_to_rachel'] = "Bienvenue à RACHEL";

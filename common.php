@@ -1,6 +1,13 @@
 <?php
 
 #-------------------------------------------
+# Just by including this module you get browser language
+# detectino and access to the $lang associative array
+#-------------------------------------------
+require_once("common.php");
+require_once("lang/lang." . getlang() . ".php");
+
+#-------------------------------------------
 # returns an associative array of modules from the
 # filesystem - does not check the database at all
 #-------------------------------------------
@@ -243,6 +250,8 @@ function getlang() {
 
 function authorized() {
 
+    global $lang;
+
     # special case
     if (isset($_SERVER['PHP_CLI_TESTING'])) {
         return true;
@@ -271,15 +280,15 @@ function authorized() {
     <meta charset="utf-8">
     <title>Login</title>
   </head>
-  <body bgcolor="#cccccc">
+  <body bgcolor="#cccccc" onload="document.getElementById('user').focus()">
     <center>
-    <h1>Admin Login</h1>
-    <p><a href="$indexurl">&larr; back</a></p>
+    <h1>$lang[admin] $lang[login]</h1>
+    <p><a href="$indexurl">&larr; $lang[back]</a></p>
     <form method="POST">
     <table cellpadding="10">
-    <tr><td>User</td><td><input name="user"></td></tr>
-    <tr><td>Pass</td><td><input name="pass" type="password"></td></tr>
-    <tr><td colspan="2" align="right"><input type="submit" value="Log In"></td></tr>
+    <tr><td>$lang[user]</td><td><input name="user" id="user"></td></tr>
+    <tr><td>$lang[pass]</td><td><input name="pass" type="password"></td></tr>
+    <tr><td colspan="2" align="right"><input type="submit" value="$lang[login]"></td></tr>
     </table>
     </center>
     </form>

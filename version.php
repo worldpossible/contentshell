@@ -1,16 +1,18 @@
+<?php require_once("common.php"); ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?php echo $lang['langcode']; ?>">
   <head>
     <meta charset="utf-8">
-    <title>RACHEL Version Info</title>
-    <style>
-        table { border-collapse: collapse; }
-        tr { border-top: 1px solid lightgray; }
-        td { padding: 10px; }
-    </style>
+    <title>RACHEL Admin - Version Info</title>
+    <link rel="stylesheet" href="css/normalize-1.1.3.css">
+    <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.min.css">
+    <link rel="stylesheet" href="css/admin-style.css">
   </head>
-  <body>
+<body>
 
+<?php $nav_version = true; include "admin-nav.php" ?>
+
+<div id="content">
 <?php
     
     # this should work on debian variants
@@ -63,8 +65,8 @@
 
 ?>
 
-<h1>RACHEL Version Info</h1>
-<table>
+<h2>RACHEL Version Info</h2>
+<table class="version">
 <tr><td>Hardware</td><td><?php echo $hardware ?></td></tr>
 <tr><td>OS</td><td><?php echo $os ?></td></tr>
 <tr><td>RACHEL Installer</td><td><?php echo $rachel_installer_version ?>*</td></tr>
@@ -88,5 +90,6 @@
 <li>A * indicates the version number was recorded at installation; if you have modified your installation this info may be out of date</li>
 </ul>
 
-  </body>
+</div>
+</body>
 </html>

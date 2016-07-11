@@ -10,9 +10,11 @@
 $lang = array();
  
 # for index.php
+$lang['langcode'] = 'en';
 $lang['home'] = 'Home';
 $lang['about'] = 'About';
 $lang['server_address'] = 'Server Address';
+$lang['main'] = 'Main';
 $lang['admin'] = 'Admin';
 $lang['stats'] = 'Stats';
 $lang['version'] = 'Version';
@@ -27,12 +29,18 @@ $lang['no_mods_error'] = "<h2>No modules found.</h2>\n"
     . "and that they are not all hidden on the admin page.\n";
 
 # for admin.php
+$lang['user'] = "Username";
+$lang['pass'] = "Password";
+$lang['next'] = "Next";
+$lang['back'] = "Back";
+$lang['cancel'] = "Cancel";
 $lang['found_in'] = "Found in";
 $lang['hide'] = "hide";
 $lang['save_changes'] = "Save Changes";
 $lang['saved'] = "Saved";
 $lang['not_saved_error'] = "Not Saved - Internal Error";
-$lang['logout'] = "logout";
+$lang['login'] = "Login";
+$lang['logout'] = "Logout";
 $lang['no_moddir_found'] = "No module directory found.";
 $lang['shutdown_system'] = "Shutdown System";
 $lang['confirm_shutdown'] = "Are you sure you want to shut down?";
@@ -44,6 +52,7 @@ $lang['shutdown_ok'] = "The server is shutting down now.";
 $lang['restart_ok'] = "The server is restarting down now.";
 $lang['shutdown_failed'] = "Unable to shutdown server.";
 $lang['restart_failed'] = "Unable to restart server.";
+$lang['admin_instructions'] = "You can show, hide modules here, or change the order by dragging them. <br> Be sure to click \"Save Changes\" at the bottom of the page.";
 
 # for captiveportal-redirect.php
 $lang['welcome_to_rachel'] = "Welcome to RACHEL";

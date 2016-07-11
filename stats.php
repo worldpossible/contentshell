@@ -1,5 +1,7 @@
 <?php
 
+require_once("common.php");
+
 #-------------------------------------------
 # configuration
 #-------------------------------------------
@@ -71,7 +73,7 @@ function draw_stats() {
     # read query string (and display)
     if ($_GET && $_GET['module']) {
         $module = $_GET['module'];
-        $out .= "<h1><a href=\"stats.php\">RACHEL Stats</a></h1>\n";
+        $out .= "<p>Usage Stats\n";
         $dispmod = preg_replace("/\/modules\//", "", $module);
     } else {
         if (file_exists("./modules")) {
@@ -79,7 +81,7 @@ function draw_stats() {
         } else {
             $module = "/";
         }
-        $out .= "<h1>RACHEL Stats</h1>\n";
+        $out .= "<p>Usage Stats\n";
         $dispmod = "";
     }
     $modmatch = preg_quote($module, "/");
@@ -158,23 +160,23 @@ function draw_stats() {
 
     }
 
-    # tell the user the path they're in
-    if ($dispmod) {
-        $out .= "<h2>$dispmod</h2>\n";
-    }
-
-    # date & time formatting
-    $start = preg_replace("/\:/", " ", $start, 1);
-    $end   = preg_replace("/\:/", " ", $end, 1);
-    $start = preg_replace("/\:\d\d$/", "", $start, 1);
-    $end   = preg_replace("/\:\d\d$/", "", $end, 1);
+    # date & time formatting (we used to show time, but now we don't)
+    $start = preg_replace("/\:.+/", " ", $start, 1);
+    $end   = preg_replace("/\:.+/", " ", $end, 1);
+    #$start = preg_replace("/\:/", " ", $start, 1);
+    #$end   = preg_replace("/\:/", " ", $end, 1);
+    #$start = preg_replace("/\:\d\d$/", "", $start, 1);
+    #$end   = preg_replace("/\:\d\d$/", "", $end, 1);
     $start = preg_replace("/\//", " ", $start);
     $end   = preg_replace("/\//", " ", $end);
-    $out .= "<b>$start</b> <small>through</small> <b>$end</b>\n";
+    $out .= "<b>$start</b> through <b>$end</b></p>\n";
+
+    # tell the user the path they're in
+    if ($dispmod) { $out .= "<h3>$dispmod</h3>\n"; }
 
     # stats display
     arsort($stats);
-    $out .= "<table>\n";
+    $out .= "<table class=\"stats\">\n";
     $out .= "<tr><th>Hits</th><th>Content</th></tr>\n";
     foreach ($stats as $mod => $hits) {
         # html pages are links to the content
@@ -200,12 +202,14 @@ function draw_stats() {
     );
 
     # download log links
-    $out .= (
-        "<ul>\n" .
-        "<li><a href=\"stats.php?dl_alog=1\">Download Access Log</a>" .
-        "<li><a href=\"stats.php?dl_elog=1\">Download Error Log</a>" .
-        "</ul>\n"
-    );
+    if (!$dispmod) {
+        $out .= (
+            "<ul>\n" .
+            "<li><a href=\"stats.php?dl_alog=1\">Download Access Log</a>" .
+            "<li><a href=\"stats.php?dl_elog=1\">Download Error Log</a>" .
+            "</ul>\n"
+        );
+    }
 
     return $out;
 
@@ -273,24 +277,20 @@ function tail($filename, $lines = 10, $buffer = 4096) {
 
 }
 
-?>
-<!DOCTYPE html">
+?><!DOCTYPE html">
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>RACHEL - STATS</title>
-    <style>
-        body { background-color: #ffc; font-family: sans-serif; }
-        h1 { margin-bottom: 10px; }
-        table { border-collapse: collapse; margin-top: 20px;}
-        td { border: 1px solid #cc9; padding: 5px; }
-    </style>
+    <title>RACHEL Admin - Stats</title>
+    <link rel="stylesheet" href="css/normalize-1.1.3.css">
+    <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.min.css">
+    <link rel="stylesheet" href="css/admin-style.css">
 </head>
 <body>
-
+<?php $nav_stats = true; include "admin-nav.php" ?>
+<div id="content">
 <?php echo $output ?>
-
-
+</div>
 </body>
 </html>
 

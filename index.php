@@ -34,8 +34,6 @@
 <div id="rachel">
     <div id="adminnav">
     <a href="admin.php"><?php echo $lang['admin'] ?></a> |
-    <a href="stats.php"><?php echo $lang['stats'] ?></a> |
-    <a href="version.php"><?php echo $lang['version'] ?></a>
     </div>
 </div>
 

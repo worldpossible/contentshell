@@ -1,8 +1,6 @@
 <?php
 
 require_once("common.php");
-$preflang = getlang();
-require_once("lang/lang.$preflang.php");
 
 # cookie-based authorization
 if (!authorized()) { exit(); }
@@ -74,42 +72,19 @@ if (isset($_GET['moddirs'])) {
 }
 
 ?><!DOCTYPE html>
-<html lang="<?php echo $preflang ?>">
+<html lang="<?php echo $lang['langcode'] ?>">
 <head>
 <meta charset="utf-8">
 <title>RACHEL Admin</title>
 <link rel="stylesheet" href="css/normalize-1.1.3.css">
 <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.min.css">
-<style>
-    body { margin: 10px; }
-    button { margin: 3px; padding: .25em 1em; }
-    .ui-icon { background-image: url(css/ui-lightness/images/ui-icons_ef8c08_256x240.png); }
-    #sortable { list-style-type: none; margin: 0; padding: 0; }
-    #sortable li {
-        margin: 0 3px 3px 3px;
-        padding: .25em;
-        padding-left: 1.5em;
-        height: 1em; width: 40em;
-        overflow: hidden;
-        position: relative;
-    }
-    #sortable li span { position: absolute; margin-left: -1.3em; }
-    #sortable .checkbox { position: absolute; right: 10px; top: 5px; font-size: small; color: gray; }
-    .error { border: 1px solid #c00; background: #fee; color: #c00; padding: 10px; }
-    .error h2, .error h3 { margin: 0 0 10px 0; }
-    .error p { margin: 0 }
-    #ip {
-        float: right;
-        margin: 10px 10px;
-    }
-</style>
+<link rel="stylesheet" href="css/admin-style.css">
 <script src="js/jquery-1.10.2.min.js"></script>
 <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
 <script>
 
     // onload
     $(function() {
-
         // detect changes to sorting and hiding
         $("#sortable").sortable({
             change: function(event, ui) {
@@ -123,9 +98,6 @@ if (isset($_GET['moddirs'])) {
                 $("#modbut").html("<?php echo $lang['save_changes'] ?>");
                 $("#modbut").prop("disabled", false);
         });
-// not needed? check a few browsers...
-//        $("#sortable").disableSelection();
-
     });
 
     // button click calls this to save the module order & hiding
@@ -158,44 +130,9 @@ if (isset($_GET['moddirs'])) {
 </head>
 <body>
 
-<div style="float: right;">
-<a href="index.php"><?php echo $lang['home'] ?></a> &bull;
-<a href="admin.php?logout=1"><?php echo $lang['logout'] ?></a>
-<p>
-    <?php
-        # some notes to prevent future regression:
-        # the PHP suggested gethostbyname(gethostname())
-        # brings back the unhelpful 127.0.0.1 on RPi systems,
-        # as well as slowing down some Windows installations
-        # with a DNS lookup. $_SERVER["SERVER_ADDR"] will just
-        # display what's in the user's address bar, so also
-        # not useful - using ifconfig/ipconfig is the way to go,
-        # but requires system-specific tweaking
-        echo "<b>" . $lang['server_address'] . "</b><br>\n";
-        if (preg_match("/^win/i", PHP_OS)) {
-            # under windows it's ipconfig
-            $output = shell_exec("ipconfig");
-            preg_match("/IPv4 Address.+?: (.+)/", $output, $match);
-            if (isset($match[1])) { echo "$match[1]<br>\n"; }
-        } else if (preg_match("/^darwin/i", PHP_OS)) {
-            # OSX is unix, but it's a little different
-            exec("/sbin/ifconfig", $output);
-            preg_match("/en0.+?inet (.+?) /", join("", $output), $match);
-            if (isset($match[1])) { echo "$match[1]<br>\n"; }
-        } else {
-            # most likely linux based - so ifconfig should work
-            exec("/sbin/ifconfig", $output);
-            preg_match("/eth0.+?inet addr:(.+?) /", join("", $output), $match);
-            if (isset($match[1])) { echo "LAN: $match[1]<br>\n"; }
-            preg_match("/wlan0.+?inet addr:(.+?) /", join("", $output), $match);
-            if (isset($match[1])) { echo "WIFI: $match[1]<br>\n"; }
-        }
+<?php $nav_admin = true; include "admin-nav.php"?>
 
-    ?>
-</p>
-</div>
-<h1>RACHEL <?php echo $lang['admin'] ?></h1>
-
+<div id="content">
 <?php
 
 $basedir = "modules";
@@ -248,6 +185,7 @@ if (is_dir($basedir)) {
     # display the sortable list
     $disabled = " disabled";
     $nofragment = false;
+    echo "<p>$lang[admin_instructions]</p>\n";
     echo "<p>$lang[found_in] /modules/:</p><ul id=\"sortable\">\n";
     foreach (array_keys($fsmods) as $moddir) {
         if (!$fsmods[$moddir]['fragment']) {
@@ -333,6 +271,6 @@ if (file_exists("/usr/bin/raspi-config") ||
 }
 
 ?>
-
+</div>
 </body>
 </html>
