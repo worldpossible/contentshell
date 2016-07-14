@@ -113,7 +113,11 @@ a:visited { color: #649; }
 }
 
 .indexmodule input[type="text"] { width: 20em; margin-left: 2px; }
-.indexmodule input[type="submit"] { width: 14em; }
+/* we're switching to just "Search" from now on (no
+/* module title) so we don't need to worry about
+/* aligning them with a hardcoded width
+/* .indexmodule input[type="submit"] { width: 14em; }
+**/
 
 /*-------------------------------------------*/
 /* END for index modules                     */
