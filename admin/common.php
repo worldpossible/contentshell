@@ -120,16 +120,13 @@ function getmods_db() {
 function getdb() {
 
     try {
-        $db = new SQLite3("admin.sqlite");
+        $db = new SQLite3(getadmindir()."/admin.sqlite");
     } catch (Exception $ex) {
         return null;
     }
 
-    # in case this is the first time
-    # - a bit wasteful to do this every time
-    # but it saves errors in the log if the
-    # db file gets lost and people don't
-    # go to admin.php to re-initialize it
+    # in case this is the first time - a bit wasteful to do this every time
+    # but it saves errors in the log if the db file gets lost
     $db->exec("
         CREATE TABLE IF NOT EXISTS modules (
             module_id INTEGER PRIMARY KEY,
@@ -350,6 +347,10 @@ function getrelmodpath() {
     } else {
         return "modules";
     }
+}
+
+function getadmindir() {
+    return getbasedir() . "/admin";
 }
 
 ?>
