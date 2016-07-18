@@ -25,7 +25,7 @@
     }
 
     # this should work on redhat variants
-    if (!$os) {
+    if (!isset($os)) {
         foreach (glob("/etc/*-release") as $filename) {
             $os = file_get_contents($filename);
             break;
@@ -33,7 +33,7 @@
     }
 
     # this works on remaining unix systems (i.e. Mac OS)
-    if (!$os) { $os = exec("uname -srmp"); }
+    if (!isset($os)) { $os = exec("uname -srmp"); }
 
     # this gets the hardware version on rpi systems
     $hardware = "";

@@ -4,55 +4,22 @@ require_once("common.php");
 
 # cookie-based authorization
 if (!authorized()) { exit(); }
-if (isset($_GET['logout'])) { clearcookie(); }
+if (isset($_GET['logout'])) { clearcookie(); exit; }
 
 # If we've got a list of moddirs, we update the DB to
 # reflect that ordering. This all takes place as an AJAX
-# request, and the success/failure is reflected in the
-# "Save" button on the page.
+# request, and the success/failure is returned via HTTP
+# code and reflected in the "Save" button on the page.
 if (isset($_GET['moddirs'])) {
-    # if we don't do this, even caught db problems
-    # will print to the browser (as a "200 OK"), breaking
-    # our ability to signal failure
-    ini_set('display_errors', '0');
-    $position = 1;
-    try {
-        $db = getdb();
-        if (!$db) { throw new Exception($db->lastErrorMsg); }
-        # figure out which modules to hide
-        $hidden= array();
-        if (isset($_GET['hidden'])) {
-            foreach (explode(",", $_GET['hidden']) as $moddir) {
-                $hidden[$moddir] = 1;
-            }
-        }
-        $db->exec("BEGIN");
-        # go to the DB and set the new order and new hidden state
-        foreach (explode(",", $_GET['moddirs']) as $moddir) {
-            $moddir = $db->escapeString($moddir);
-            if (isset($hidden[$moddir])) { $is_hidden = 1; } else { $is_hidden = 0; }
-            $rv = $db->exec(
-                "UPDATE modules SET position = '$position', hidden = '$is_hidden'" .
-                " WHERE moddir = '$moddir'"
-            );
-            if (!$rv) { throw new Exception($db->lastErrorMsg()); }
-            ++$position;
-        }
-    } catch (Exception $ex) {
-        $db->exec("ROLLBACK");
-        error_log($ex);
-        header("HTTP/1.1 500 Internal Server Error");    
-        exit;
-    }
-    $db->exec("COMMIT");
-    header("HTTP/1.1 200 OK");    
+    updatemods();
     exit;
+}
 
 # We also allow shutting down the server so as to avoid
 # damaging the SD/HD. This requires that www-data has
 # sudo access to /sbin/shutdown, which should be set up
 # automatically during rachelpiOS installation
-} else if (isset($_POST['shutdown'])) {
+if (isset($_POST['shutdown'])) {
     exec("sudo /sbin/shutdown now", $exec_out, $exec_err);
     if ($exec_err) {
         echo $lang['shutdown_failed'];
@@ -68,7 +35,6 @@ if (isset($_GET['moddirs'])) {
         echo $lang['restart_ok'];
     }
     exit;
-
 }
 
 ?><!DOCTYPE html>
@@ -83,30 +49,65 @@ if (isset($_GET['moddirs'])) {
 <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
 <script>
 
+    function setButtonsActive () {
+        $("#savebut").css("color", "");
+        $("#savebut").html("<?php echo $lang['save_changes'] ?>");
+        $("#savebut").prop("disabled", false);
+        $("#resetbut").prop("disabled", false);
+    }
+
+    // all languages represented - populated onload below
+    var langs = [];
+
     // onload
     $(function() {
         // detect changes to sorting and hiding
-        $("#sortable").sortable({
-            change: function(event, ui) {
-                $("#modbut").css("color", "");
-                $("#modbut").html("<?php echo $lang['save_changes'] ?>");
-                $("#modbut").prop("disabled", false);
+        $("#sortable").sortable({ change: setButtonsActive });
+        $(":checkbox").change( setButtonsActive );
+
+        // create language filtering options XXX optimize by using native JS?
+        // first we grab each language code by going through the modules
+        var langhash = {};
+        $("input[type=checkbox]").each(function () {
+            match = $(this).attr('id').match(/^(..)-/);
+            if (match[0]) { langhash[ match[1] ] = true; }
+        });
+        // then we convert it to an array
+        for (var lang in langhash) {
+            if(langhash.hasOwnProperty(lang)) {
+                langs.push(lang);
             }
-        });
-        $(":checkbox").change( function() {
-                $("#modbut").css("color", "");
-                $("#modbut").html("<?php echo $lang['save_changes'] ?>");
-                $("#modbut").prop("disabled", false);
-        });
+        }
+        // then we create a button for each
+        langs.sort();
+        langs.reverse();
+        var langsLength = langs.length
+        for (var i = 0; i < langsLength; ++i) {
+            $("#controls").prepend(
+                "<button onclick=\"changelang(this, '"+langs[i]+"', true);\"><?php echo $lang['hide'] ?> "+langs[i]+"</button>\n"
+            );
+        }
+
+        $("#controls").prepend("&nbsp;&bull;&nbsp;\n");
+
+        // add a sort button
+        for (var i = 0; i < langsLength; ++i) {
+            $("#controls").prepend(
+                "<button onclick=\"sortlang(this, '"+langs[i]+"');\"><?php echo $lang['sort'] ?> "+langs[i]+"</button>\n"
+            );
+        }
+
     });
 
     // button click calls this to save the module order & hiding
     function saveModState() {
-        $("#modbut").html("Saving...");
-        $("#modbut").prop("disabled", true);
+        $("#savebut").html("Saving...");
+        $("#savebut").prop("disabled", true);
+        $("#resetbut").prop("disabled", true);
         var ordered = $("#sortable").sortable("toArray");
         var hidden = [];
-        for (var i = 0; i < ordered.length; ++i) {
+        var orderedLength = ordered.length;
+        for (var i = 0; i < orderedLength; ++i) {
             if ($("#"+ordered[i]+"-hidden").prop("checked")) {
                 hidden.push(ordered[i]);
             }
@@ -116,14 +117,58 @@ if (isset($_GET['moddirs'])) {
             url: "admin.php?moddirs=" + ordered.join(",")
                 + "&hidden=" + hidden.join(","),
             success: function() {
-                $("#modbut").css("color", "green");
-                $("#modbut").html("&#10004; <?php echo $lang['saved'] ?>");
+                $("#savebut").css("color", "green");
+                $("#savebut").html("&#10004; <?php echo $lang['saved'] ?>");
             },
             error: function() {
-                $("#modbut").css("color", "#c00");
-                $("#modbut").html("X <?php echo $lang['not_saved_error'] ?>");
+                $("#savebut").css("color", "#c00");
+                $("#savebut").html("X <?php echo $lang['not_saved_error'] ?>");
+                $("#resetbut").prop("disabled", false);
             }
         });
+    }
+
+    function changeall(myself, value) {
+        $("input[type=checkbox]").each(function () {
+            $(this).prop("checked", value);
+        });
+        setButtonsActive();
+        $(myself).blur();
+    }
+
+    function changelang(myself, lang, value) {
+        var regex = new RegExp("^"+lang+"-");
+        $("input[type=checkbox]").each(function () {
+            if ($(this).attr('id').match(regex)) {
+                $(this).prop("checked", value);
+            }
+        });
+        setButtonsActive();
+        $(myself).blur();
+        //$(myself).html("yo");
+    }
+
+    function sortlang(myself, lang) {
+        var items = $("#sortable").children("li");
+        //alert(items[0].id);
+        //console.log(items);
+        var regex = new RegExp("^"+lang+"-");
+        items.sort(function(a,b) {
+            if (a.id.match(regex) && b.id.match(regex)) {
+                if (a.id < b.id) { return -1; }
+                if (a.id > b.id) { return 1; }
+                return 0;
+            } else {
+                if (a.id.match(regex)) { return -1; }
+                if (b.id.match(regex)) { return 1; }
+                if (a.id < b.id) { return -1; }
+                if (a.id > b.id) { return 1; }
+                return 0;
+            }
+        });
+        //console.log(items);
+        $("#sortable").empty().html(items);
+        //var itemsLength = items.length;
     }
 
 </script>
@@ -185,8 +230,14 @@ if (is_dir($basedir)) {
     # display the sortable list
     $disabled = " disabled";
     $nofragment = false;
-    echo "<p>$lang[admin_instructions]</p>\n";
-    echo "<p>$lang[found_in] /modules/:</p><ul id=\"sortable\">\n";
+    echo "
+        <p>$lang[admin_instructions]</p>
+        <p id=\"controls\">
+        <button onclick=\"changeall(this, true);\">$lang[hide_all]</button>
+        <button onclick=\"changeall(this, false);\">$lang[show_all]</button>
+        </p>
+        <ul id=\"sortable\">
+    ";
     foreach (array_keys($fsmods) as $moddir) {
         if (!$fsmods[$moddir]['fragment']) {
             $nofragment = true;
@@ -210,10 +261,11 @@ if (is_dir($basedir)) {
     }
     echo "</ul>\n";
     
-    echo "<button id='modbut' onclick=\"saveModState();\"$disabled>" . $lang['save_changes'] . "</button>\n";
+    echo "<button id='savebut' onclick=\"saveModState();\"$disabled>" . $lang['save_changes'] . "</button>\n";
+    echo "<button id='resetbut' onclick=\"location.reload();\" disabled>" . $lang['reset'] . "</button>\n";
 
     if ($nofragment) {
-        echo "<h3>The following modules were ignored because they had no index.htmlf</h3><ul>\n";
+        echo "<h3>The following modules were ignored because they had no rachel-index.php</h3><ul>\n";
         foreach (array_keys($fsmods) as $moddir) {
             if (!$fsmods[$moddir]['fragment']) {
                 echo "<li> $moddir </li>\n";
@@ -274,3 +326,64 @@ if (file_exists("/usr/bin/raspi-config") ||
 </div>
 </body>
 </html>
+<?php
+
+# called if the user hits the "Save" button
+function updatemods () {
+
+    # if we don't turn off visible errors, even caught db
+    # exceptions will print to the browser (as a "200 OK"),
+    # breaking our ability to signal failure
+    ini_set('display_errors', '0');
+
+    $position = 1;
+
+    try {
+
+        $db = getdb();
+        if (!$db) { throw new Exception($db->lastErrorMsg); }
+
+        # figure out which modules to hide
+        $hidden= array();
+        if (isset($_GET['hidden'])) {
+            foreach (explode(",", $_GET['hidden']) as $moddir) {
+                $hidden[$moddir] = 1;
+            }
+        }
+        $db->exec("BEGIN");
+
+        # go to the DB and set the new order and new hidden state
+        foreach (explode(",", $_GET['moddirs']) as $moddir) {
+            $moddir = $db->escapeString($moddir);
+            if (isset($hidden[$moddir])) { $is_hidden = 1; } else { $is_hidden = 0; }
+            $rv = $db->exec(
+                "UPDATE modules SET position = '$position', hidden = '$is_hidden'" .
+                " WHERE moddir = '$moddir'"
+            );
+            if (!$rv) { throw new Exception($db->lastErrorMsg()); }
+            ++$position;
+        }
+
+    } catch (Exception $ex) {
+
+        $db->exec("ROLLBACK");
+        error_log($ex);
+        header("HTTP/1.1 500 Internal Server Error");    
+        exit;
+
+    }
+
+    $db->exec("COMMIT");
+
+    # restart kiwix so it sees what modules are visible/hidden
+    if (is_rachelpi()) {
+        exec("sudo service kiwix restart");
+    } else if (is_rachelplus()) {
+        exec("bash /root/rachel-scripts/rachelKiwixStart.sh");
+    }
+
+    header("HTTP/1.1 200 OK");    
+
+}
+
+?>

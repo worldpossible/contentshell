@@ -57,6 +57,22 @@
     #sortable li span { position: absolute; margin-left: -1.3em; }
     #sortable .checkbox { position: absolute; right: 10px; top: 5px; font-size: small; color: gray; }
 
+    #controls {
+        width: 42em;
+        text-align: right;
+    }
+    #controls button {
+        font-size: small;
+        margin: 1px;
+        padding: 1px 5px;
+        background: none;
+        color: #333;
+        border: 1px solid #ccc;
+    }
+    /* #controls button:hover {
+        background: #fff;
+    }*/
+
     .error { border: 1px solid #c00; background: #fee; color: #c00; padding: 10px; }
     .error h2, .error h3 { margin: 0 0 10px 0; }
     .error p { margin: 0 }

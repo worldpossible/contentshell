@@ -1,10 +1,11 @@
 <div id="headbar">
     <b>RACHEL <?php echo $lang['admin'] ?></b>
     <ul id="nav">
-        <li><a href="admin.php"<?php if (isset($nav_admin)) { echo ' class="active"'; } ?>><?php echo $lang['main'] ?></a></li>
+        <li><a href="admin.php"<?php if (isset($nav_admin)) { echo ' class="active"'; } ?>><?php echo $lang['modules'] ?></a></li>
         <li><a href="stats.php"<?php if (isset($nav_stats)) { echo ' class="active"'; } ?>><?php echo $lang['stats'] ?></a></li>
         <li><a href="version.php"<?php if (isset($nav_version)) { echo ' class="active"'; } ?>><?php echo $lang['version'] ?></a></li>
-        <li><a href="admin.php?logout=1"><?php echo $lang['logout'] ?></a></li>
+        <li><a href="update.php"<?php if (isset($nav_update)) { echo ' class="active"'; } ?>><?php echo $lang['update'] ?></a></li>
+        <li><a href="login.php?logout=1"><?php echo $lang['logout'] ?></a></li>
     </ul>
     <div id="ip">
         <?php

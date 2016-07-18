@@ -307,4 +307,24 @@ function clearcookie() {
     );
 }
 
+# what kind of RACHEL are we?
+define("RACHELPI_MODBASEDIR", "/var/www/modules");
+define("RACHELPLUS_MODBASEDIR", "/media/RACHEL/rachel/modules");
+function is_rachelpi() {
+    return is_dir(RACHELPI_MODBASEDIR);
+}
+function is_rachelplus() {
+    return is_dir(RACHELPLUS_MODBASEDIR);
+}
+function modbasedir() {
+    if (is_rachelpi()) {
+        return RACHELPI_MODBASEDIR;
+    } else if (is_rachelplus()) {
+        return RACCHELPLUS_MODBASEDIR;
+    } else {
+        # probably a testing environment 
+        return __DIR__ . "/modules";
+    }
+}
+
 ?>
