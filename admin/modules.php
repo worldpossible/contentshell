@@ -6,7 +6,7 @@ require_once("common.php");
 if (!authorized()) { exit(); }
 
 #-------------------------------------------
-# First we do some things that don't result in HTML
+# First we take care of things that don't result in HTML
 # 
 # If we've got a list of moddirs, we update the DB to
 # reflect that ordering. This all takes place as an AJAX
@@ -15,32 +15,6 @@ if (!authorized()) { exit(); }
 #-------------------------------------------
 if (isset($_GET['moddirs'])) {
     updatemods();
-    exit;
-}
-
-#-------------------------------------------
-# We also allow shutting down the server so as to avoid
-# damaging the SD/HD. This requires that www-data has
-# sudo access to /sbin/shutdown, which should be set up
-# automatically during rachelpiOS installation
-# XXX should make this work for RACHEL-Plus too, and
-# give it it's own page
-#-------------------------------------------
-if (isset($_POST['shutdown'])) {
-    exec("sudo /sbin/shutdown now", $exec_out, $exec_err);
-    if ($exec_err) {
-        echo $lang['shutdown_failed'];
-    } else {
-        echo $lang['restart_ok'];
-    }
-    exit;
-} else if (isset($_POST['reboot'])) {
-    exec("sudo /sbin/shutdown -r now", $exec_out, $exec_err);
-    if ($exec_err) {
-        echo $lang['restart_failed'];
-    } else {
-        echo $lang['restart_ok'];
-    }
     exit;
 }
 
@@ -61,27 +35,30 @@ if ($fsmods) {
     # -- and we warn about it at the top - but later we
     # will try to actually read/write to the DB and we
     # will need to check this before doing those
-    # XXX probably should move this test to common.php
     $db = getdb();
     if (!$db) {
-        echo "<div class=\"error\">\n";
-        echo "<h2>Couldn't Open Database</h2>\n";
-        echo "<h3>You probably need to <tt>chmod 777</tt>\n";
-        echo "the web root directory</h3>\n";
-        echo "<p>Until you do, saving the sort order and hiding modules\n";
-        echo "will not work.<br>Everything in the modules directory will show\n";
-        echo "up in alphabetical order\n</p></div>";
+        echo "<div class=\"error\">
+              <h2>Couldn't Open Database</h2>
+              <h3>You probably need to <tt>chmod 777</tt>
+              the admin directory</h3>
+              <p>Until you do, saving the sort order and hiding modules
+              will not work.<br>Everything in the modules directory will show
+              up in alphabetical order</p>
+              </div>
+        ";
     } else {
         # we do a test write so we can signal problems to the user
         $rv = $db->exec("CREATE TABLE writetest (col INTEGER)");
         if (!$rv) {
-            echo "<div class=\"error\">\n";
-            echo "<h2>Couldn't Write To Database</h2>\n";
-            echo "<h3>You probably need to <tt>chmod 666 admin.sqlite</tt>\n";
-            echo "and <tt>chmod 777</tt> the web root directory</h3>\n";
-            echo "<p>Until you do, saving the sort order and hiding modules\n";
-            echo "will not work.<br>Everything in the modules directory will show\n";
-            echo "up in alphabetical order\n</p></div>";
+            echo "<div class=\"error\">
+                  <h2>Couldn't Write To Database</h2>
+                  <h3>You probably need to <tt>chmod 666 admin.sqlite</tt>
+                  and <tt>chmod 777</tt> the web root directory</h3>
+                  <p>Until you do, saving the sort order and hiding modules
+                  will not work.<br>Everything in the modules directory will show
+                  up in alphabetical order</p>
+                  </div>
+            ";
         } else {
            $db->exec("DROP TABLE writetest"); 
         }
@@ -176,22 +153,6 @@ if ($fsmods) {
 
     echo "<h2>$lang[no_moddir_found]</h2>\n";
 
-}
-
-# Totally separate from module management, we also offer
-# a shutdown option for raspberry pi systems (which otherwise
-# might corrupt themselves when unplugged)
-if (file_exists("/usr/bin/raspi-config") ||
-    file_exists("/etc/fake-raspi-config")) { # for testing on non-raspi systems
-    echo "
-        <div style='margin: 50px 0 50px 0; padding: 10px; border: 1px solid red; background: #fee;'>
-        <form action='modules.php' method='post'>
-        <input type='submit' name='shutdown' value='$lang[shutdown_system]' onclick=\"if (!confirm('$lang[confirm_shutdown]')) { return false; }\">
-        <input type='submit' name='reboot' value='$lang[restart_system]' onclick=\"if (!confirm('$lang[confirm_restart]')) { return false; }\">
-        </form>
-        $lang[shutdown_blurb]
-        </div>
-    ";
 }
 
 # called if the user hits the "Save" button

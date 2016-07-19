@@ -48,6 +48,15 @@ $(function() {
         );
     }
 
+    // add a warning when leaving page with unsaved changes
+    // (is this more helpful or annoying?)
+    $(window).bind('beforeunload', function () {
+        if (!$("#savebut").prop("disabled")) {
+            // any string is fine - each browser has it's own output
+            return "Changes Not Saved";
+        }
+    });
+
 });
 
 // save button calls this to save the module order & hiding via AJAX

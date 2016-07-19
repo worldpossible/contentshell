@@ -48,6 +48,7 @@ $lang['reset'] = "Reset";
 $lang['sort'] = "sort";
 $lang['modules'] = "Modules";
 $lang['no_moddir_found'] = "No module directory found.";
+$lang['hardware'] = "Hardware";
 $lang['shutdown_system'] = "Shutdown System";
 $lang['confirm_shutdown'] = "Are you sure you want to shut down?";
 $lang['restart_system'] = "Restart System";
@@ -59,6 +60,9 @@ $lang['restart_ok'] = "The server is restarting down now.";
 $lang['shutdown_failed'] = "Unable to shutdown server.";
 $lang['restart_failed'] = "Unable to restart server.";
 $lang['admin_instructions'] = "You can show and hide modules here, or change the order by dragging them. <br> Be sure to click \"Save Changes\" at the bottom of the page.";
+$lang['rplus_safe_shutdown'] = "To safely shut down, just press the power button for two seconds.";
+$lang['unknown_system'] = "Unknown System";
+$lang['shutdown_not_supported'] = "Shutdown not supported on this hardware.";
 
 # for captiveportal-redirect.php
 $lang['welcome_to_rachel'] = "Welcome to RACHEL";

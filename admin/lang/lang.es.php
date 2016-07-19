@@ -48,6 +48,7 @@ $lang['reset'] = "Reiniciar";
 $lang['sort'] = "ordenar";
 $lang['modules'] = "Módulos";
 $lang['no_moddir_found'] = "No se encontró directorio de módulos.";
+$lang['hardware'] = "Hardware";
 $lang['shutdown_system'] = "Apagar el Sistema";
 $lang['confirm_shutdown'] = "¿Seguro que desea cerrar?";
 $lang['restart_system'] = "Reiniciar el Sistema";
@@ -59,6 +60,9 @@ $lang['restart_ok'] = "El servidor está reiniciando ahora.";
 $lang['shutdown_failed'] = "No se puede cerrar el servidor.";
 $lang['restart_failed'] = "No es posible reiniciar el servidor.";
 $lang['admin_instructions'] = "Puede mostrar y ocultar módulos de aquí, o cambiar el orden arrastrándolos. <br> Asegúrese de hacer clic \"Guardar Cambios \" en la parte inferior de la página.";
+$lang['rplus_safe_shutdown'] = "Para apagar con seguridad, sólo tiene que pulsar el botón de encendido durante dos segundos.";
+$lang['unknown_system'] = "Sistema desconocido";
+$lang['shutdown_not_supported'] = "Cierre no compatible con este hardware.";
 
 # for captiveportal-redirect.php
 $lang['welcome_to_rachel'] = "Bienvenido a RACHEL";
