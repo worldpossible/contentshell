@@ -41,3 +41,5 @@ rsync -avz rsync://$1/rachelmods/en-law_library /media/RACHEL/rachel/modules/
 rsync -avz rsync://$1/rachelmods/en-fantastic_phonics /media/RACHEL/rachel/modules/
 rsync -avz rsync://$1/rachelmods/en-scale-of-universe /media/RACHEL/rachel/modules/
 rsync -av  rsync://$1/rachelmods/en-TED /media/RACHEL/rachel/modules/
+rsync -avz rsync://$1/rachelmods/en-saylor /media/RACHEL/rachel/modules/
+rsync -avz rsync://$1/rachelmods/en-fairshake /media/RACHEL/rachel/modules/
