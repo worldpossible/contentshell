@@ -8,6 +8,13 @@ require_once("common.php");
 require_once("lang/lang." . getlang() . ".php");
 
 #-------------------------------------------
+# To avoid warnings, we specify UTC. Previously the system
+# timezone was used, which was Etd/UTC for RACHEL-Pi and
+# Asia/Shanghai for the RACHEL-Plus
+#-------------------------------------------
+date_default_timezone_set('Etc/UCT');
+
+#-------------------------------------------
 # returns an associative array of modules from the
 # filesystem - does not check the database at all
 #-------------------------------------------
@@ -105,7 +112,7 @@ function getmods_db() {
     if ($db) {
         # get that db module list
         $rv = $db->query("SELECT * FROM modules");
-        while ($row = $rv->fetchArray()) {
+        while ($row = $rv->fetchArray(SQLITE3_ASSOC)) {
             $dbmods[$row['moddir']] = $row;
         }
     }
@@ -119,15 +126,22 @@ function getmods_db() {
 #-------------------------------------------
 function getdb() {
 
+    # we need to keep a copy so we can close it in a callback later
+    global $_db;
+
     try {
-        $db = new SQLite3(getadmindir()."/admin.sqlite");
+        $_db = new SQLite3(getadmindir()."/admin.sqlite");
     } catch (Exception $ex) {
         return null;
     }
 
+    # allow blocking for 5 seconds while other
+    # processes are writing to the db
+    $_db->busyTimeout(5000);
+
     # in case this is the first time - a bit wasteful to do this every time
     # but it saves errors in the log if the db file gets lost
-    $db->exec("
+    $_db->exec("
         CREATE TABLE IF NOT EXISTS modules (
             module_id INTEGER PRIMARY KEY,
             moddir    VARCHAR(255),
@@ -136,10 +150,36 @@ function getdb() {
             hidden    INTEGER
         )
     ");
+    $_db->exec("
+        CREATE TABLE IF NOT EXISTS tasks (
+            task_id     INTEGER PRIMARY KEY,
+            command     VARCHAR(255),
+            pid         INTEGER,
+            stdout_tail TEXT,
+            stderr_tail TEXT,
+            started     INTEGER, -- timestamp
+            last_update INTEGER, -- timestamp
+            completed   INTEGER, -- timestamp
+            retval      INTEGER
+        )
+    ");
 
-    return $db;
+    return $_db;
 
 }
+
+#-------------------------------------------
+# If we don't do this, dangling filehandles build up
+# and after a while we can't open any more... yikes. 
+#-------------------------------------------
+function cleanup() {
+    global $_db;
+    if (isset($_db)) {
+        $_db->close();
+        unset($_db);
+    }
+}
+register_shutdown_function('cleanup');
 
 #-------------------------------------------
 # sort by db position, then alphabetically by moddir,
@@ -173,6 +213,7 @@ function available_langs() {
             array_push($available_langs, $matches[1]);
         }
     }
+    closedir($handle);
 
     # if there's one option, return it
     if (sizeof($available_langs) == 1) {
@@ -340,9 +381,15 @@ function getbaseurl() {
 #-------------------------------------------
 # sometimes we want the module directory
 # relative from the current directory instead
+# -- this should work through HTTP or command line
 #-------------------------------------------
 function getrelmodpath() {
-    if (basename(dirname($_SERVER['REQUEST_URI'])) == "admin") {
+    if (isset($_SERVER['REQUEST_URI'])) {
+        $me = $_SERVER['REQUEST_URI'];
+    } else {
+        $me = __FILE__;
+    }
+    if (basename(dirname($me)) == "admin") {
         return "../modules";
     } else {
         return "modules";

@@ -7,10 +7,38 @@ $page_nav = "update";
 include "head.php";
 ?>
 
+<div id="progressbar"></div>
+
+
+<script>
+// called by jsonp respopnse
+
+$.ajax({
+    url: "background.php?getLocalModuleList=1",
+    success: function(results) {
+        console.log("success");
+        $("#modlist").html("success");
+        var arrayLength = results.length;
+        for (var i = 0; i < arrayLength; i++) {
+            $("#modlist").append(
+                "<li id>" + results[i].moddir +
+                " (<a href=\"#\" onclick=\"deleteMod('" + results[i].moddir +
+                "');\">del</a>)</li>"
+            );
+        }
+    },
+    error: function(myxhr, mystatus, myerror) {
+        console.log("failure");
+        $("#modlist").html("failure");
+    }
+});
+
+</script>
+
 <!-- whatever you want goes here -->
-<h2>getbasedir(): <?php echo getbasedir(); ?></h2>
-<h2>getbaseurl(): <?php echo getbaseurl(); ?></h2>
-<h2>getrelmodpath(): <?php echo getrelmodpath(); ?></h2>
+<ul id="modlist"></ul>
+
+
 
 <!-- and finish off with a few closing tags-->
 <?php include "foot.php" ?>

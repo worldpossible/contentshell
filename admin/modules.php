@@ -80,11 +80,8 @@ if ($fsmods) {
     $disabled = " disabled";
     $nofragment = false;
     echo "
-        <p>$lang[admin_instructions]</p>
-        <p id=\"controls\">
-        <button onclick=\"changeall(this, true);\">$lang[hide_all]</button>
-        <button onclick=\"changeall(this, false);\">$lang[show_all]</button>
-        </p>
+        <p style=\"margin-bottom: 0;\">$lang[admin_instructions]</p>
+        <p id=\"controls\"><button onclick=\"changeall(this, true);\">$lang[hide_all]</button><button onclick=\"changeall(this, false);\">$lang[show_all]</button></p>
         <ul id=\"sortable\">
     ";
     foreach (array_keys($fsmods) as $moddir) {
@@ -102,10 +99,6 @@ if ($fsmods) {
         echo "\t<label for=\"$moddir-hidden\">$lang[hide]</label></span>\n";
         echo "\t<span class=\"ui-icon ui-icon-arrowthick-2-n-s\"></span>\n";
         echo "\t$moddir - " . $fsmods[$moddir]['title'];
-        if ($fsmods[$moddir]['position'] < 1) {
-            echo " <small style=\"color: green;\">(new)</small>\n";
-            $disabled = "";
-        }
         echo "</li>\n";
     }
     echo "</ul>\n";

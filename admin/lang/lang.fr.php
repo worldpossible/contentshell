@@ -50,9 +50,10 @@ $lang['sort'] = "sorte";
 $lang['modules'] = "Modules";
 $lang['no_moddir_found'] = "Aucun répertoire de module trouvé.";
 $lang['hardware'] = "Matériel";
-$lang['shutdown_system'] = "Système d'arrêt";
+$lang['system_shutdown'] = "Arrêt du Système";
+$lang['shutdown'] = "Arrêt";
 $lang['confirm_shutdown'] = "Êtes-vous sûr de vouloir arrêter?";
-$lang['restart_system'] = "Redémarrer le système";
+$lang['restart'] = "Redémarrer";
 $lang['confirm_restart'] = "Êtes-vous sûr de vouloir redémarrer?";
 $lang['shutdown_blurb'] = "<p>Arrêt ici est plus sûr pour le SD / HD que de débrancher simplement le pouvoir.</p>\n"
     . "<p>Si vous arrêtez (par opposition à redémarrer), vous aurez besoin de débrancher votre système et rebranchez pour redémarrer.</p>\n";
@@ -64,6 +65,13 @@ $lang['admin_instructions'] = "Vous pouvez afficher et masquer modules ici, ou m
 $lang['rplus_safe_shutdown'] = "Pour arrêter en toute sécurité, il suffit d'appuyer sur le bouton d'alimentation pendant deux secondes.";
 $lang['unknown_system'] = "Système Inconnu";
 $lang['shutdown_not_supported'] = "Shutdown pas pris en charge sur ce matériel.";
+$lang['storage_usage'] = "Stockage Utilisation";
+$lang['location'] = "Emplacement";
+$lang['size'] = "Taille";
+$lang['used'] = "Utilisé";
+$lang['available'] = "Disponible";
+$lang['percentage'] = "Pourcentage";
+$lang['advanced'] = "Avancé";
 
 # for captiveportal-redirect.php
 $lang['welcome_to_rachel'] = "Bienvenue à RACHEL";

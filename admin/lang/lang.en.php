@@ -49,9 +49,10 @@ $lang['sort'] = "sort";
 $lang['modules'] = "Modules";
 $lang['no_moddir_found'] = "No module directory found.";
 $lang['hardware'] = "Hardware";
-$lang['shutdown_system'] = "Shutdown System";
+$lang['system_shutdown'] = "System Shutdown";
+$lang['shutdown'] = "Shutdown";
 $lang['confirm_shutdown'] = "Are you sure you want to shut down?";
-$lang['restart_system'] = "Restart System";
+$lang['restart'] = "Restart";
 $lang['confirm_restart'] = "Are you sure you want to restart?";
 $lang['shutdown_blurb'] = "<p>Shutting down here is safer for the SD/HD than simply unplugging the power.</p>\n"
     . "<p>If you shut down (as opposed to restart), you will need to unplug your system and plug it back in to restart.</p>\n";
@@ -63,6 +64,13 @@ $lang['admin_instructions'] = "You can show and hide modules here, or change the
 $lang['rplus_safe_shutdown'] = "To safely shut down, just press the power button for two seconds.";
 $lang['unknown_system'] = "Unknown System";
 $lang['shutdown_not_supported'] = "Shutdown not supported on this hardware.";
+$lang['storage_usage'] = "Storage Usage";
+$lang['location'] = "Location";
+$lang['size'] = "Size";
+$lang['used'] = "Used";
+$lang['available'] = "Available";
+$lang['percentage'] = "Percentage";
+$lang['advanced'] = "Advanced";
 
 # for captiveportal-redirect.php
 $lang['welcome_to_rachel'] = "Welcome to RACHEL";

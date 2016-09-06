@@ -60,10 +60,11 @@
     #controls {
         width: 42em;
         text-align: right;
+        margin: 5px 0 5px 0;
     }
     #controls button {
         font-size: small;
-        margin: 1px;
+        margin: 0 0 5px 5px;
         padding: 1px 5px;
         background: none;
         color: #333;

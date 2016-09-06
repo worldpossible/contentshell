@@ -49,9 +49,10 @@ $lang['sort'] = "ordenar";
 $lang['modules'] = "Módulos";
 $lang['no_moddir_found'] = "No se encontró directorio de módulos.";
 $lang['hardware'] = "Hardware";
-$lang['shutdown_system'] = "Apagar el Sistema";
+$lang['system_shutdown'] = "Apagado del Sistema";
+$lang['shutdown'] = "Apagar";
 $lang['confirm_shutdown'] = "¿Seguro que desea cerrar?";
-$lang['restart_system'] = "Reiniciar el Sistema";
+$lang['restart'] = "Reiniciar";
 $lang['confirm_restart'] = "¿Seguro que desea reiniciar?";
 $lang['shutdown_blurb'] = "<p>El cierre de aquí es más seguro para el SD / HD que simplemente desconectar la fuente.</p>\n"
     . "<p>Si se cierra (en oposición a reiniciar), que tendrá que desconectar el sistema y vuelva a conectarlo para reiniciar.</p>\n";
@@ -63,6 +64,13 @@ $lang['admin_instructions'] = "Puede mostrar y ocultar módulos de aquí, o camb
 $lang['rplus_safe_shutdown'] = "Para apagar con seguridad, sólo tiene que pulsar el botón de encendido durante dos segundos.";
 $lang['unknown_system'] = "Sistema desconocido";
 $lang['shutdown_not_supported'] = "Cierre no compatible con este hardware.";
+$lang['storage_usage'] = "Uso De Almacenamiento";
+$lang['location'] = "Ubicación";
+$lang['size'] = "Tamaño";
+$lang['used'] = "Usado";
+$lang['available'] = "Disponible";
+$lang['percentage'] = "Porcentaje";
+$lang['advanced'] = "Avanzado";
 
 # for captiveportal-redirect.php
 $lang['welcome_to_rachel'] = "Bienvenido a RACHEL";

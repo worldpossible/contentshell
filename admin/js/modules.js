@@ -35,16 +35,16 @@ $(function() {
     var langsLength = langs.length
     for (var i = 0; i < langsLength; ++i) {
         $("#controls").prepend(
-            "<button onclick=\"changelang(this, '"+langs[i]+"', true);\"><?php echo $lang['hide'] ?> "+langs[i]+"</button>\n"
+            "<button onclick=\"changelang(this, '"+langs[i]+"', true);\"><?php echo $lang['hide'] ?> "+langs[i]+"</button>"
         );
     }
 
-    $("#controls").prepend("&nbsp;&bull;&nbsp;\n");
+    $("#controls").prepend("<br>");
 
     // add a sort button
     for (var i = 0; i < langsLength; ++i) {
         $("#controls").prepend(
-            "<button onclick=\"sortlang(this, '"+langs[i]+"');\"><?php echo $lang['sort'] ?> "+langs[i]+"</button>\n"
+            "<button onclick=\"sortlang(this, '"+langs[i]+"');\"><?php echo $lang['sort'] ?> "+langs[i]+"</button>"
         );
     }
 
@@ -116,14 +116,17 @@ function sortlang(myself, lang) {
     var regex = new RegExp("^"+lang+"-");
     items.sort(function(a,b) {
         if (a.id.match(regex) && b.id.match(regex)) {
-            if (a.id < b.id) { return -1; }
-            if (a.id > b.id) { return 1; }
+            // both our top language? direct compare.
+            if (a.id.toLowerCase() < b.id.toLowerCase()) { return -1; }
+            if (a.id.toLowerCase() > b.id.toLowerCase()) { return 1; }
             return 0;
         } else {
+            // one or the other our top laguage? special treatment.
             if (a.id.match(regex)) { return -1; }
             if (b.id.match(regex)) { return 1; }
-            if (a.id < b.id) { return -1; }
-            if (a.id > b.id) { return 1; }
+            // both not our top language? direct compare.
+            if (a.id.toLowerCase() < b.id.toLowerCase()) { return -1; }
+            if (a.id.toLowerCase() > b.id.toLowerCase()) { return 1; }
             return 0;
         }
     });
