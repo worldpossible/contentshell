@@ -12,7 +12,6 @@ fi
 # transfer faster without the -z option (which uses zip compression)
 set -x # echo commands
 rsync -av  --del rsync://$1/rachelmods/en-kalite /media/RACHEL/rachel/modules/
-rsync -avz --del rsync://$1/rachelmods/en-afristory /media/RACHEL/rachel/modules/
 rsync -avz --del rsync://$1/rachelmods/en-ck12 /media/RACHEL/rachel/modules/
 rsync -avz --del rsync://$1/rachelmods/en-file_share /media/RACHEL/rachel/modules/
 rsync -avz --del rsync://$1/rachelmods/en-GCF2015 /media/RACHEL/rachel/modules/
