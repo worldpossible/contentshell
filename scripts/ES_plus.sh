@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -e # stop on error
 
 if [ ! $1 ]
 then
@@ -10,6 +10,7 @@ fi
 
 # files that are already highly compressed (zim, videos) will probably
 # transfer faster without the -z option (which uses zip compression)
+set -x # echo commands
 rsync -av  --del rsync://$1/rachelmods/es-kalite /media/RACHEL/rachel/modules/
 rsync -av  --del rsync://$1/rachelmods/es-wikipedia /media/RACHEL/rachel/modules/
 rsync -avz --del rsync://$1/rachelmods/es-wikihow /media/RACHEL/rachel/modules/
