@@ -32,5 +32,5 @@ echo 'bring in admin.sqlite'
 rsync -avz --del rsync://$1/rachelmods/extra-build-files/st.admin.sqlite /media/RACHEL/rachel/admin.sqlite
 
 echo 'df -h'
+df -h
 cd $HOME
-./cap-rachel-configure.sh -i
