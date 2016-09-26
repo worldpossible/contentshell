@@ -82,14 +82,11 @@ if (!$info['running']) {
     $db_stdout_tail = $db->escapeString(fread($pipes[1], 1024));
     $db_stderr_tail = $db->escapeString(fread($pipes[2], 1024));
     $db_retval = $db->escapeString($info['exitcode']);
-    # we auto-dismiss if it completed successfully
-    $db_dismissed = $info['exitcode'] == 0 ? "'$db_completed'" : "NULL";
     $db->exec("
         UPDATE tasks SET
             pid = '$db_pid',
             completed = '$db_completed',
             last_update = '$db_completed',
-            dismissed = $db_dismissed,
             stdout_tail = '$db_stdout_tail',
             stderr_tail = '$db_stderr_tail',
             retval = '$db_retval'
@@ -206,19 +203,17 @@ if (EXTRA_LOGGING) { error_log("pipes closed, calling proc_close()"); }
 # close the process
 $db_retval = $db->escapeString(proc_close($proc));
 $db_completed = $db->escapeString(time());
-$db_dismissed = $db_retval == 0 ? "'$db_completed'" : "NULL";
 
+if (EXTRA_LOGGING) { error_log("updating db"); }
 $db->exec("
     UPDATE tasks SET
         completed = '$db_completed',
         last_update = '$db_completed',
-        dismissed = $db_dismissed,
         stderr_tail = '$db_stderr_tail',
         retval = '$db_retval'
     WHERE task_id = '$db_task_id'
 ");
 
-if (EXTRA_LOGGING) { error_log("finished updating db, "); }
 #proc_terminate($proc);
 if (EXTRA_LOGGING) { error_Log("all done."); }
 

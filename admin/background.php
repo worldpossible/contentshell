@@ -49,7 +49,7 @@ function getLocalModuleList() {
     # sorting function in the common.php module
     uasort($fsmods, 'bypos');
     header('Content-Type: application/json');
-    echo json_encode(array_values($fsmods), JSON_PRETTY_PRINT);
+    echo json_encode(array_values($fsmods)); # , JSON_PRETTY_PRINT); # this only works in 5.4+ -- RACHEL-PLUS has 5.3.10
     exit;
 }
 
@@ -86,8 +86,11 @@ function deleteModule($moddir) {
 
 function addModule($moddir) {
 
+    # XXX hardcoded to my mac for now
+    $host = "192.168.1.6";
+
     # fire off our clever database updating rsync process
-    exec("php rsync.php localhost $moddir > /dev/null &", $output, $rval);
+    exec("php rsync.php $host $moddir > /dev/null &", $output, $rval);
 
     if ($rval == 0) {
         header("HTTP/1.1 200 OK");
@@ -146,11 +149,19 @@ function getTasks() {
     $tasks = array();
     while ($row = $rv->fetchArray(SQLITE3_ASSOC)) {
         $row['tasktime'] = time(); // so we can calculate against server time, not browser time
+        if ($row['completed'] && $row['retval'] == 0) {
+            // if the command completed successfully
+            // auto dismiss and notify the client
+            $row['dismissed'] = time();
+            $db_dismissed = $db->escapeString($row['dismissed']);
+            $db_task_id = $db->escapeString($row['task_id']);
+            $db->exec("UPDATE tasks SET dismissed = '$db_dismissed' WHERE task_id = '$db_task_id'");
+        }
         array_push($tasks, $row);
     }
     header("HTTP/1.1 200 OK");
     header("Content-Type: application/json");
-    echo json_encode($tasks, JSON_PRETTY_PRINT);
+    echo json_encode($tasks); # , JSON_PRETTY_PRINT); # this only works in 5.4+ -- RACHEL-PLUS has 5.3.10
     exit;
 
 }

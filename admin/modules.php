@@ -144,7 +144,10 @@ if ($fsmods) {
 
 } else {
 
-    echo "<h2>$lang[no_moddir_found]</h2>\n";
+    echo "<h2>$lang[no_mods_found]</h2>\n";
+    # hacky -- but we need to let the js know it's ok to leave
+    # the page without an alert (see beforeunload in modules.js)
+    echo "<button id='savebut' style='display: none;' disabled>";
 
 }
 

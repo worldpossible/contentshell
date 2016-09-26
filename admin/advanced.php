@@ -44,6 +44,7 @@ $mods_fs = getmods_fs();
         position: relative;
         top: 8px;
         left: 5px;
+        display: none;
     }
     #tasks {
         font-family: monospace;
@@ -121,10 +122,12 @@ function addMod() {
             // take the added item out of the available list
             $("#available option[value=\"" + sel(results.moddir).substring(1)  + "\"]").remove();
             // add the added item to the deleteable list
+/*
             $("#modlist").prepend(
                 "<li id=\"" + results.moddir + "\">" + results.moddir +
                 "<a href=\"javascript:void(0)\" onclick=\"delMod('" + results.moddir + "')\">del</a></li>\n"
             );
+*/
             // re-enable the button
             $("#addmodbut").prop("disabled", false);
         },
@@ -139,9 +142,11 @@ function addMod() {
 // delete (i.e. rm -rf) a module
 function delMod(moddir) {
 
+/*
     if (!confirm("Are you sure you want to delete " + moddir + "?")) {
         return false;
     }
+*/
 
     $(sel(moddir)).css({ opacity: 0.5 });
     $(sel(moddir)).append("<img src=\"../art/spinner.gif\">");
@@ -173,7 +178,7 @@ function delMod(moddir) {
 function cancelTask(task_id, mybutton) {
 
     $(mybutton).parent().css({ opacity: 0.5 });
-    $(mybutton).parent().append("<img src=\"../art/spinner.gif\">");
+    // $(mybutton).parent().append("<img src=\"../art/spinner.gif\">");
     $(mybutton).parent().find("button").prop("disabled", true);
     $(mybutton).parent().find("button").blur();
 
@@ -197,14 +202,24 @@ function pollTasks() {
     $.ajax({
         url: "background.php?getTasks=1",
         success: function(results) {
+
             $("#tasks").empty();
+
             var arrayLength = results.length;
             if (arrayLength == 0) {
                 $("#tasks").append("<li>None</li>");
             }
 
+            var reloadLocal = false;
+
             // loop through and display the tasks
             for (var i = 0; i < arrayLength; i++) {
+
+                // for completed tasks we get a task with a "dismissed" time set
+                if (results[i].dismissed) {
+                    reloadLocal = true;
+                    continue;
+                }
 
                 var age = secondsToHms(results[i].tasktime - results[i].started);
                 var newHTML = "<li id=\"task" + results[i].task_id + "\"><button onclick=\"cancelTask('" + results[i].task_id + "', this)\">Cancel</button>";
@@ -216,6 +231,8 @@ function pollTasks() {
                 newHTML += "<b>command:</b> " + results[i].command + "<br>" +
                               "<b>runtime:</b> " + age;
 
+                // detect stalled tasks and mark them XXX should move this logic
+                // to background.php methinks
                 if (results[i].last_update < results[i].tasktime - freshtime) {
                     if(results[i].completed) {
                         newHTML += " <span style=\"color: #933; font-weight: bold;\">failed</span>";
@@ -224,7 +241,7 @@ function pollTasks() {
                     }
                 }
 
-                // error takes precedence over normal output (could show both?)
+                // error takes precedence over normal output (we could show both?)
                 var out_tail = "";
                 if (results[i].stderr_tail) {
                     out_tail = results[i].stderr_tail.replace(/\n+/g, "<br>");
@@ -234,13 +251,13 @@ function pollTasks() {
                 newHTML += "<br><b>latest output:</b><p style=\"margin: 0 0 0 20px;\">" + out_tail + "</p></li>";
 
                 $("#tasks").append(newHTML);
-/*
-    // we need to make it so that polling doesn't blow away the cancelling tasks
-                if (tasksInCancel.find(function (task) { task[0] == results[i].task_id })) { 
-                    cancelTask( results[i].task_id );
-                }
-*/
             }
+
+            // if there were any completed tasks, we update the local module list
+            if (reloadLocal) {
+                populateLocalModuleList();
+            }
+
         },
         error: function(xhr, status, error) {
             console.log("Failed to get tasks");
@@ -258,10 +275,10 @@ function pollTasks() {
 function populateRemoteModuleList() {
 
     // before we make changes to the list, we adjust the UI
-    $("#addmodbut").remove(); // remove the button
-    $("#available").empty();  // empty the list
+    $("#addmodbut").prop("disabled", true); // - disable button
+    $("#availspin").show();                 // - add spinner
+    $("#available").empty();                // - empty the list
     $("#available").append("<option>Loading...</option>"); // add "Loading" text
-    $("#available").after("<img src=\"../art/spinner.gif\" id=\"availspin\">"); // add spinner
 
     // now we make our ajax call to get the latest list
     $.ajax({
@@ -282,7 +299,7 @@ function populateRemoteModuleList() {
             results.sort(compare);
 
             // clear the existing list and spinner
-            $("#availspin").remove();
+            $("#availspin").hide();
             $("#available").empty();
 
             // now we can populate the list
@@ -308,12 +325,12 @@ function populateRemoteModuleList() {
             }
 
             // now that we've got a list we can add the button back
-            $("#available").after("<button id=\"addmodbut\" onclick=\"addMod();\">Submit</button>");
+            $("#addmodbut").prop("disabled", false); // disable button
 
         },
         error: function(myxhr, mystatus, myerror) {
+            $("#availspin").hide();
             $("#available").empty();
-            $("#availspin").remove();
             $("#available").append("<option>Internal Error</option>");
         },
         timeout: ajaxTimeout
@@ -321,13 +338,14 @@ function populateRemoteModuleList() {
 
 }
 
-// onload
-$(function() {
+var firstCall = true;
+function populateLocalModuleList() {
 
     // populate the local module list (deletable)
     $.ajax({
         url: "background.php?getLocalModuleList=1",
         success: function(results) {
+            $("#modlist").empty();
             var arrayLength = results.length;
             for (var i = 0; i < arrayLength; i++) {
                 $("#modlist").append(
@@ -337,15 +355,29 @@ $(function() {
             }
         },
         error: function(myxhr, mystatus, myerror) {
+            $("#modlist").empty();
             $("#modlist").append("<li>getLocalModuleList: Internal Error</li>");
         },
         complete: function(xhr, status) {
-            // don't fire this off until after we've heard back
-            populateRemoteModuleList();
+            // first time we get the local we populate the remote list too...
+            // we don't fire this off until after we've heard back
+            // because we need to know what's local to filter the remote list
+            if (firstCall) {
+                populateRemoteModuleList();
+                firstCall = false;
+            }
         },
-        // because we need to know what's local before we can populate the remote list
         timeout: ajaxTimeout
     });
+
+}
+
+// onload
+$(function() {
+
+    // remote list gets populated automatically the
+    // first time we call this
+    populateLocalModuleList();
 
     // start polling the task list
     pollTasks();
@@ -358,6 +390,8 @@ $(function() {
 <form style="position: relative;">
     <select id="available">
     </select>
+    <button id="addmodbut" onclick="addMod();" disabled>Submit</button>
+    <img src="../art/spinner.gif" id="availspin">
 </form>
 
 <h3>Currently Adding</h3>
