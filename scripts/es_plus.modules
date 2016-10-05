@@ -1,17 +1,24 @@
+#
+# This .modules file indicates the modules which are to be included
+# during installation. They will be sorted in the order they appear
+# here. Lines that begin with a # are ignored. Lines that begin with
+# a . are installed but hidden.
+#
 es-kalite
 es-wikipedia
 es-wikihow
+en-local_content
+es-ebooks
 es-ap_didact
 es-biblioteca
-es-blockly_games
 es-cnbguatemala
-es-ebooks
+en-worldmap
+es-blockly_games
 es-educalab
-es-file_share
 es-guatemala
-es-guias
 es-hesperian_health
 es-medline_plus
 es-soluciones
 es-vedoque
+es-guias
 es-windows_apps

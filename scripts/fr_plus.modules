@@ -1,5 +1,13 @@
+#
+# This .modules file indicates the modules which are to be included
+# during installation. They will be sorted in the order they appear
+# here. Lines that begin with a # are ignored. Lines that begin with
+# a . are installed but hidden.
+#
 fr-kalite
 fr-wikipedia
+en-local_content
+en-worldmap
 fr-wikivoyage
 fr-wiktionary
 fr-ebooksgratuits
