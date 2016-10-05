@@ -2,9 +2,9 @@
 
 #-------------------------------------------
 # Just by including this module you get browser language
-# detectino and access to the $lang associative array
+# detection and access to the $lang associative array
 #-------------------------------------------
-require_once("common.php");
+# require_once("common.php"); # require ourself? why?
 require_once("lang/lang." . getlang() . ".php");
 
 #-------------------------------------------
@@ -305,6 +305,83 @@ function clearcookie() {
         "Location: //$_SERVER[HTTP_HOST]/"
         . dirname($_SERVER["REQUEST_URI"])
     );
+}
+
+function sortmods($file) {
+
+    $fh = fopen($file, "r");
+    if ($fh) {
+        $hidden = array();
+        $sorted = array();
+        while (($line = fgets($fh)) !== false) {
+            # remove all whitespace
+            $line = preg_replace("/\s+/", "", $line);
+            # skip comments and blank lines
+            if (preg_match("/^#/", $line) || !preg_match("/\S/", $line)) {
+                continue;
+            }
+            # detect screwy files and bail
+            # (module names can only be letters, numbers, underscore, hyphen, and dot)
+            if (preg_match("/[^\w\.\-]/", $line)) {
+                error_log("$file does not look like a valid .modules file");
+                exit;
+            }
+            # flag hidden items in an associative array
+            if (preg_match("/^\./", $line)) {
+                $line = preg_replace("/^\./", "", $line);
+                $hidden[$line] = 1;
+            }
+            # put all items in an ordered array
+            array_push($sorted, $line);
+        }
+
+        # one could make the argument that we should first
+        # sync the DB to the modules existing in the filesystem
+        # however we are taking the approach of minimal change
+        # here and simply sorting and hiding, without adding or
+        # removing entries to or from the DB  - feel free to
+        # be more aggressive if bugs crop up from this approach
+
+        try {
+
+            $db = getdb();
+            if (!$db) { throw new Exception($db->lastErrorMsg); }
+            $db->exec("BEGIN");
+
+            # boink everything to the bottom and hide it
+            $rv = $db->query("SELECT * FROM modules ORDER BY moddir");
+            if (!$rv) { throw new Exception($db->lastErrorMsg()); }
+            $position = 1000;
+            while ($row = $rv->fetchArray()) {
+                $res = $db->exec("UPDATE modules SET position = '$position', hidden = '1' WHERE moddir = '$row[moddir]'");
+                if (!$res) { throw new Exception($db->lastErrorMsg()); }
+                ++$position;
+            }
+
+            # go to the DB and set the new order and new hidden state
+            $position = 1;
+            foreach ($sorted as $moddir) {
+                $moddir = $db->escapeString($moddir);
+                if (isset($hidden[$moddir])) { $is_hidden = 1; } else { $is_hidden = 0; }
+                $rv = $db->exec(
+                    "UPDATE modules SET position = '$position', hidden = '$is_hidden'" .
+                    " WHERE moddir = '$moddir'"
+                );
+                echo "UPDATE modules SET position = '$position', hidden = '$is_hidden' WHERE moddir = '$moddir'\n";
+                if (!$rv) { throw new Exception($db->lastErrorMsg()); }
+                ++$position;
+            }
+
+        } catch (Exception $ex) {
+            $db->exec("ROLLBACK");
+            error_log($ex);
+        }
+        $db->exec("COMMIT");
+
+    } else {
+        error_log("modulesort() Couldn't Open File: $file");
+    }
+
 }
 
 ?>
