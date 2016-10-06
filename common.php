@@ -319,6 +319,8 @@ function syncmods_fs2db() {
     $db = getdb();
     if ($db) {
 
+        $db->exec("BEGIN");
+
         # insert anything we found in the fs that wasn't in the db
         foreach (array_keys($fsmods) as $moddir) {
             if (!isset($dbmods[$moddir])) {
@@ -339,6 +341,8 @@ function syncmods_fs2db() {
                 $db->exec("DELETE FROM modules WHERE moddir = '$db_moddir'");
             }
         }
+
+        $db->exec("COMMIT");
 
     }
 
@@ -405,7 +409,7 @@ function sortmods($file) {
                     "UPDATE modules SET position = '$position', hidden = '$is_hidden'" .
                     " WHERE moddir = '$moddir'"
                 );
-                echo "UPDATE modules SET position = '$position', hidden = '$is_hidden' WHERE moddir = '$moddir'\n";
+                #error_log("UPDATE modules SET position = '$position', hidden = '$is_hidden' WHERE moddir = '$moddir'\n");
                 if (!$rv) { throw new Exception($db->lastErrorMsg()); }
                 ++$position;
             }
