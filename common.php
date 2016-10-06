@@ -307,10 +307,51 @@ function clearcookie() {
     );
 }
 
+# this function updates the database to match the modules that
+# are in the filesystem
+function syncmods_fs2db() {
+
+    # get info on the modules in the filesystem
+    $fsmods = getmods_fs();
+    # get info on the modules in the database
+    $dbmods = getmods_db();
+
+    $db = getdb();
+    if ($db) {
+
+        # insert anything we found in the fs that wasn't in the db
+        foreach (array_keys($fsmods) as $moddir) {
+            if (!isset($dbmods[$moddir])) {
+                $db_moddir =   $db->escapeString($moddir);
+                $db_title  =   $db->escapeString($fsmods[$moddir]['title']);
+                $db_position = $db->escapeString($fsmods[$moddir]['position']);
+                $db->exec(
+                    "INSERT into modules (moddir, title, position, hidden) " .
+                    "VALUES ('$db_moddir', '$db_title', '$db_position', '0')"
+                );
+            }
+        }
+
+        # delete anything from the db that wasn't in the fs
+        foreach (array_keys($dbmods) as $moddir) {
+            if (!isset($fsmods[$moddir])) {
+                $db_moddir =   $db->escapeString($moddir);
+                $db->exec("DELETE FROM modules WHERE moddir = '$db_moddir'");
+            }
+        }
+
+    }
+
+}
+
 function sortmods($file) {
 
+    # we're going to read in the .modules file here and
+    # if successful, use it to update the order and visibility
+    # of all the modules in the filesystem
     $fh = fopen($file, "r");
     if ($fh) {
+
         $hidden = array();
         $sorted = array();
         while (($line = fgets($fh)) !== false) {
@@ -335,12 +376,9 @@ function sortmods($file) {
             array_push($sorted, $line);
         }
 
-        # one could make the argument that we should first
-        # sync the DB to the modules existing in the filesystem
-        # however we are taking the approach of minimal change
-        # here and simply sorting and hiding, without adding or
-        # removing entries to or from the DB  - feel free to
-        # be more aggressive if bugs crop up from this approach
+        # when run during install, there is no data in the db to update,
+        # so it's important that we sync the database to match the filesystem first
+        syncmods_fs2db();
 
         try {
 
