@@ -112,9 +112,6 @@ a:visited { color: #649; }
     clear: both;
 }
 
-.indexmodule input[type="text"] { width: 20em; margin-left: 2px; }
-.indexmodule input[type="submit"] { width: 14em; }
-
 /*-------------------------------------------*/
 /* END for index modules                     */
 /*-------------------------------------------*/
