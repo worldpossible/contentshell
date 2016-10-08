@@ -13,25 +13,36 @@ require_once("lang/lang." . getlang() . ".php");
 #-------------------------------------------
 function getmods_fs() {
 
+    # usually we're in the right place
     $basedir = "modules";
 
-    if (!is_dir($basedir)) { return false; }
+    # but actually when scripts call us during install
+    # we might not be... so be specific
+    $absdir = $basedir;
+    if (file_exists("/media/RACHEL/rachel/modules")) {
+        # rachel plus
+        $absdir = "/media/RACHEL/rachel/modules";
+    } else if (file_exists("/var/www/modules")) {
+        # rachel pi
+        $absdir = "/var/www/modules";
+    }
+    if (!is_dir($absdir)) { return array(); }
 
     # first we get a list of all the modules from the filesystem
     $fsmods = array();
-    $handle = opendir($basedir);
+    $handle = opendir($absdir);
     while ($moddir = readdir($handle)) {
 
         if (preg_match("/^\./", $moddir)) continue; // skip hidden files
 
-        if (is_dir("$basedir/$moddir")) { // look in dirs only
+        if (is_dir("$absdir/$moddir")) { // look in dirs only
 
             $fragment = "";
-            if (file_exists("$basedir/$moddir/rachel-index.php")) {
+            if (file_exists("$absdir/$moddir/rachel-index.php")) {
                 # new name - less confusing, and
                 # will get syntax highlighting in editors
                 $fragment = "$basedir/$moddir/rachel-index.php";
-            } else if (file_exists("$basedir/$moddir/index.htmlf")) {
+            } else if (file_exists("$absdir/$moddir/index.htmlf")) {
                 # old name - deprecated
                 $fragment = "$basedir/$moddir/index.htmlf";
             }
@@ -396,6 +407,7 @@ function sortmods($file) {
             $position = 1000;
             while ($row = $rv->fetchArray()) {
                 $res = $db->exec("UPDATE modules SET position = '$position', hidden = '1' WHERE moddir = '$row[moddir]'");
+                #error_log("UPDATE modules SET position = '$position', hidden = '1' WHERE moddir = '$row[moddir]'");
                 if (!$res) { throw new Exception($db->lastErrorMsg()); }
                 ++$position;
             }
@@ -409,7 +421,7 @@ function sortmods($file) {
                     "UPDATE modules SET position = '$position', hidden = '$is_hidden'" .
                     " WHERE moddir = '$moddir'"
                 );
-                #error_log("UPDATE modules SET position = '$position', hidden = '$is_hidden' WHERE moddir = '$moddir'\n");
+                #error_log("UPDATE modules SET position = '$position', hidden = '$is_hidden' WHERE moddir = '$moddir'");
                 if (!$rv) { throw new Exception($db->lastErrorMsg()); }
                 ++$position;
             }
