@@ -1,0 +1,51 @@
+#
+# This .modules file indicates the modules which are to be included
+# during installation. They will be sorted in the order they appear
+# here. Lines that begin with a # are ignored. Lines that begin with
+# a . are installed but hidden.
+#
+en-local_content 
+en-fairshake 
+en-saylor 
+en-oya 
+en-law_library 
+en-kalite 
+en-wikipedia_for_schools 
+en-GCF2015 
+en-worldmap 
+en-wikivoyage 
+en-ck12 
+en-TED 
+en-radiolab 
+en-PhET 
+en-fantastic_phonics 
+en-wiktionary 
+en-ebooks 
+en-practical_action 
+en-afristory
+en-infonet 
+en-iicba 
+en-math_expression 
+en-musictheory 
+en-olpc 
+en-powertyping 
+en-understanding_algebra 
+en-scratch 
+en-scale-of-universe 
+es-kalite 
+es-ebooks 
+es-educalab 
+es-wikihow 
+es-blockly_games 
+es-vedoque 
+es-ap_didact 
+es-soluciones 
+es-biblioteca 
+es-cnbguatemala 
+es-guatemala 
+es-guias 
+fr-kalite 
+fr-ebooksgratuits 
+fr-wikivoyage 
+fr-wiktionary 
+fr-haitifutur 
