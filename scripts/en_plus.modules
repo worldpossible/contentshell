@@ -4,17 +4,21 @@
 # here. Lines that begin with a # are ignored. Lines that begin with
 # a . are installed but hidden.
 #
+en-local_content
+en-saylor
+.en-fairshake
+.en-oya
+.en-law_library
 en-kalite
 en-wikipedia
-.en-wikipedia_for_schools
-en-local_content
+en-wikipedia_for_schools
 en-worldmap
 en-wikivoyage
 en-ck12
 en-GCF2015
 en-TED
 en-radiolab
-.en-fantastic_phonics
+en-fantastic_phonics
 en-ebooks
 en-afristory
 en-scale-of-universe
@@ -30,7 +34,7 @@ en-musictheory
 en-scratch
 en-understanding_algebra
 en-wiktionary
-.en-olpc
+en-olpc
 en-windows_apps
 es-kalite
 es-wikipedia
@@ -50,3 +54,9 @@ es-soluciones
 es-vedoque
 es-guias
 es-windows_apps
+fr-kalite
+fr-wikipedia
+fr-wikivoyage
+fr-wiktionary
+fr-ebooksgratuits
+fr-haitifutur
