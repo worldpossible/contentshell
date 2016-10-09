@@ -41,10 +41,10 @@ function getmods_fs() {
             if (file_exists("$absdir/$moddir/rachel-index.php")) {
                 # new name - less confusing, and
                 # will get syntax highlighting in editors
-                $fragment = "$basedir/$moddir/rachel-index.php";
+                $fragment = "$absdir/$moddir/rachel-index.php";
             } else if (file_exists("$absdir/$moddir/index.htmlf")) {
                 # old name - deprecated
-                $fragment = "$basedir/$moddir/index.htmlf";
+                $fragment = "$absdir/$moddir/index.htmlf";
             }
 
             if ($fragment) { // check for index fragment
@@ -128,7 +128,13 @@ function getmods_db() {
 function getdb() {
 
     try {
-        $db = new SQLite3("admin.sqlite");
+	$dbfile = "admin.sqlite";
+	if (file_exists("/media/RACHEL/rachel")) {
+	    $dbfile = "/media/RACHEL/rachel/$dbfile";
+	} else if (file_exists("/var/www/modules")) {
+	    $dbfile = "/var/www/$dbfile";
+	}
+        $db = new SQLite3($dbfile);
     } catch (Exception $ex) {
         return null;
     }
@@ -342,6 +348,8 @@ function syncmods_fs2db() {
                     "INSERT into modules (moddir, title, position, hidden) " .
                     "VALUES ('$db_moddir', '$db_title', '$db_position', '0')"
                 );
+                #error_log("INSERT into modules (moddir, title, position, hidden) " .
+                #    "VALUES ('$db_moddir', '$db_title', '$db_position', '0')");
             }
         }
 
@@ -350,6 +358,7 @@ function syncmods_fs2db() {
             if (!isset($fsmods[$moddir])) {
                 $db_moddir =   $db->escapeString($moddir);
                 $db->exec("DELETE FROM modules WHERE moddir = '$db_moddir'");
+                #error_log("DELETE FROM modules WHERE moddir = '$db_moddir'");
             }
         }
 
