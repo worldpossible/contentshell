@@ -167,6 +167,7 @@ function getdb() {
             started     INTEGER, -- timestamp
             last_update INTEGER, -- timestamp
             completed   INTEGER, -- timestamp
+            dismissed   INTEGER, -- timestamp
             retval      INTEGER
         )
     ");
