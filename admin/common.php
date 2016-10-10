@@ -128,7 +128,12 @@ function getdb() {
 
     # we need to keep a copy so we can close it in a callback later
     global $_db;
+    # and also because caching per-request is smart
+    if (isset($_db)) {
+        return $_db;
+    }
 
+    # not already connected? connect.
     try {
         $_db = new SQLite3(getadmindir()."/admin.sqlite");
     } catch (Exception $ex) {
@@ -139,8 +144,10 @@ function getdb() {
     # processes are writing to the db
     $_db->busyTimeout(5000);
 
-    # in case this is the first time - a bit wasteful to do this every time
-    # but it saves errors in the log if the db file gets lost
+    # It seems a bit wasteful to do this every time we grab a db connection.
+    # However it's probably better than trying to detect if each table
+    # exists, in the case of a new install or an upgrade.
+    $_db->exec("BEGIN");
     $_db->exec("
         CREATE TABLE IF NOT EXISTS modules (
             module_id INTEGER PRIMARY KEY,
@@ -163,6 +170,22 @@ function getdb() {
             retval      INTEGER
         )
     ");
+    $_db->exec("
+        CREATE TABLE IF NOT EXISTS users (
+            user_id     INTEGER PRIMARY KEY,
+            username    VARCHAR(255),
+            password    VARCHAR(255),
+            CONSTRAINT username UNIQUE (username)
+        )
+    ");
+    $admin = $_db->querySingle("SELECT 1 FROM users WHERE username = 'admin'");
+    if (!$admin) {
+        $_db->exec("
+            INSERT INTO users (username, password)
+            VALUES ('admin', 'd54f4a435aca0ed313c2a7a0b9914d78')
+        ");
+    }
+    $_db->exec("COMMIT");
 
     return $_db;
 
@@ -293,7 +316,7 @@ function authorized() {
 
     global $lang;
 
-    # special case
+    # special case for test scripts
     if (isset($_SERVER['PHP_CLI_TESTING'])) {
         return true;
     }
@@ -303,23 +326,36 @@ function authorized() {
         return true;
 
     # if we've got good user/pass, issue cookie
-    } else if (isset($_POST['user']) && isset($_POST['pass']) &&
-            $_POST['user'] == "admin" && md5($_POST['pass']) == "d54f4a435aca0ed313c2a7a0b9914d78") {
-        # we used to let the path be current directory, but then
-        # we had cookies getting set that were difficult to unset
-        # (if you don't know what directory they were set in, even
-        # unsetting at "/" doesn't work) -- so now we set and
-        # unset everything at the root
-        setcookie("rachel-auth", "admin", 0, "/");
-        header(
-            "Location: //$_SERVER[HTTP_HOST]"
-            . strtok($_SERVER["REQUEST_URI"],'?')
+    } else if (isset($_POST['user']) && isset($_POST['pass'])) {
+
+        $db = getdb();
+        $db_user = $db->escapeString($_POST['user']);
+        $db_pass = $db->escapeString(md5($_POST['pass']));
+        $validuser = $db->querySingle(
+            "SELECT * FROM users WHERE username = '$db_user' AND password = '$db_pass'"
         );
 
-    # if we've got nothing or bad user/pass, show login page
-    } else {
-        $indexurl = getbaseurl();
-        print <<<EOT
+        if ($validuser) {
+            # we used to let the path be current directory, but then
+            # we had cookies getting set that were difficult to unset
+            # (if you don't know what directory they were set in, even
+            # unsetting at "/" doesn't work) -- so now we set and
+            # unset everything at the root
+            setcookie("rachel-auth", "admin", 0, "/");
+            header(
+                "Location: //$_SERVER[HTTP_HOST]"
+                . strtok($_SERVER["REQUEST_URI"],'?')
+            );
+            return true;
+        }
+
+    }
+
+    # if we made it here it means they're not authorized
+    # -- so give them a chance to log in
+
+    $indexurl = getbaseurl();
+    print <<<EOT
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -344,7 +380,6 @@ function authorized() {
   </body>
 </html>
 EOT;
-    }
 
 }
 
