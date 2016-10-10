@@ -5,12 +5,14 @@
 # a . are installed but hidden.
 #
 
+
+en-local_content
 en-kalite
 en-wikipedia
 en-wikipedia_for_schools
-en-local_content
 en-worldmap
 en-wikivoyage
+en-saylor
 en-ck12
 en-GCF2015
 en-TED
@@ -31,6 +33,9 @@ en-powertyping
 en-scratch
 en-understanding_algebra
 en-wiktionary
+en-fairshake
+en-oya
+en-law_library
 en-olpc
 en-windows_apps
 
@@ -61,7 +66,5 @@ fr-ebooksgratuits
 fr-haitifutur
 
 # justice content
-en-fairshake
-en-oya
-en-law_library
-en-saylor
+
+
