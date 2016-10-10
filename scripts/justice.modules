@@ -5,6 +5,7 @@
 # a . are installed but hidden.
 #
 
+en-local_content
 en-fairshake
 en-oya
 en-law_library
@@ -13,7 +14,6 @@ en-saylor
 en-kalite
 #en-wikipedia
 en-wikipedia_for_schools
-en-local_content
 en-worldmap
 en-wikivoyage
 en-ck12
