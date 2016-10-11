@@ -1,10 +1,6 @@
-<?php
-    require_once("common.php");
-    $preflang = getlang();
-    require_once("lang/lang.$preflang.php");
-?>
+<?php require_once("admin/common.php"); ?>
 <!DOCTYPE html>
-<html lang="<?php echo $preflang ?>">
+<html lang="<?php echo $lang['langcode'] ?>">
 <head>
 <meta charset="utf-8">
 <title>RACHEL - <?php echo $lang['home'] ?></title>
@@ -13,27 +9,13 @@
 <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.min.css">
 <script src="js/jquery-1.10.2.min.js"></script>
 <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
-<script>
-    // this sets the autocomplete handler for each module's text input field
-    $(document).ready( function () {
-        $(":text").each( function () {
-            var myid = $(this).attr("id");
-            if (myid) {
-                var moddir = myid.replace(/_search$/, "");
-                $("#"+myid).autocomplete({
-                        source: "modules/"+moddir+"/search/suggest.php",
-                });
-            }
-        });
-    });
-</script>
 <base target="content">
 </head>
 
 <body>
 <div id="rachel">
     <div id="adminnav">
-    <a href="admin.php"><?php echo $lang['admin'] ?></a> |
+    <a href="admin/modules.php"><?php echo $lang['admin'] ?></a> |
     </div>
 </div>
 

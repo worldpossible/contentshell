@@ -6,7 +6,7 @@
 
     if (isset($argv[1]) && is_readable($argv[1])) {
 
-        require_once("common.php");
+        require_once("admin/common.php");
         sortmods($argv[1]);
 
     } else {
