@@ -22,38 +22,38 @@ $html = shell_exec("php index.php");
 passfail(preg_match("/<!DOCTYPE.+Test Module 1.+Test Module 2.+<\/html>/s", $html) == 1);
 
 testmsg("Testing index.php created db");
-passfail(file_exists("admin.sqlite"));
-unlink("admin.sqlite") or error("Couldn't remove test db file");
+passfail(file_exists("admin/admin.sqlite"));
+unlink("admin/admin.sqlite") or error("Couldn't remove test db file");
 
-testmsg("Testing admin.php with two modules, no db");
-$html = shell_exec("PHP_CLI_TESTING=1 php admin.php");
-passfail(preg_match("/<!DOCTYPE.+mod_one - Test Module 1.+new.+mod_two - Test Module 2.+new.+<\/html>/s", $html) == 1);
+testmsg("Testing admin/modules.php with two modules, no db");
+$html = shell_exec("PHP_CLI_TESTING=1 php admin/modules.php");
+passfail(preg_match("/<!DOCTYPE.+mod_one - Test Module 1.+mod_two - Test Module 2.+<\/html>/s", $html) == 1);
 
-testmsg("Testing admin.php created db");
-passfail(file_exists("admin.sqlite"));
+testmsg("Testing admin/modules.php created db");
+passfail(file_exists("admin/admin.sqlite"));
 
-testmsg("Testing admin.php saving module order");
+testmsg("Testing admin/modules.php saving module order");
 $html = shell_exec(
     "PHP_CLI_TESTING=1 " .
     "php -e -r '\$_GET[\"moddirs\"] = \"mod_two,mod_one\"; " .
-    "include \"admin.php\";'"
+    "include \"admin/modules.php\";'"
 );
 passfail($html == "");
 
-testmsg("Testing admin.php reading saved module order");
-$html = shell_exec("PHP_CLI_TESTING=1 php admin.php");
+testmsg("Testing admin/modules.php reading saved module order");
+$html = shell_exec("PHP_CLI_TESTING=1 php admin/modules.php");
 passfail(preg_match("/<!DOCTYPE.+mod_two - Test Module 2.+mod_one - Test Module 1.+<\/html>/s", $html) == 1);
 
 testmsg("Testing index.php reading saved module order");
 $html = shell_exec("php index.php");
 passfail(preg_match("/<!DOCTYPE.+Test Module 2.+Test Module 1.+<\/html>/s", $html) == 1);
 
-testmsg("Testing admin.php hiding both modules");
+testmsg("Testing admin/modules.php hiding both modules");
 $html = shell_exec(
     "PHP_CLI_TESTING=1 " .
     "php -e -r '\$_GET[\"moddirs\"] = \"mod_one,mod_two\"; " .
     "\$_GET[\"hidden\"] = \"mod_one,mod_two\"; " .
-    "include \"admin.php\";'"
+    "include \"admin/modules.php\";'"
 );
 passfail($html == "");
 
@@ -74,8 +74,8 @@ function init() {
     $fail = 0; $pass = 0; $error = 0;
     rename("modules", "modules.tmp") or error("Couldn't move 'modules' directory\n");
     mkdir("modules") or error("Couldn't create 'modules' directory\n");
-    if (file_exists("admin.sqlite")) {
-        rename("admin.sqlite", "admin.sqlite.tmp") or error("Couldn't move 'admin.sqlite'\n");
+    if (file_exists("admin/admin.sqlite")) {
+        rename("admin/admin.sqlite", "admin/admin.sqlite.tmp") or error("Couldn't move 'admin/admin.sqlite'\n");
     }
     # if something went wrong already, bail
     if ($error) { cleanup(); }
@@ -98,11 +98,11 @@ function cleanup() {
         rmdir("modules") or error("Couldn't remove test 'modules'");
         rename("modules.tmp", "modules") or error("Couldn't put 'modules.tmp' back");
     }
-    if (file_exists("admin.sqlite.tmp")) {
-        if (file_exists("admin.sqlite")) {
-            unlink("admin.sqlite") or error("Couldn't put 'admin.sqlite.tmp' back");
+    if (file_exists("admin/admin.sqlite.tmp")) {
+        if (file_exists("admin/admin.sqlite")) {
+            unlink("admin/admin.sqlite") or error("Couldn't put 'admin/admin.sqlite.tmp' back (1)");
         }
-        rename("admin.sqlite.tmp", "admin.sqlite") or error("Couldn't put 'admin.sqlite.tmp' back");
+        rename("admin/admin.sqlite.tmp", "admin/admin.sqlite") or error("Couldn't put 'admin/admin.sqlite.tmp' back (2)");
     }
 
     if ($error) {

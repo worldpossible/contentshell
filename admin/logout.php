@@ -6,6 +6,6 @@ require_once("common.php");
 # unsetting at "/" doesn't work) -- so now we set and
 # unset everything at the root
 setcookie("rachel-auth", null, -1, "/");
-header( "Location: //$_SERVER[HTTP_HOST]/" . getbaseurl() );
+header( "Location: //$_SERVER[HTTP_HOST]/" . getAbsBaseUrl() );
 exit;
 ?>
