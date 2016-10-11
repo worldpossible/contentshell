@@ -223,30 +223,8 @@ if (is_dir($basedir)) {
     }
 
     # we update the db with whatever we've seen in the filesystem
-    if ($db) {
-
-        # insert anything we found in the fs that wasn't in the db
-        foreach (array_keys($fsmods) as $moddir) {
-            if (!isset($dbmods[$moddir])) {
-                $db_moddir =   $db->escapeString($moddir);
-                $db_title  =   $db->escapeString($fsmods[$moddir]['title']);
-                $db_position = $db->escapeString($fsmods[$moddir]['position']);
-                $db->exec(
-                    "INSERT into modules (moddir, title, position, hidden) " .
-                    "VALUES ('$db_moddir', '$db_title', '$db_position', '0')"
-                );
-            }
-        }
-
-        # delete anything from the db that wasn't in the fs
-        foreach (array_keys($dbmods) as $moddir) {
-            if (!isset($fsmods[$moddir])) {
-                $db_moddir =   $db->escapeString($moddir);
-                $db->exec("DELETE FROM modules WHERE moddir = '$db_moddir'");
-            }
-        }
-
-    }
+    # so that if any fileystem changes have been made, they're reflected
+    syncmods_fs2db();
 
 } else {
 

@@ -2,9 +2,9 @@
 
 #-------------------------------------------
 # Just by including this module you get browser language
-# detectino and access to the $lang associative array
+# detection and access to the $lang associative array
 #-------------------------------------------
-require_once("common.php");
+# require_once("common.php"); # require ourself? why?
 require_once("lang/lang." . getlang() . ".php");
 
 #-------------------------------------------
@@ -13,27 +13,38 @@ require_once("lang/lang." . getlang() . ".php");
 #-------------------------------------------
 function getmods_fs() {
 
+    # usually we're in the right place
     $basedir = "modules";
 
-    if (!is_dir($basedir)) { return false; }
+    # but actually when scripts call us during install
+    # we might not be... so be specific
+    $absdir = $basedir;
+    if (file_exists("/media/RACHEL/rachel/modules")) {
+        # rachel plus
+        $absdir = "/media/RACHEL/rachel/modules";
+    } else if (file_exists("/var/www/modules")) {
+        # rachel pi
+        $absdir = "/var/www/modules";
+    }
+    if (!is_dir($absdir)) { return array(); }
 
     # first we get a list of all the modules from the filesystem
     $fsmods = array();
-    $handle = opendir($basedir);
+    $handle = opendir($absdir);
     while ($moddir = readdir($handle)) {
 
         if (preg_match("/^\./", $moddir)) continue; // skip hidden files
 
-        if (is_dir("$basedir/$moddir")) { // look in dirs only
+        if (is_dir("$absdir/$moddir")) { // look in dirs only
 
             $fragment = "";
-            if (file_exists("$basedir/$moddir/rachel-index.php")) {
+            if (file_exists("$absdir/$moddir/rachel-index.php")) {
                 # new name - less confusing, and
                 # will get syntax highlighting in editors
-                $fragment = "$basedir/$moddir/rachel-index.php";
-            } else if (file_exists("$basedir/$moddir/index.htmlf")) {
+                $fragment = "$absdir/$moddir/rachel-index.php";
+            } else if (file_exists("$absdir/$moddir/index.htmlf")) {
                 # old name - deprecated
-                $fragment = "$basedir/$moddir/index.htmlf";
+                $fragment = "$absdir/$moddir/index.htmlf";
             }
 
             if ($fragment) { // check for index fragment
@@ -117,7 +128,13 @@ function getmods_db() {
 function getdb() {
 
     try {
-        $db = new SQLite3("admin.sqlite");
+	$dbfile = "admin.sqlite";
+	if (file_exists("/media/RACHEL/rachel")) {
+	    $dbfile = "/media/RACHEL/rachel/$dbfile";
+	} else if (file_exists("/var/www/modules")) {
+	    $dbfile = "/var/www/$dbfile";
+	}
+        $db = new SQLite3($dbfile);
     } catch (Exception $ex) {
         return null;
     }
@@ -305,6 +322,129 @@ function clearcookie() {
         "Location: //$_SERVER[HTTP_HOST]/"
         . dirname($_SERVER["REQUEST_URI"])
     );
+}
+
+# this function updates the database to match the modules that
+# are in the filesystem
+function syncmods_fs2db() {
+
+    # get info on the modules in the filesystem
+    $fsmods = getmods_fs();
+    # get info on the modules in the database
+    $dbmods = getmods_db();
+
+    $db = getdb();
+    if ($db) {
+
+        $db->exec("BEGIN");
+
+        # insert anything we found in the fs that wasn't in the db
+        foreach (array_keys($fsmods) as $moddir) {
+            if (!isset($dbmods[$moddir])) {
+                $db_moddir =   $db->escapeString($moddir);
+                $db_title  =   $db->escapeString($fsmods[$moddir]['title']);
+                $db_position = $db->escapeString($fsmods[$moddir]['position']);
+                $db->exec(
+                    "INSERT into modules (moddir, title, position, hidden) " .
+                    "VALUES ('$db_moddir', '$db_title', '$db_position', '0')"
+                );
+                #error_log("INSERT into modules (moddir, title, position, hidden) " .
+                #    "VALUES ('$db_moddir', '$db_title', '$db_position', '0')");
+            }
+        }
+
+        # delete anything from the db that wasn't in the fs
+        foreach (array_keys($dbmods) as $moddir) {
+            if (!isset($fsmods[$moddir])) {
+                $db_moddir =   $db->escapeString($moddir);
+                $db->exec("DELETE FROM modules WHERE moddir = '$db_moddir'");
+                #error_log("DELETE FROM modules WHERE moddir = '$db_moddir'");
+            }
+        }
+
+        $db->exec("COMMIT");
+
+    }
+
+}
+
+function sortmods($file) {
+
+    # we're going to read in the .modules file here and
+    # if successful, use it to update the order and visibility
+    # of all the modules in the filesystem
+    $fh = fopen($file, "r");
+    if ($fh) {
+
+        $hidden = array();
+        $sorted = array();
+        while (($line = fgets($fh)) !== false) {
+            # remove all whitespace
+            $line = preg_replace("/\s+/", "", $line);
+            # skip comments and blank lines
+            if (preg_match("/^#/", $line) || !preg_match("/\S/", $line)) {
+                continue;
+            }
+            # detect screwy files and bail
+            # (module names can only be letters, numbers, underscore, hyphen, and dot)
+            if (preg_match("/[^\w\.\-]/", $line)) {
+                error_log("$file does not look like a valid .modules file");
+                exit;
+            }
+            # flag hidden items in an associative array
+            if (preg_match("/^\./", $line)) {
+                $line = preg_replace("/^\./", "", $line);
+                $hidden[$line] = 1;
+            }
+            # put all items in an ordered array
+            array_push($sorted, $line);
+        }
+
+        # when run during install, there is no data in the db to update,
+        # so it's important that we sync the database to match the filesystem first
+        syncmods_fs2db();
+
+        try {
+
+            $db = getdb();
+            if (!$db) { throw new Exception($db->lastErrorMsg); }
+            $db->exec("BEGIN");
+
+            # boink everything to the bottom and hide it
+            $rv = $db->query("SELECT * FROM modules ORDER BY moddir");
+            if (!$rv) { throw new Exception($db->lastErrorMsg()); }
+            $position = 1000;
+            while ($row = $rv->fetchArray()) {
+                $res = $db->exec("UPDATE modules SET position = '$position', hidden = '1' WHERE moddir = '$row[moddir]'");
+                #error_log("UPDATE modules SET position = '$position', hidden = '1' WHERE moddir = '$row[moddir]'");
+                if (!$res) { throw new Exception($db->lastErrorMsg()); }
+                ++$position;
+            }
+
+            # go to the DB and set the new order and new hidden state
+            $position = 1;
+            foreach ($sorted as $moddir) {
+                $moddir = $db->escapeString($moddir);
+                if (isset($hidden[$moddir])) { $is_hidden = 1; } else { $is_hidden = 0; }
+                $rv = $db->exec(
+                    "UPDATE modules SET position = '$position', hidden = '$is_hidden'" .
+                    " WHERE moddir = '$moddir'"
+                );
+                #error_log("UPDATE modules SET position = '$position', hidden = '$is_hidden' WHERE moddir = '$moddir'");
+                if (!$rv) { throw new Exception($db->lastErrorMsg()); }
+                ++$position;
+            }
+
+        } catch (Exception $ex) {
+            $db->exec("ROLLBACK");
+            error_log($ex);
+        }
+        $db->exec("COMMIT");
+
+    } else {
+        error_log("modulesort() Couldn't Open File: $file");
+    }
+
 }
 
 ?>
