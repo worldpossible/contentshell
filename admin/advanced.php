@@ -317,10 +317,15 @@ function populateRemoteModuleList() {
                 }
                 lastLang = results[i].moddir.substring(0,2);
 
+                // calc size in GB
+                var gbsize = ((results[i].ksize/1024)/1024).toFixed(1)
+                if (gbsize <  0.1) { gbsize = "0.1"; }
+
                 // finally, add the entry for this module
                 $("#available").append(
                     "<option value=\"" + results[i].moddir + "\">"
-                    + results[i].moddir + "</option>"
+                    + results[i].moddir + " -- "
+                    + gbsize + " GB</option>"
                 );
             }
 

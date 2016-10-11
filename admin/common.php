@@ -385,9 +385,13 @@ EOT;
 # what kind of RACHEL are we?
 #-------------------------------------------
 define("RACHELPI_MODPATH", "/var/www/modules");
-function is_rachelpi() { return is_dir(RACHELPI_MODPATH); }
+function is_rachelpi() {
+    return is_dir(RACHELPI_MODPATH) || file_exists("/tmp/fake-rachelpi");
+}
 define("RACHELPLUS_MODPATH", "/media/RACHEL/rachel/modules");
-function is_rachelplus() { return is_dir(RACHELPLUS_MODPATH); }
+function is_rachelplus() {
+    return is_dir(RACHELPLUS_MODPATH) || file_exists("/tmp/fake-rachelplus");
+}
 
 #-------------------------------------------
 # gets the absolute module path on any machine

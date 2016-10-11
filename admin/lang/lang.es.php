@@ -18,6 +18,7 @@ $lang['main'] = 'Principal';
 $lang['admin'] = 'Administración';
 $lang['stats'] = 'Estadísticas';
 $lang['version'] = 'Versión';
+$lang['settings'] = 'Ajustes';
 $lang['months'] = array(
     'Null', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
@@ -61,7 +62,7 @@ $lang['restart_ok'] = "El servidor está reiniciando ahora.";
 $lang['shutdown_failed'] = "No se puede cerrar el servidor.";
 $lang['restart_failed'] = "No es posible reiniciar el servidor.";
 $lang['admin_instructions'] = "Puede mostrar y ocultar módulos de aquí, o cambiar el orden arrastrándolos. <br> Asegúrese de hacer clic \"Guardar Cambios \" en la parte inferior de la página.";
-$lang['rplus_safe_shutdown'] = "Para apagar con seguridad, sólo tiene que pulsar el botón de encendido durante dos segundos.";
+$lang['rplus_safe_shutdown'] = "<h4>Para apagar con seguridad, sólo tiene que pulsar el botón de encendido durante un segundo y liberación.<br>La unidad se apagará después de unos momentos.</h4><p>También puede apagar o reiniciar aquí:</p>";
 $lang['unknown_system'] = "Sistema desconocido";
 $lang['shutdown_not_supported'] = "Cierre no compatible con este hardware.";
 $lang['storage_usage'] = "Uso De Almacenamiento";
@@ -71,6 +72,15 @@ $lang['used'] = "Usado";
 $lang['available'] = "Disponible";
 $lang['percentage'] = "Porcentaje";
 $lang['advanced'] = "Avanzado";
+
+$lang['change_password'] = "Cambia la contraseña";
+$lang['change_pass_success'] = "Contraseña cambiada correctamente";
+$lang['old_password'] = "Contraseña actual";
+$lang['new_password'] = "Nueva contraseña";
+$lang['new_password2'] = "Nuevo otra vez";
+$lang['wrong_old_pass'] = "Contraseña actual incorrecto";
+$lang['missing_new_pass'] = "La nueva contraseña no puede estar en blanco";
+$lang['password_mismatch'] = "Las nuevas contraseñas no coinciden";
 
 # for captiveportal-redirect.php
 $lang['welcome_to_rachel'] = "Bienvenido a RACHEL";

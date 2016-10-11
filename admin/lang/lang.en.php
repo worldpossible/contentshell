@@ -18,6 +18,7 @@ $lang['main'] = 'Main';
 $lang['admin'] = 'Admin';
 $lang['stats'] = 'Stats';
 $lang['version'] = 'Version';
+$lang['settings'] = 'Settings';
 $lang['months'] = array(
     'Null', 'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
@@ -61,7 +62,7 @@ $lang['restart_ok'] = "The server is restarting down now.";
 $lang['shutdown_failed'] = "Unable to shutdown server.";
 $lang['restart_failed'] = "Unable to restart server.";
 $lang['admin_instructions'] = "You can show and hide modules here, or change the order by dragging them. <br> Be sure to click \"Save Changes\" at the bottom of the page.";
-$lang['rplus_safe_shutdown'] = "To safely shut down, just press the power button for two seconds.";
+$lang['rplus_safe_shutdown'] = "<h4>To safely shut down, just press the power button for one second and release.<br>The unit will power off after a few moments.</h4><p>You can also shut down or restart here:</p>";
 $lang['unknown_system'] = "Unknown System";
 $lang['shutdown_not_supported'] = "Shutdown not supported on this hardware.";
 $lang['storage_usage'] = "Storage Usage";
@@ -71,6 +72,15 @@ $lang['used'] = "Used";
 $lang['available'] = "Available";
 $lang['percentage'] = "Percentage";
 $lang['advanced'] = "Advanced";
+
+$lang['change_password'] = "Change Password";
+$lang['change_pass_success'] = "Password Successfully Changed";
+$lang['old_password'] = "Current Password";
+$lang['new_password'] = "New Password";
+$lang['new_password2'] = "Repeat New";
+$lang['wrong_old_pass'] = "Wrong current password";
+$lang['missing_new_pass'] = "New password cannot be blank";
+$lang['password_mismatch'] = "New passwords do not match";
 
 # for captiveportal-redirect.php
 $lang['welcome_to_rachel'] = "Welcome to RACHEL";

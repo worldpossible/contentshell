@@ -70,9 +70,9 @@ if (is_rachelpi()) {
     $usage_supported = true;
 
     $partitions = array(
-        "/media/preloaded" => "Admin Partition (preloaded)",
-        "/media/uploaded"  => "Teacher Partition (uploaded)",
-        "/media/RACHEL"    => "RACHEL Partition (RACHEL modules)"
+        "/media/preloaded" => "Admin (preloaded)",
+        "/media/uploaded"  => "Teacher (uploaded)",
+        "/media/RACHEL"    => "RACHEL (RACHEL modules)"
     );
 
     foreach ($output as $line) {
@@ -85,13 +85,18 @@ if (is_rachelpi()) {
         ));
     }
 
+# this handles output on OSX, and probably some other unix variants
 } else if (preg_match("/Filesystem.+Size.+Used.+Avail.+Capacity.+iused.+ifree/", $output[0])) {
 
     $usage_supported = true;
 
     foreach ($output as $line) {
-        list($fs, $size, $used, $avail, $perc, $iused, $ifree, $iusedperc, $name) = preg_split("/\s+/", $line);
+        list($fs, $size, $used, $avail, $perc, $iused, $ifree, $iusedperc, $name, $name2) = preg_split("/\s+/", $line);
         if (!preg_match("/^\/dev/", $fs)) { continue; }
+        if ($name2) {$name .= " $name2"; }
+        $size  = preg_replace("/i$/", "B", $size);
+        $used  = preg_replace("/i$/", "B", $used);
+        $avail = preg_replace("/i$/", "B", $avail);
         array_push( $usage_rows, array(
             "name"  => $name, "size"  => $size, "used"  => $used,
             "avail" => $avail, "perc"  => $perc,
@@ -144,7 +149,14 @@ if (is_rachelpi()) {
 } else if (is_rachelplus()) {
     echo "
         <h3>RACHEL-Plus</h3>
-        <p>$lang[rplus_safe_shutdown]</p>
+        <img src='art/intel-cap-power-button.png' width='250' height='170'>
+        $lang[rplus_safe_shutdown]
+        <div style='padding: 10px; border: 1px solid red; background: #fee;'>
+        <form action='hardware.php' method='post'>
+        <input type='submit' name='shutdown' value='$lang[shutdown]' onclick=\"if (!confirm('$lang[confirm_shutdown]')) { return false; }\">
+        <input type='submit' name='reboot' value='$lang[restart]' onclick=\"if (!confirm('$lang[confirm_restart]')) { return false; }\">
+        </form>
+        </div>
     ";
 } else {
     echo "
