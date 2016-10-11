@@ -132,7 +132,13 @@ function getdb() {
 
     # not already connected? connect.
     try {
-        $_db = new SQLite3(getAbsAdminPath()."/admin.sqlite");
+        $dbfile = getAbsAdminPath() . "/admin.sqlite";
+        $_db = new SQLite3($dbfile);
+        # File could get created by webserver or cli script
+        # and we want both to be able to use it.
+        # Also the @ suppresses the error if we're not
+        # the owner.
+        @chmod($dbfile, 0666);
     } catch (Exception $ex) {
         return null;
     }
