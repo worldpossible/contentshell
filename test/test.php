@@ -74,7 +74,9 @@ function init() {
     $fail = 0; $pass = 0; $error = 0;
     rename("modules", "modules.tmp") or error("Couldn't move 'modules' directory\n");
     mkdir("modules") or error("Couldn't create 'modules' directory\n");
-    rename("admin.sqlite", "admin.sqlite.tmp") or error("Couldn't move 'admin.sqlite'\n");
+    if (file_exists("admin.sqlite")) {
+        rename("admin.sqlite", "admin.sqlite.tmp") or error("Couldn't move 'admin.sqlite'\n");
+    }
     # if something went wrong already, bail
     if ($error) { cleanup(); }
 }
@@ -98,9 +100,9 @@ function cleanup() {
     }
     if (file_exists("admin.sqlite.tmp")) {
         if (file_exists("admin.sqlite")) {
-            unlink("admin.sqlite") or error("Couldn't put 'modules.tmp' back");
+            unlink("admin.sqlite") or error("Couldn't put 'admin.sqlite.tmp' back");
         }
-        rename("admin.sqlite.tmp", "admin.sqlite") or error("Couldn't put 'modules.tmp' back");
+        rename("admin.sqlite.tmp", "admin.sqlite") or error("Couldn't put 'admin.sqlite.tmp' back");
     }
 
     if ($error) {

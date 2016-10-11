@@ -2,9 +2,9 @@
 
 #-------------------------------------------
 # Just by including this module you get browser language
-# detectino and access to the $lang associative array
+# detection and access to the $lang associative array
 #-------------------------------------------
-require_once("common.php");
+# require_once("common.php"); # require ourself? why?
 require_once("lang/lang." . getlang() . ".php");
 
 #-------------------------------------------
@@ -20,27 +20,28 @@ date_default_timezone_set('Etc/UCT');
 #-------------------------------------------
 function getmods_fs() {
 
-    $modbase = getrelmodpath();
-
-    if (!is_dir($modbase)) { return false; }
+    $absModPath = getAbsModPath();
+    if (!is_dir($absModPath)) { return array(); }
+    $relModPath = getRelModPath();
 
     # first we get a list of all the modules from the filesystem
     $fsmods = array();
-    $handle = opendir($modbase);
+    $handle = opendir($absModPath);
+
     while ($moddir = readdir($handle)) {
 
         if (preg_match("/^\./", $moddir)) continue; // skip hidden files
 
-        if (is_dir("$modbase/$moddir")) { // look in dirs only
+        if (is_dir("$absModPath/$moddir")) { // look in dirs only
 
             $fragment = "";
-            if (file_exists("$modbase/$moddir/rachel-index.php")) {
+            if (file_exists("$absModPath/$moddir/rachel-index.php")) {
                 # new name - less confusing, and
                 # will get syntax highlighting in editors
-                $fragment = "$modbase/$moddir/rachel-index.php";
-            } else if (file_exists("$modbase/$moddir/index.htmlf")) {
+                $fragment = "$absModPath/$moddir/rachel-index.php";
+            } else if (file_exists("$absModPath/$moddir/index.htmlf")) {
                 # old name - deprecated
-                $fragment = "$modbase/$moddir/index.htmlf";
+                $fragment = "$absModPath/$moddir/index.htmlf";
             }
 
             if ($fragment) { // check for index fragment
@@ -62,13 +63,11 @@ function getmods_fs() {
                 # pull the version from the file
                 $version = "";
                 preg_match("/version\s*=\s*([\d\.]+)/", $content, $match);
-                if (isset($match[1])) {
-                    $version = $match[1];
-                }
+                if (isset($match[1])) { $version = $match[1]; }
 
                 // save info about this module
                 $fsmods{ $moddir } = array(
-                    'dir'      => "$modbase/$moddir",
+                    'dir'      => "$relModPath/$moddir",
                     'moddir'   => $moddir,
                     'title'    => $title,
                     'position' => 0,
@@ -81,7 +80,7 @@ function getmods_fs() {
 
                 # save info about this incomplete module
                 $fsmods{ $moddir } = array(
-                    'dir'      => "$modbase/$moddir",
+                    'dir'      => "$relModPath/$moddir",
                     'moddir'   => $moddir,
                     'title'    => $moddir,
                     'position' => 0,
@@ -129,13 +128,11 @@ function getdb() {
     # we need to keep a copy so we can close it in a callback later
     global $_db;
     # and also because caching per-request is smart
-    if (isset($_db)) {
-        return $_db;
-    }
+    if (isset($_db)) { return $_db; }
 
     # not already connected? connect.
     try {
-        $_db = new SQLite3(getadmindir()."/admin.sqlite");
+        $_db = new SQLite3(getAbsAdminPath()."/admin.sqlite");
     } catch (Exception $ex) {
         return null;
     }
@@ -355,7 +352,7 @@ function authorized() {
     # if we made it here it means they're not authorized
     # -- so give them a chance to log in
 
-    $indexurl = getbaseurl();
+    $indexurl = getAbsBaseUrl();
     print <<<EOT
 <!DOCTYPE html>
 <html lang="en">
@@ -387,39 +384,41 @@ EOT;
 #-------------------------------------------
 # what kind of RACHEL are we?
 #-------------------------------------------
-define("RACHELPI_MODBASEDIR", "/var/www/modules");
-define("RACHELPLUS_MODBASEDIR", "/media/RACHEL/rachel/modules");
-function is_rachelpi() { return is_dir(RACHELPI_MODBASEDIR); }
-function is_rachelplus() { return is_dir(RACHELPLUS_MODBASEDIR); }
+define("RACHELPI_MODPATH", "/var/www/modules");
+function is_rachelpi() { return is_dir(RACHELPI_MODPATH); }
+define("RACHELPLUS_MODPATH", "/media/RACHEL/rachel/modules");
+function is_rachelplus() { return is_dir(RACHELPLUS_MODPATH); }
 
 #-------------------------------------------
-# get the filesystem path from the current location
-# to the root RACHEL directory, presumably where
-# index.php is residing
+# gets the absolute module path on any machine
+# this should work from any directory so install
+# scripts can call it and find the right place
 #-------------------------------------------
-function getbasedir() {
-    $basedir = dirname(__DIR__);
-    $basedir = preg_replace("/\/admin$/", "", $basedir);
-    return $basedir;
+function getAbsModPath() {
+
+    if (is_rachelplus()) { return RACHELPLUS_MODPATH; }
+    if (is_rachelpi()) { return RACHELPI_MODPATH; }
+
+    # other system (from webroot)
+    if (file_exists("./modules")) { return realpath("./modules"); }
+    # other (from admin dir)
+    if (file_exists("../modules")) { return realpath("../modules"); }
+
+    # unknown
+    return false;
+
+}
+
+function getAbsAdminPath() {
+    return preg_replace("/modules/", "admin", getAbsModPath());
 }
 
 #-------------------------------------------
-# get the absolute URL from the current location
-# to the root RACHEL directory, presumably where
-# index.php is residing
+# Sometimes we want the module directory
+# relative from the current directory instead.
+# This should work through HTTP or command line
 #-------------------------------------------
-function getbaseurl() {
-    $baseurl = dirname($_SERVER['REQUEST_URI']);
-    $baseurl = preg_replace("/\/admin$/", "", $baseurl);
-    return $baseurl;
-}
-
-#-------------------------------------------
-# sometimes we want the module directory
-# relative from the current directory instead
-# -- this should work through HTTP or command line
-#-------------------------------------------
-function getrelmodpath() {
+function getRelModPath() {
     if (isset($_SERVER['REQUEST_URI'])) {
         $me = $_SERVER['REQUEST_URI'];
     } else {
@@ -432,8 +431,148 @@ function getrelmodpath() {
     }
 }
 
-function getadmindir() {
-    return getbasedir() . "/admin";
+function getRelAdminPath() {
+    return preg_replace("/modules/", "admin", getRelModPath());
+}
+
+#-------------------------------------------
+# Get the absolute URL from the current location
+# to the root RACHEL directory, presumably where
+# index.php is residing
+#-------------------------------------------
+function getAbsBaseUrl() {
+    $baseurl = dirname($_SERVER['REQUEST_URI']);
+    $baseurl = preg_replace("/\/admin$/", "", $baseurl);
+    return $baseurl;
+}
+
+#-------------------------------------------
+# this function updates the database to match the modules that
+# are in the filesystem
+#-------------------------------------------
+function syncmods_fs2db() {
+
+    # get info on the modules in the filesystem
+    $fsmods = getmods_fs();
+    # get info on the modules in the database
+    $dbmods = getmods_db();
+
+    $db = getdb();
+    if ($db) {
+
+        $db->exec("BEGIN");
+
+        # insert anything we found in the fs that wasn't in the db
+        foreach (array_keys($fsmods) as $moddir) {
+            if (!isset($dbmods[$moddir])) {
+                $db_moddir =   $db->escapeString($moddir);
+                $db_title  =   $db->escapeString($fsmods[$moddir]['title']);
+                $db_position = $db->escapeString($fsmods[$moddir]['position']);
+                $db->exec(
+                    "INSERT into modules (moddir, title, position, hidden) " .
+                    "VALUES ('$db_moddir', '$db_title', '$db_position', '0')"
+                );
+            }
+        }
+
+        # delete anything from the db that wasn't in the fs
+        foreach (array_keys($dbmods) as $moddir) {
+            if (!isset($fsmods[$moddir])) {
+                $db_moddir =   $db->escapeString($moddir);
+                $db->exec("DELETE FROM modules WHERE moddir = '$db_moddir'");
+            }
+        }
+
+        $db->exec("COMMIT");
+
+    }
+
+}
+
+#-------------------------------------------
+# This function takes a .modules file and sorts,
+# shows, and hides all the modules accordingly.
+# The file format is just a list of module names,
+# one per line. Lines starting with a "#" are ignored,
+# and lines starting with a "." are hidden.
+#-------------------------------------------
+function sortmods($file) {
+
+    # we're going to read in the .modules file here and
+    # if successful, use it to update the order and visibility
+    # of all the modules in the filesystem
+    $fh = fopen($file, "r");
+    if ($fh) {
+
+        $hidden = array();
+        $sorted = array();
+        while (($line = fgets($fh)) !== false) {
+            # remove all whitespace
+            $line = preg_replace("/\s+/", "", $line);
+            # skip comments and blank lines
+            if (preg_match("/^#/", $line) || !preg_match("/\S/", $line)) {
+                continue;
+            }
+            # detect screwy files and bail
+            # (module names can only be letters, numbers, underscore, hyphen, and dot)
+            if (preg_match("/[^\w\.\-]/", $line)) {
+                error_log("$file does not look like a valid .modules file");
+                exit;
+            }
+            # flag hidden items in an associative array
+            if (preg_match("/^\./", $line)) {
+                $line = preg_replace("/^\./", "", $line);
+                $hidden[$line] = 1;
+            }
+            # put all items in an ordered array
+            array_push($sorted, $line);
+        }
+
+        # when run during install, there is no data in the db to update,
+        # so it's important that we sync the database to match the filesystem first
+        syncmods_fs2db();
+
+        try {
+
+            $db = getdb();
+            if (!$db) { throw new Exception($db->lastErrorMsg); }
+            $db->exec("BEGIN");
+
+            # boink everything to the bottom and hide it
+            $rv = $db->query("SELECT * FROM modules ORDER BY moddir");
+            if (!$rv) { throw new Exception($db->lastErrorMsg()); }
+            $position = 1000;
+            while ($row = $rv->fetchArray()) {
+                $res = $db->exec("UPDATE modules SET position = '$position', hidden = '1' WHERE moddir = '$row[moddir]'");
+                #error_log("UPDATE modules SET position = '$position', hidden = '1' WHERE moddir = '$row[moddir]'");
+                if (!$res) { throw new Exception($db->lastErrorMsg()); }
+                ++$position;
+            }
+
+            # go to the DB and set the new order and new hidden state
+            $position = 1;
+            foreach ($sorted as $moddir) {
+                $moddir = $db->escapeString($moddir);
+                if (isset($hidden[$moddir])) { $is_hidden = 1; } else { $is_hidden = 0; }
+                $rv = $db->exec(
+                    "UPDATE modules SET position = '$position', hidden = '$is_hidden'" .
+                    " WHERE moddir = '$moddir'"
+                );
+                #error_log("UPDATE modules SET position = '$position', hidden = '$is_hidden' WHERE moddir = '$moddir'");
+                if (!$rv) { throw new Exception($db->lastErrorMsg()); }
+                ++$position;
+            }
+
+        } catch (Exception $ex) {
+            $db->exec("ROLLBACK");
+            error_log($ex);
+        }
+        $db->exec("COMMIT");
+
+    } else {
+        error_log("modulesort() Couldn't Open File: $file");
+    }
+
 }
 
 ?>
