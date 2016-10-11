@@ -11,6 +11,7 @@ include "head.php";
 list($wrong_old_pass, $missing_new_pass, $password_mismatch) = array(0, 0, 0);
 list($old_password, $new_password, $new_password2) = array("", "", "");
 $focus_field = "old_password";
+$show_success = 0;
 
 # if it's a POST we check our inputs and return errors or update
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {

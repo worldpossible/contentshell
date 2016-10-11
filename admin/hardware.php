@@ -91,16 +91,23 @@ if (is_rachelpi()) {
     $usage_supported = true;
 
     foreach ($output as $line) {
-        list($fs, $size, $used, $avail, $perc, $iused, $ifree, $iusedperc, $name, $name2) = preg_split("/\s+/", $line);
+
+        list($fs, $size, $used, $avail, $perc, $iused, $ifree, $iusedperc) = preg_split("/\s+/", $line);
         if (!preg_match("/^\/dev/", $fs)) { continue; }
-        if ($name2) {$name .= " $name2"; }
+
+        # we have to do name this way so we capture full names with spaces
+        preg_match("/\%\s+([^\%]+)$/", $line, $matches);
+        $name = $matches[1];
+
         $size  = preg_replace("/i$/", "B", $size);
         $used  = preg_replace("/i$/", "B", $used);
         $avail = preg_replace("/i$/", "B", $avail);
+
         array_push( $usage_rows, array(
             "name"  => $name, "size"  => $size, "used"  => $used,
             "avail" => $avail, "perc"  => $perc,
         ));
+
     }
 
 }
