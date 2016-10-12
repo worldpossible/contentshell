@@ -35,6 +35,23 @@ a:visited { color: #649; }
     margin: 10px auto;
 }
 
+/* this is really just for the about page */
+.fullpage {
+    padding: 10px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #fff;
+}
+.fullpage h2 {
+    border-bottom: 1px solid #ccc;
+    padding: 0;
+    margin: 0 0 5px 0;
+}
+.fullpage p {
+    margin: 0 0 20px 0;
+}
+
 /*-------------------------------------------*/
 /* BEGIN index modules                       */
 /*-------------------------------------------*/
@@ -166,19 +183,6 @@ a:visited { color: #649; }
     font-size: small;
     font-weight: bold;
     color:#ffffff;
-}
-
-/* used on about.html page only - clean this up */
-.thumblist {
-    /* automatically expands to fill container */
-    padding: 9px 10px 10px 9px;
-    border-radius: 5px;
-    margin-bottom: 10px;
-    background-color: #fff;
-    border-top:  1px solid #666;
-    border-left: 1px solid #666;
-    border-bottom:  2px solid #666;
-    border-right: 2px solid #666;
 }
 
 /**
