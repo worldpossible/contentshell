@@ -90,4 +90,13 @@ $lang['for_people_wo_int'] = "pour les personnes sans internet";
 $lang['click_here_to_start'] = "Cliquez ici pour commencer";
 $lang['brought_to_you_by'] = "Présenté par";
 
+$lang['wifi_control'] = "Contrôle WIFI";
+$lang['current_status'] = "Statut Actuel";
+$lang['turn_on']  = "Activer";
+$lang['turn_off'] = "Désactiver";
+$lang['is_on']    = "Activé";
+$lang['is_off']   = "Désactivé";
+$lang['wifi_warning'] = "ATTENTION: Si vous désactivez WIFI tout connecté via WIFI, vous serez déconnecté.<br>WIFI se rallume lorsque l'appareil est redémarré.";
+$lang['an_error_occurred'] = "Une Erreur Est Survenue";
+
 ?>

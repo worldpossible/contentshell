@@ -142,7 +142,7 @@ if ($usage_supported) {
 
 } else {
 
-    echo "<h3>Unknown System - Unformatted Output</h3>";
+    echo "<h3>$lang[unknown_system]</h3>";
     echo "<pre style=\"background: #fff;\">";
     echo implode("", $output);
     echo "</pre>";
@@ -154,19 +154,16 @@ if ($usage_supported) {
 if (is_rachelplus()) {
 
     echo "
-	<h2>WIFI control</h3>
+	<h2>$lang[wifi_control]</h3>
 	<div style='height: 24px;'>
-	<div style='float: left; height: 24px; margin-right: 10px;'>Current Status:</div> 
+	<div style='float: left; height: 24px; margin-right: 10px;'>$lang[current_status]:</div> 
         <div id='wifistat' style='height: 24px;'>&nbsp;</div>
 	</div>
 	<div style='margin-top: 10px;'>
-        <button onclick=\"wifiStatus('on');\">Turn On</button>
-        <button onclick=\"wifiStatus('off');\">Turn Off</button>
+        <button onclick=\"wifiStatus('on');\">$lang[turn_on]</button>
+        <button onclick=\"wifiStatus('off');\">$lang[turn_off]</button>
 	</div>
-	<p>
-	WARNING: If you turn off WIFI while connected through WIFI, you will be disconnected.<br>
-	WIFI will turn on again when rebooted.
-	</p>
+	<p>$lang[wifi_warning]</p>
     ";
 
 }
@@ -175,9 +172,9 @@ if (is_rachelplus()) {
 # We also offer a shutdown option for raspberry pi systems
 # (which otherwise might corrupt themselves when unplugged)
 #-------------------------------------------
-echo "<h2>$lang[system_shutdown]</h3>";
 if (is_rachelpi()) {
     echo "
+        <h2>$lang[system_shutdown]</h3>
         <h3>Rachel-Pi</h3>
         <div style='padding: 10px; border: 1px solid red; background: #fee;'>
         <form action='hardware.php' method='post'>
@@ -189,6 +186,7 @@ if (is_rachelpi()) {
     ";
 } else if (is_rachelplus()) {
     echo "
+        <h2>$lang[system_shutdown]</h3>
         <h3>RACHEL-Plus</h3>
         <img src='art/intel-cap-power-button.png' width='250' height='170'>
         $lang[rplus_safe_shutdown]
@@ -200,10 +198,11 @@ if (is_rachelpi()) {
         </div>
     ";
 } else {
-    echo "
-        <h3>$lang[unknown_system]</h3>
-        <p>$lang[shutdown_not_supported]</p>
-    ";
+# decided to just not show this for unsupported systems
+#    echo "
+#        <h3>$lang[unknown_system]</h3>
+#        <p>$lang[shutdown_not_supported]</p>
+#    ";
 }
 
 include "foot.php"

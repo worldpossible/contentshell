@@ -89,4 +89,13 @@ $lang['for_people_wo_int'] = "cuando no haya acceso a Internet";
 $lang['click_here_to_start'] = "Haz click aquí para comenzar";
 $lang['brought_to_you_by'] = "Traído a usted por";
 
+$lang['wifi_control'] = "Control de WIFI";
+$lang['current_status'] = "Estado Actual";
+$lang['turn_on']  = "Activar";
+$lang['turn_off'] = "Desactivar";
+$lang['is_on']    = "Activado";
+$lang['is_off']   = "Desactivado";
+$lang['wifi_warning'] = "ADVERTENCIA: Si apaga WIFI mientras está conectado a través de Wi-Fi, usted será desconectado.<br>WIFI se encenderá de nuevo cuando se reinicie el dispositivo.";
+$lang['an_error_occurred'] = "Ocurrió Un Error";
+
 ?>

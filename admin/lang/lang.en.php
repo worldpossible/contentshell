@@ -89,4 +89,14 @@ $lang['for_people_wo_int'] = "for people without internet";
 $lang['click_here_to_start'] = "Click here to start";
 $lang['brought_to_you_by'] = "Brought to you by";
 
+# the distinction is an action vs status
+$lang['wifi_control'] = "WIFI Control";
+$lang['current_status'] = "Current Status";
+$lang['turn_on']  = "Turn On";
+$lang['turn_off'] = "Turn Off";
+$lang['is_on']    = "On";
+$lang['is_off']   = "Off";
+$lang['wifi_warning'] = "WARNING: If you turn off WIFI while connected through WIFI, you will be disconnected.<br>WIFI will turn on again when the device is restarted.";
+$lang['an_error_occurred'] = "An Error Occurred";
+
 ?>
