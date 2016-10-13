@@ -1,7 +1,6 @@
 <?php
-    require_once("common.php");
-    $preflang = getlang();
-    require_once("lang/lang.$preflang.php");
+    # for multi-lingual support
+    require_once("admin/common.php");
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $preflang ?>">
