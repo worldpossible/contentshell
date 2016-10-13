@@ -2,21 +2,9 @@
 require_once("common.php");
 if (!authorized()) { exit(); }
 $page_title = $lang['hardware'];
-$page_script = "";
+$page_script = "js/hardware.js";
 $page_nav = "hardware";
 include "head.php";
-
-echo "
-    <style>
-    h2 { border-bottom: 1px solid #ccc; }
-    #spacetable { border-spacing: 15px; border-collapse: separate; }
-    #spacetable td { border-bottom: 1px solid #ccc; padding: 5px; }
-    .bartd { padding: 0; background: #eef; color: #669; text-align: right; width: 200px; position: relative; border: 1px solid #ccc; }
-    .barused { position: absolute; top: 0; left: 0; background: #cce; padding-bottom: 12px; height: 1em; }
-    .barusedtxt { position: absolute; top: 0; left: 0; padding: 5px; }
-    .baravailtxt { position: absolute; top: 0; right: 0; padding: 5px; }
-    </style>
-";
 
 #-------------------------------------------
 # We also allow shutting down the server so as to avoid
@@ -25,6 +13,17 @@ echo "
 # automatically during rachelpiOS installation
 # XXX should make this work for RACHEL-Plus too
 #-------------------------------------------
+if (isset($_GET['wifi'])) {
+    if ($_GET['wifi'] == "on") {
+	echo "Turning WIFI ON... ";
+	exec("/etc/WiFi_Setting.sh");
+    } else if ($_GET['wifi'] == "off") {
+	echo "Turning WIFI OFF... ";
+	exec("/sbin/ifconfig wlan0 down");
+    }
+    echo "Done.";
+}
+
 if (isset($_POST['shutdown'])) {
     exec("sudo /sbin/shutdown now", $exec_out, $exec_err);
     if ($exec_err) {
@@ -42,6 +41,18 @@ if (isset($_POST['shutdown'])) {
     }
     exit;
 }
+
+echo "
+    <style>
+    h2 { border-bottom: 1px solid #ccc; }
+    #spacetable { border-spacing: 15px; border-collapse: separate; }
+    #spacetable td { border-bottom: 1px solid #ccc; padding: 5px; }
+    .bartd { padding: 0; background: #eef; color: #669; text-align: right; width: 200px; position: relative; border: 1px solid #ccc; }
+    .barused { position: absolute; top: 0; left: 0; background: #cce; padding-bottom: 12px; height: 1em; }
+    .barusedtxt { position: absolute; top: 0; left: 0; padding: 5px; }
+    .baravailtxt { position: absolute; top: 0; right: 0; padding: 5px; }
+    </style>
+";
 
 #-------------------------------------------
 # get the disk usage and format it as best we can
@@ -135,6 +146,29 @@ if ($usage_supported) {
     echo "<pre style=\"background: #fff;\">";
     echo implode("", $output);
     echo "</pre>";
+}
+
+#-------------------------------------------
+# This is the only way to turn wifi on and off on the PLUS
+#-------------------------------------------
+if (is_rachelplus()) {
+
+    echo "
+	<h2>WIFI control</h3>
+	<div style='height: 24px;'>
+	<div style='float: left; height: 24px; margin-right: 10px;'>Current Status:</div> 
+        <div id='wifistat' style='height: 24px;'>&nbsp;</div>
+	</div>
+	<div style='margin-top: 10px;'>
+        <button onclick=\"wifiStatus('on');\">Turn On</button>
+        <button onclick=\"wifiStatus('off');\">Turn Off</button>
+	</div>
+	<p>
+	WARNING: If you turn off WIFI while connected through WIFI, you will be disconnected.<br>
+	WIFI will turn on again when rebooted.
+	</p>
+    ";
+
 }
 
 #-------------------------------------------

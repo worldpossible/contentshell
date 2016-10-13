@@ -20,9 +20,12 @@ if (isset($_GET['getRemoteModuleList'])) {
 } else if (isset($_GET['getTasks'])) {
     getTasks();
 
+} else if (isset($_GET['wifistat'])) {
+    wifiStatus();
+
 }
 
-error_log("Unknown request to background.php");
+error_log("Unknown request to background.php: " . print_r($_GET, true));
 header("HTTP/1.1 500 Internal Server Error");
 exit;
 
@@ -162,6 +165,38 @@ function getTasks() {
     header("HTTP/1.1 200 OK");
     header("Content-Type: application/json");
     echo json_encode($tasks); # , JSON_PRETTY_PRINT); # this only works in 5.4+ -- RACHEL-PLUS has 5.3.10
+    exit;
+
+}
+
+function wifiStatus() {
+
+    if ($_GET['wifistat'] == "on") {
+         exec("/etc/WiFi_Setting.sh > /dev/null 2>&1", $output, $return);
+    } else if ($_GET['wifistat'] == "off") {
+	exec("/sbin/ifconfig wlan0 down", $output, $return);
+    } else if ($_GET['wifistat'] == "check") {
+	$return = 0;
+    } else {
+	# unknown command
+	$return = 1;
+    }
+
+    # there was a problem
+    if ($return > 0) {
+        header("HTTP/1.1 500 Internal Server Error");
+        exit;
+    }
+
+    # we always finish by sending back the status
+    $wifistat = 0;
+    exec("ifconfig wlan0 | grep ' UP '", $output);
+
+    if ($output) { $wifistat = 1; }
+
+    header("HTTP/1.1 200 OK");
+    header("Content-Type: application/json");
+    echo "{ \"wifistat\" : \"$wifistat\" }\n";
     exit;
 
 }
