@@ -1,10 +1,25 @@
 <?php
 require_once("common.php");
-if (!authorized()) { exit(); }
+
+# this script is allowed to run from the command line
+# without further explicit authorization
+$is_cli = php_sapi_name() == "cli";
+if ($is_cli) {
+    if (!(isset($argv[1]) && $argv[1] == "-p" && isset($argv[3]))) {
+        echo "Usage: php $argv[0] -p oldpass newpass\n";
+        exit;
+    }
+} else if (!authorized()) {
+    exit();
+}
+
 $page_title = $lang['settings'];
 $page_script = "";
 $page_nav = "settings";
-include "head.php";
+
+if (!$is_cli) {
+    include "head.php";
+}
 
 # initialize values to avoid warnings
 # we use 0 and 1 because it works in php and javascript
@@ -13,8 +28,17 @@ list($old_password, $new_password, $new_password2) = array("", "", "");
 $focus_field = "old_password";
 $show_success = 0;
 
+# check if we're running from the command line
+
 # if it's a POST we check our inputs and return errors or update
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+# -- we also support a command line option
+if ($is_cli || $_SERVER['REQUEST_METHOD'] == 'POST') {
+
+    if ($is_cli) {
+        $_POST['old_password'] = $argv[2];
+        $_POST['new_password'] = $argv[3];
+        $_POST['new_password2'] = $argv[3];
+    }
 
     # these are the copies that will go into the
     # page if we show errors -- NOT the copies we check
@@ -56,6 +80,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $db->exec("UPDATE users SET password = '$db_newpass' WHERE username = 'admin'");
         list($old_password, $new_password, $new_password2) = array("", "", "");
         $show_success = 1;
+    }
+
+    if ($is_cli) {
+        if ($show_success) {
+            echo "Password updated successfully.\n";
+        } else {
+            echo "Password updated FAILED: ";
+            if ($wrong_old_pass) {
+                echo "Wrong old password.\n";
+            } else {
+                echo "Unknown Error. (db permissions?)\n";
+            }
+        }
+        exit;
     }
 
 }
