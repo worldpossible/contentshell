@@ -7,7 +7,7 @@ $is_cli = php_sapi_name() == "cli";
 if ($is_cli) {
     if (!(isset($argv[1]) && $argv[1] == "-p" && isset($argv[3]))) {
         echo "Usage: php $argv[0] -p oldpass newpass\n";
-        exit;
+        exit(1);
     }
 } else if (!authorized()) {
     exit();
@@ -82,9 +82,11 @@ if ($is_cli || $_SERVER['REQUEST_METHOD'] == 'POST') {
         $show_success = 1;
     }
 
+    # notify the results via CLI
     if ($is_cli) {
         if ($show_success) {
             echo "Password updated successfully.\n";
+            exit;
         } else {
             echo "Password updated FAILED: ";
             if ($wrong_old_pass) {
@@ -92,8 +94,8 @@ if ($is_cli || $_SERVER['REQUEST_METHOD'] == 'POST') {
             } else {
                 echo "Unknown Error. (db permissions?)\n";
             }
+            exit(1);
         }
-        exit;
     }
 
 }
