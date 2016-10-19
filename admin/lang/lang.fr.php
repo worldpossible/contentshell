@@ -74,6 +74,7 @@ $lang['available'] = "Disponible";
 $lang['percentage'] = "Pourcentage";
 $lang['advanced'] = "Avancé";
 
+# for settings.php
 $lang['change_password'] = "Changer le mot de passe";
 $lang['change_pass_success'] = "Mot de passe changé avec succès";
 $lang['old_password'] = "Mot de passe actuel";
@@ -90,6 +91,7 @@ $lang['for_people_wo_int'] = "pour les personnes sans internet";
 $lang['click_here_to_start'] = "Cliquez ici pour commencer";
 $lang['brought_to_you_by'] = "Présenté par";
 
+# for hardware.php
 $lang['wifi_control'] = "Contrôle WIFI";
 $lang['current_status'] = "Statut Actuel";
 $lang['turn_on']  = "Activer";

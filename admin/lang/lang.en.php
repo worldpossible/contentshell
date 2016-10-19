@@ -73,6 +73,7 @@ $lang['available'] = "Available";
 $lang['percentage'] = "Percentage";
 $lang['advanced'] = "Advanced";
 
+# for settings.php
 $lang['change_password'] = "Change Password";
 $lang['change_pass_success'] = "Password Successfully Changed";
 $lang['old_password'] = "Current Password";
@@ -89,7 +90,7 @@ $lang['for_people_wo_int'] = "for people without internet";
 $lang['click_here_to_start'] = "Click here to start";
 $lang['brought_to_you_by'] = "Brought to you by";
 
-# the distinction is an action vs status
+# for hardware.php
 $lang['wifi_control'] = "WIFI Control";
 $lang['current_status'] = "Current Status";
 $lang['turn_on']  = "Turn On";
