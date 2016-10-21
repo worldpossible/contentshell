@@ -55,6 +55,7 @@ $mods_fs = getmods_fs();
         display: inline-block;
         border-radius: 5px;
         position: relative;
+        width: 700px;
     }
     #tasks li { border-top: 1px solid #ccc; padding: 10px 0px; }
     #tasks li:first-child { border-top: none; }
@@ -63,7 +64,9 @@ $mods_fs = getmods_fs();
         background: #eee;
         border: 1px solid #ccc;
         float: right;
-        height: 24px;
+        /* for when it used to turn to a spinner */
+        /* height: 24px; */
+        width: 5em;
         margin: 0 0 5px 5px;
     }
     #tasks img {
@@ -71,6 +74,28 @@ $mods_fs = getmods_fs();
         right: 0; top: 50%;
         margin-top: -12px;
         margin-right: -32px;
+    }
+    .progbar {
+        width: 400px;
+        border: 1px solid #999;
+        position: relative;
+    }
+    .progbarin {
+        width: 0;
+        background: #999;
+        white-space: nowrap;
+        padding: 4px;
+        font-family: sans-serif;
+    }
+    .progbarend {
+        white-space: nowrap;
+        padding: 4px;
+        position: absolute;
+        top: 0; right: 0;
+    }
+    .details {
+        clear: right;
+        margin-top: 10px;
     }
 </style>
 
@@ -185,7 +210,7 @@ function cancelTask(task_id, mybutton) {
     $.ajax({
         url: "background.php?cancelTask=" + task_id,
         success: function(results) {
-            console.log(results.task_id);
+            //console.log(results.task_id);
         },
         error: function(xhr, status, error) {
             var results = JSON.parse(xhr.responseText);
@@ -205,14 +230,12 @@ function pollTasks() {
 
             $("#tasks").empty();
 
-            var arrayLength = results.length;
-            if (arrayLength == 0) {
-                $("#tasks").append("<li>None</li>");
-            }
 
+            var hadtasks = false;
             var reloadLocal = false;
 
             // loop through and display the tasks
+            var arrayLength = results.length;
             for (var i = 0; i < arrayLength; i++) {
 
                 // for completed tasks we get a task with a "dismissed" time set
@@ -222,24 +245,65 @@ function pollTasks() {
                 }
 
                 var age = secondsToHms(results[i].tasktime - results[i].started);
-                var newHTML = "<li id=\"task" + results[i].task_id + "\"><button onclick=\"cancelTask('" + results[i].task_id + "', this)\">Cancel</button>";
-
-                if (results[i].last_update < results[i].tasktime - freshtime) {
-                    newHTML += " <button onclick=\"retryTask('" + results[i].task_id + "', this)\">Retry</button>";
-                }
-
-                newHTML += "<b>command:</b> " + results[i].command + "<br>" +
-                              "<b>runtime:</b> " + age;
 
                 // detect stalled tasks and mark them XXX should move this logic
                 // to background.php methinks
+                var infoflag = "";
+                var butlabel = "cancel";
                 if (results[i].last_update < results[i].tasktime - freshtime) {
+                    // we no longer add a retry button, just let them manually do it again
+                    //newHTML += " <button onclick=\"retryTask('" + results[i].task_id + "', this)\">retry</button>";
+                    butlabel = "clear"; 
                     if(results[i].completed) {
-                        newHTML += " <span style=\"color: #933; font-weight: bold;\">failed</span>";
+                        infoflag = " <span style=\"color: #933; font-weight: bold;\">failed</span>";
                     } else {
-                        newHTML += " <span style=\"color: #933; font-weight: bold;\">stalled</span>";
+                        infoflag = " <span style=\"color: #933; font-weight: bold;\">stalled</span>";
                     }
                 }
+
+                var newHTML = (
+                    "<li id='task" + results[i].task_id + "'>" +
+                    "<button onclick=\"cancelTask('" + results[i].task_id + "', this)\">" + butlabel + "</button>" +
+                    "<button onclick=\"toggleDetails('#details-" + results[i].task_id + "');\">details</button>"
+                );
+
+                // get info about the size (files and data)
+                // this is from a cached copy of the remote module list
+                // which means it might not be there if this task is already
+                // being displayed before it's populated
+                if (remotemodlist[ results[i].moddir ]) {
+                    var total_files = remotemodlist[ results[i].moddir ].file_count;
+                    var total_data  = remotemodlist[ results[i].moddir ].ksize;
+                    var files_done  = results[i].files_done;
+                    var data_done   = Math.round( results[i].data_done / 1024 );
+                    var files_perc = Math.round((files_done / total_files) * 100);
+                    var data_perc  = Math.round((data_done / total_data) * 100);
+                } else {
+                    var total_files = "-";
+                    var total_data  = "-";
+                    var files_done  = "-";
+                    var data_done   = "-";
+                    var files_perc = "-";
+                    var data_perc  = "-";
+                }
+
+                detailstyle = "style='display: none;'";
+                if (detailShow["#details-" + results[i].task_id]) {
+                    detailstyle = "style='display: block;'";
+                }
+
+                // put the actual readout in there
+                newHTML += (
+                    "<div class='progbar'><div class='progbarin' style='width: " + data_perc + "%;'>" +
+                    results[i].moddir + infoflag + "<div class='progbarend'>" + results[i].data_rate +
+                    "</div></div></div>" +
+                    "<div " + detailstyle + " class='details' id='details-" + results[i].task_id + "'>" +
+                    "<b>command:</b> " + results[i].command + "<br>" +
+                    "<b>runtime:</b> " + age + infoflag + "<br>" +
+                    "<b>files_done:</b> " + files_done + " out of " + total_files + " ( " + files_perc + "% )<br>" +
+                    "<b>data_done:</b> "  + data_done  + " out of " + total_data  + " ( " + data_perc  + "% )<br>" +
+                    "<b>data_rate:</b> "  + results[i].data_rate + "<br>"
+                );
 
                 // error takes precedence over normal output (we could show both?)
                 var out_tail = "";
@@ -248,9 +312,16 @@ function pollTasks() {
                 } else if (results[i].stdout_tail) {
                     out_tail = results[i].stdout_tail.replace(/\n+/g, "<br>");
                 }
-                newHTML += "<br><b>latest output:</b><p style=\"margin: 0 0 0 20px;\">" + out_tail + "</p></li>";
+                newHTML += "<b>latest output:</b><p style=\"margin: 0 0 0 20px;\">" + out_tail + "</p></div></li>";
 
                 $("#tasks").append(newHTML);
+
+                hadtasks = true;
+
+            }
+
+            if (!hadtasks) {
+                $("#tasks").append("<li>None</li>");
             }
 
             // if there were any completed tasks, we update the local module list
@@ -270,8 +341,24 @@ function pollTasks() {
 
 }
 
+// toggles the visibility of "details" for the transfer
+// which is easy enough with jquery... but since we refresh
+// every few seconds we have to keep a record of the state, too
+var detailShow = {};
+function toggleDetails(id) {
+    $(id).toggle();
+    if (detailShow[id]) {
+        delete detailShow[id];        
+    } else {
+        detailShow[id] = true;
+    }
+}
+
 // populate the remote module list (downloadable)
 // -- this is called once the local module list is known
+//
+// store a copy so we know how big these things are for our progress meter
+var remotemodlist = {};
 function populateRemoteModuleList() {
 
     // before we make changes to the list, we adjust the UI
@@ -305,6 +392,9 @@ function populateRemoteModuleList() {
             // now we can populate the list
             var lastLang = false;
             for (var i = 0; i < arrayLength; i++) {
+
+                // store it for later (by moddir)
+                remotemodlist[results[i].moddir] = results[i];
 
                 // skip if it already appears locally
                 if ( $('#modlist').find(sel(results[i].moddir)).length ) {
@@ -403,10 +493,8 @@ $(function() {
 <ul id="tasks">
 </ul>
 
-<!-- whatever you want goes here -->
 <h3>Delete Modules</h3>
 <ul id="modlist">
 </ul>
 
-<!-- and finish off with a few closing tags-->
 <?php include "foot.php" ?>

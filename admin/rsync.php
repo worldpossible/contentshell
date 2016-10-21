@@ -46,17 +46,6 @@ $cmd = "rsync -Pavz rsync://$host/rachelmods/$moddir $relmodpath/";
 #$cmd = "ping -c 10 localhost";
 if (EXTRA_LOGGING) { error_log("$cmd"); }
 
-# task_id   INTEGER PRIMARY KEY,
-# command   VARCHAR(255),
-# pid       INTEGER,
-# stdout_tail TEXT,
-# stderr_tail TEXT,
-# started     INTEGER, -- timestamp
-# last_update INTEGER, -- timestamp
-# completed   INTEGER, -- timestamp
-# dismissed   INTEGER, -- timestamp
-# retval    INTEGER
-
 #-------------------------------------------
 # record our effort in the DB - we do this even before
 # running the command so that if it fails so completely
@@ -65,7 +54,14 @@ if (EXTRA_LOGGING) { error_log("$cmd"); }
 $db = getdb();
 $db_cmd = $db->escapeString($cmd);
 $db_started = $db->escapeString(time());
-$db->exec("INSERT INTO tasks (command, started) VALUES ('$db_cmd', '$db_started')");
+$db_moddir = $db->escapeString($moddir);
+$db->exec("
+    INSERT INTO tasks (
+        moddir, command, started, files_done, data_done, data_rate
+    ) VALUES (
+        '$db_moddir', '$db_cmd', '$db_started', 0, 0, ''
+    )
+");
 $db_task_id = $db->escapeString($db->lastInsertRowID());
 
 #-------------------------------------------
@@ -120,6 +116,8 @@ $cr = false;
 $frequency = 2;
 $tail_length = 2;
 $lastone = false;
+$files_done = 0;
+$data_done = 0;
 while (1) {
 
     $char = fgetc($pipes[1]);
@@ -148,6 +146,15 @@ while (1) {
                 $lines = array_slice($lines, -$tail_length);
             }
 
+            # Check this most recent line to see if it indicates
+            # a completed file. If so, we count that and the data
+            # transferred.
+            if (preg_match("/^\s+(\d+) 100%\s+(\S+)/", $line, $matches)) {
+                ++$files_done;
+                $data_done += $matches[1];
+                $data_rate = $matches[2];
+            }
+
         }
 
         # we've recorded the line in the array, clear it
@@ -165,8 +172,11 @@ while (1) {
             $db->exec("
                 UPDATE tasks SET
                     stdout_tail = '$db_stdout_tail',
-                    last_update = '$db_last_update'
-                WHERE task_id = '$db_task_id'
+                    last_update = '$db_last_update',
+                    files_done  = '$files_done',
+                    data_done   = '$data_done',
+                    data_rate   = '$data_rate'
+                WHERE task_id   = '$db_task_id'
             ");
             if (EXTRA_LOGGING) { error_log("updating db with:\n'$db_stdout_tail'"); }
 
@@ -210,6 +220,9 @@ $db->exec("
         completed = '$db_completed',
         last_update = '$db_completed',
         stderr_tail = '$db_stderr_tail',
+        files_done  = '$files_done',
+        data_done   = '$data_done',
+        data_rate   = '$data_rate',
         retval = '$db_retval'
     WHERE task_id = '$db_task_id'
 ");

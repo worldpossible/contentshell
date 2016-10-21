@@ -32,7 +32,7 @@ include "head.php";
 ?>
 
 <!-- whatever you want goes here, for example -->
-<h1>Our modueles are in: <?php echo modbasedir(); ?></h1>
+<h1>Our modueles are in: <?php echo getAbsModPath(); ?></h1>
 
 <!-- and finish off with a few closing tags-->
 <?php include "foot.php" ?>

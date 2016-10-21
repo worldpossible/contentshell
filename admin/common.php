@@ -132,6 +132,9 @@ function getdb() {
 
     # not already connected? connect.
     try {
+        # this has to work from both cgi & random cli,
+        # however it doesn't work if we're faking being
+        # a rachelplus or rachelpi (search for "fake-rachel" below)
         $dbfile = getAbsAdminPath() . "/admin.sqlite";
         $_db = new SQLite3($dbfile);
         # File could get created by webserver or cli script
@@ -140,6 +143,8 @@ function getdb() {
         # the owner.
         @chmod($dbfile, 0666);
     } catch (Exception $ex) {
+        error_log($ex->getMessage());
+        error_log("DB File: $dbfile");
         return null;
     }
 
@@ -163,6 +168,7 @@ function getdb() {
     $_db->exec("
         CREATE TABLE IF NOT EXISTS tasks (
             task_id     INTEGER PRIMARY KEY,
+            moddir      VARCHAR(255),
             command     VARCHAR(255),
             pid         INTEGER,
             stdout_tail TEXT,
@@ -171,7 +177,10 @@ function getdb() {
             last_update INTEGER, -- timestamp
             completed   INTEGER, -- timestamp
             dismissed   INTEGER, -- timestamp
-            retval      INTEGER
+            retval      INTEGER,
+            files_done  INTEGER,
+            data_done   INTEGER,
+            data_rate   VARCHAR(255)
         )
     ");
     $_db->exec("
@@ -389,6 +398,11 @@ EOT;
 
 #-------------------------------------------
 # what kind of RACHEL are we?
+# we have a couple /tmp/ files you can plop down
+# to get the admin interface to temporarily show you
+# what would come up for different devices
+# ...sadly this breaks db access, but we'll have
+# to figure that out later
 #-------------------------------------------
 define("RACHELPI_MODPATH", "/var/www/modules");
 function is_rachelpi() {
