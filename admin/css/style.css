@@ -86,5 +86,5 @@
 
     .version { border-collapse: collapse; background: #fff; }
     .version tr { border-top: 1px solid lightgray; }
-    .version td { padding: 10px; }
+    .version td { padding: 10px; white-space: nowrap; }
 

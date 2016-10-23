@@ -23,6 +23,9 @@ if (isset($_GET['getRemoteModuleList'])) {
 } else if (isset($_GET['wifistat'])) {
     wifiStatus();
 
+} else if (isset($_GET['selfUpdate'])) {
+    selfUpdate();
+
 }
 
 error_log("Unknown request to background.php: " . print_r($_GET, true));
@@ -58,7 +61,7 @@ function getLocalModuleList() {
 
 function deleteModule($moddir) {
 
-    $deldir = getrelmodpath() . "/" . $moddir;
+    $deldir = getRelModPath() . "/" . $moddir;
 
     # XXX standardize and refactor all the error handling in this module
     if (preg_match("/[^\w\-\.]/", $moddir)) {
@@ -70,7 +73,7 @@ function deleteModule($moddir) {
     }
 
     # brutally dangerous? how to improve?
-    exec("rm -rf $deldir 2>&1", $output, $rval);
+    exec("rm -rf '$deldir' 2>&1", $output, $rval);
 
     if ($rval == 0) {
         header("HTTP/1.1 200 OK");
@@ -172,18 +175,18 @@ function getTasks() {
 function wifiStatus() {
 
     if ($_GET['wifistat'] == "on") {
-         exec("/etc/WiFi_Setting.sh > /dev/null 2>&1", $output, $return);
+         exec("/etc/WiFi_Setting.sh > /dev/null 2>&1", $output, $retval);
     } else if ($_GET['wifistat'] == "off") {
-	exec("/sbin/ifconfig wlan0 down", $output, $return);
+	exec("/sbin/ifconfig wlan0 down", $output, $retval);
     } else if ($_GET['wifistat'] == "check") {
-	$return = 0;
+	$retval = 0;
     } else {
 	# unknown command
-	$return = 1;
+	$retval = 1;
     }
 
     # there was a problem
-    if ($return > 0) {
+    if ($retval > 0) {
         header("HTTP/1.1 500 Internal Server Error");
         exit;
     }
@@ -198,6 +201,42 @@ function wifiStatus() {
     header("Content-Type: application/json");
     echo "{ \"wifistat\" : \"$wifistat\" }\n";
     exit;
+
+}
+
+function selfUpdate() {
+
+    if (!empty($_GET['check'])) {
+        $json = file_get_contents("http://dev.worldpossible.org/cgi/updatecheck.pl");
+        if (empty($json)) {
+            header("HTTP/1.1 500 Internal Server Error");
+            exit;
+        }
+        header('Content-Type: application/json');
+        echo $json;
+        exit;
+    }
+
+    # we install two directories up from here
+    $destdir = dirname(dirname(__FILE__));
+    # we also don't want to overwrite the modules directory or the admin.sqite file
+    # as those are often customized by the user, also skip hidden files
+    # lastly - it's important that we keep the trailing "/" on the source because we're
+    # putting the contents into a directory of a different name, and don't want to
+    # create a directory called "contentshell" in there
+    $cmd = "rsync -Pavz --exclude modules --exclude /admin/admin.sqlite --exclude '.*' --del rsync://dev.worldpossible.org/rachelmods/contentshell/ $destdir";
+    exec($cmd, $output, $retval);
+    if ($retval == 0) {
+        # pull the version info from the new file
+        $version = preg_replace("/.+cur_contentshell\">(.+?)<.+/s", "$1", file_get_contents("version.php"));
+        header("HTTP/1.1 200 OK");
+        header("Content-Type: application/json");
+        echo "{ \"version\" : \"$version\" }\n";
+        exit;
+    } else {
+        header("HTTP/1.1 500 Internal Server Error");
+        exit;
+    }
 
 }
 
