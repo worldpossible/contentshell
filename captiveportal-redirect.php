@@ -3,7 +3,7 @@
     require_once("admin/common.php");
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo $preflang ?>">
+<html lang="<?php echo $lang['langcode'] ?>">
 <head>
     <meta charset="utf-8">
     <title><?php echo $lang['welcome_to_rachel'] ?></title>
