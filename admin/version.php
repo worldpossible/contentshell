@@ -126,6 +126,7 @@ if (file_exists("/etc/kiwix-version")) {
 
 <h2>RACHEL Version Info</h2>
 <table class="version">
+<tr><th colspan="2">System Sofware</th></tr>
 <tr><td>Hardware</td><td><?php echo $hardware ?></td></tr>
 <tr><td>OS</td><td><?php echo $os ?></td></tr>
 <tr><td>RACHEL Installer</td><td><?php echo $rachel_installer_version ?>*</td></tr>
@@ -140,13 +141,15 @@ if (file_exists("/etc/kiwix-version")) {
         <button id="updatebut" onclick="selfUpdate();" style="margin-left: 5px;">Check</button>
     </div>
 
-    Current: <span id="cur_contentshell">v2.1.0</span><br>
+    Current: <span id="cur_contentshell">v2.1.1</span><br>
     Available: <span id="avail_contentshell"></span>
 </td></tr>
+<tr><th colspan="2">Content</th></tr>
 
 <?php
     # get module info
     foreach (getmods_fs() as $mod) {
+        if (empty($mod[version])) { $mod[version] = "v0.0"; }
         echo "<tr><td>$mod[moddir]</td><td>$mod[version]</td></tr>\n";
     }
 ?>

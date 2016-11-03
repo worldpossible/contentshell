@@ -225,18 +225,23 @@ function selfUpdate() {
     # putting the contents into a directory of a different name, and don't want to
     # create a directory called "contentshell" in there
     $cmd = "rsync -Pavz --exclude modules --exclude /admin/admin.sqlite --exclude '.*' --del rsync://dev.worldpossible.org/rachelmods/contentshell/ $destdir";
+$cmd = "/usr/bin/true";
     exec($cmd, $output, $retval);
     if ($retval == 0) {
-        # pull the version info from the new file
-        $version = preg_replace("/.+cur_contentshell\">(.+?)<.+/s", "$1", file_get_contents("version.php"));
-        header("HTTP/1.1 200 OK");
-        header("Content-Type: application/json");
-        echo "{ \"version\" : \"$version\" }\n";
-        exit;
-    } else {
-        header("HTTP/1.1 500 Internal Server Error");
-        exit;
+        $cmd = "bash $destdir/admin/post-update-script.sh";
+        exec($cmd, $output, $retval);
+        if ($retval == 0) {
+            # pull the version info from the new file
+            $version = preg_replace("/.+cur_contentshell\">(.+?)<.+/s", "$1", file_get_contents("version.php"));
+            header("HTTP/1.1 200 OK");
+            header("Content-Type: application/json");
+            echo "{ \"version\" : \"$version\" }\n";
+            exit;
+        }
     }
+
+    header("HTTP/1.1 500 Internal Server Error");
+    exit;
 
 }
 
