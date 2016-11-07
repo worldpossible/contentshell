@@ -29,7 +29,7 @@ if (isset($_POST['shutdown'])) {
     if ($exec_err) {
         echo $lang['shutdown_failed'];
     } else {
-        echo $lang['restart_ok'];
+        echo $lang['shutdown_ok'];
     }
     exit;
 } else if (isset($_POST['reboot'])) {

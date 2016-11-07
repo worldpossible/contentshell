@@ -58,7 +58,7 @@ $lang['confirm_restart'] = "Are you sure you want to restart?";
 $lang['shutdown_blurb'] = "<p>Shutting down here is safer for the SD/HD than simply unplugging the power.</p>\n"
     . "<p>If you shut down (as opposed to restart), you will need to unplug your system and plug it back in to restart.</p>\n";
 $lang['shutdown_ok'] = "The server is shutting down now.";
-$lang['restart_ok'] = "The server is restarting down now.";
+$lang['restart_ok'] = "The server is restarting now.";
 $lang['shutdown_failed'] = "Unable to shutdown server.";
 $lang['restart_failed'] = "Unable to restart server.";
 $lang['admin_instructions'] = "You can show and hide modules here, or change the order by dragging them. <br> Be sure to click \"Save Changes\" at the bottom of the page.";
