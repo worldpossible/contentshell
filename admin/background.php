@@ -221,6 +221,7 @@ function selfUpdate() {
     if (!empty($_GET['check'])) {
         $json = file_get_contents("http://" . APIHOST . "/cgi/updatecheck.pl");
         if (empty($json)) {
+	    error_log("selfUpdate failed: no JSON at http://" . APIHOST . "/cgi/updatecheck.pl");
             header("HTTP/1.1 500 Internal Server Error");
             exit;
         }
@@ -237,9 +238,6 @@ function selfUpdate() {
     # putting the contents into a directory of a different name, and don't want to
     # create a directory called "contentshell" in there
     $cmd = "rsync -Pavz --exclude modules --exclude /admin/admin.sqlite --exclude '.*' --del rsync://" . RSYNCHOST . "/rachelmods/contentshell/ $destdir";
-
-# for testing without erasing ourselves
-$cmd = "/usr/bin/true";
 
     exec($cmd, $output, $retval);
     if ($retval == 0) {
@@ -258,7 +256,7 @@ $cmd = "/usr/bin/true";
         }
     }
 
-    error_log("selfUpdate Failed");
+    error_log("selfUpdate Failed: cmd returned $retval, " . implode(", ", $output));
     header("HTTP/1.1 500 Internal Server Error");
     exit;
 

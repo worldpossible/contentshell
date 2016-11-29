@@ -337,7 +337,7 @@ if (file_exists("/etc/kalite-version")) {
 
 $kiwix_version = "?";
 if (file_exists("/etc/kiwix-version")) {
-    $kiwix_version = file_get_contents("/kiwix-version");
+    $kiwix_version = file_get_contents("/etc/kiwix-version");
 }
 
 ?>
