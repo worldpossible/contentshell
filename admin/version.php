@@ -352,7 +352,7 @@ if (file_exists("/etc/kiwix-version")) {
 <tr><td>Kiwix</td><td><?php echo $kiwix_version ?>*</td></tr>
 <tr><td>Content Shell</td><td>
 
-    <span id="cur_contentshell">v2.2.0</span>
+    <span id="cur_contentshell">v2.2.1</span>
     <div style="float: right; margin-left: 20px;">
         <div style="float: left; width: 24px; height: 24px; margin-top: 2px;">
             <img src="../art/spinner.gif" id="spinner" style="display: none;">
