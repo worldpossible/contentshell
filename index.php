@@ -14,9 +14,12 @@
 
 <body>
 <div id="rachel">
-    <div id="adminnav">
-    <a href="admin/modules.php"><?php echo $lang['admin'] ?></a> |
-    </div>
+    <!-- Why show IP here? Some installations have WiFi and Ethernet, and
+         maybe you're on one but need to know the other. Also helps if my.content
+         isn't working on some client devices. Also nice for when you need to ssh
+         or rsync. It's visible in the Admin panel too, but it's more convenient here. -->
+    <div id="ip"><?php showip(); ?></div>
+    <div id="adminnav"><a href="admin/modules.php"><?php echo $lang['admin'] ?></a></div>
 </div>
 
 <div class="menubar cf">

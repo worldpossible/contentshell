@@ -25,10 +25,15 @@ a:visited { color: #649; }
 #adminnav {
     position: absolute;
     font-size: small;
-    bottom: 6px;
-    right: 8px;
+    bottom: 5px; right: 10px;
 }
 #adminnav a { color: #999; }
+#ip {
+    position: absolute;
+    font-size: small;
+    top: 5px; right: 10px;
+    color: white;
+}
 
 #content {
     width: 960px;
