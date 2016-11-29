@@ -62,8 +62,8 @@ function getmods_fs() {
 
                 # pull the version from the file
                 $version = "v0.0";
-                # this regex should stay in sync with update_version.pl on dev...
-                preg_match("/<!--\s*version\s*=\s*(?:\"|')?([^\"']+)(?:\"|')?\s*-->/", $content, $match);
+                # XXX this regex should stay in sync with update_version.pl on dev...
+                preg_match("/<!--\s*version\s*=\s*(?:\"|')?([^\"'\s]+?)(?:\"|')?\s*-->/", $content, $match);
                 if (isset($match[1])) { $version = $match[1]; }
 
                 # save info about this module

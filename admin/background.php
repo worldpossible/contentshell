@@ -2,6 +2,9 @@
 
 require_once("common.php");
 
+define("APIHOST",   "dev.worldpossible.org");
+define("RSYNCHOST", "dev.worldpossible.org");
+
 if (isset($_GET['getRemoteModuleList'])) {
     getRemoteModuleList();
 
@@ -40,7 +43,7 @@ exit;
 #-------------------------------------------
 
 function getRemoteModuleList() {
-    $json = file_get_contents("http://dev.worldpossible.org/cgi/json_api_v1.pl");
+    $json = file_get_contents("http://" . APIHOST . "/cgi/json_api_v1.pl");
     header('Content-Type: application/json');
     echo $json;
     exit;
@@ -95,12 +98,9 @@ function deleteModule($moddir) {
 
 function addModule($moddir) {
 
-    # XXX hardcoded to my mac for now
-    #$host = "192.168.1.6";
-    $host = "127.0.0.1";
 
     # fire off our clever database updating rsync process
-    exec("php rsync.php $host $moddir > /dev/null &", $output, $rval);
+    exec("php rsync.php " . RSYNCHOST . " $moddir > /dev/null &", $output, $rval);
 
     if ($rval == 0) {
         header("HTTP/1.1 200 OK");
@@ -217,7 +217,7 @@ function wifiStatus() {
 function selfUpdate() {
 
     if (!empty($_GET['check'])) {
-        $json = file_get_contents("http://dev.worldpossible.org/cgi/updatecheck.pl");
+        $json = file_get_contents("http://" . APIHOST . "/cgi/updatecheck.pl");
         if (empty($json)) {
             header("HTTP/1.1 500 Internal Server Error");
             exit;
@@ -234,8 +234,11 @@ function selfUpdate() {
     # lastly - it's important that we keep the trailing "/" on the source because we're
     # putting the contents into a directory of a different name, and don't want to
     # create a directory called "contentshell" in there
-    $cmd = "rsync -Pavz --exclude modules --exclude /admin/admin.sqlite --exclude '.*' --del rsync://dev.worldpossible.org/rachelmods/contentshell/ $destdir";
+    $cmd = "rsync -Pavz --exclude modules --exclude /admin/admin.sqlite --exclude '.*' --del rsync://" . RSYNCHOST . "/rachelmods/contentshell/ $destdir";
+
+# for testing without erasing ourselves
 $cmd = "/usr/bin/true";
+
     exec($cmd, $output, $retval);
     if ($retval == 0) {
         $cmd = "bash $destdir/admin/post-update-script.sh";

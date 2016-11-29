@@ -82,8 +82,9 @@ function selfUpdate() {
                     if (results.hasOwnProperty(mod)) {
                         // contentshell is a special case handled above
                         if (mod == "contentshell") { continue; }
-                        // if we've got it, and there's any difference in the version numbers, we call it an "update"
-                        if ( $("#cur_"+mod).html() && $("#cur_"+mod).html() != results[mod].version ) {
+                        // if both versions exist, and there's any difference, we call it an "update"
+                        if ( $("#cur_"+mod).html() && results[mod].version && $("#cur_"+mod).html() != results[mod].version ) {
+                            console.log("'"+$("#cur_"+mod).html()+"' vs. '"+results[mod].version+"'");
                             $("#avail_"+mod).html(results[mod].version + " Available");
                             $("#avail_"+mod).show();
                             updates_available = true;

@@ -7,4 +7,4 @@
 #   2. The script should work on any version of RACHEL
 #   3. The script should complete quickly and exit cleanly
 #
-#
+# This takes some doing, but it's important
