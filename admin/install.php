@@ -22,10 +22,9 @@ $mods_fs = getmods_fs();
         border-bottom: 1px solid #999;
         margin-bottom: 10px;
     }
-    #modlist a {
-        text-decoration: none;
+    #modlist button {
+        font-size: small;
         position: absolute;
-        display: inline-block;
         border: 1px solid #999;
         right: 0; bottom: 0;
         padding: 1px 5px 0 5px;
@@ -493,7 +492,7 @@ function populateLocalModuleList() {
             for (var i = 0; i < arrayLength; i++) {
                 $("#modlist").append(
                     "<li id=\"" + results[i].moddir + "\">" + results[i].moddir +
-                    "<a href=\"javascript:void(0)\" onclick=\"delMod('" + results[i].moddir + "')\">del</a></li>\n"
+                    "<button type=\"button\" onclick=\"delMod('" + results[i].moddir + "')\">delete</button></li>\n"
                 );
             }
         },
