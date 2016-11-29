@@ -82,6 +82,8 @@ function deleteModule($moddir) {
     exec("rm -rf '$deldir' 2>&1", $output, $rval);
 
     if ($rval == 0) {
+        # restart kiwix so it sees what modules are visible/hidden
+        kiwix_restart();
         header("HTTP/1.1 200 OK");
         header("Content-Type: application/json");
         echo "{ \"moddir\" : \"$moddir\" }\n";

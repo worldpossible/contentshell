@@ -199,11 +199,7 @@ function updatemods () {
     $db->exec("COMMIT");
 
     # restart kiwix so it sees what modules are visible/hidden
-    if (is_rachelpi()) {
-        exec("sudo service kiwix restart");
-    } else if (is_rachelplus()) {
-        exec("bash /root/rachel-scripts/rachelKiwixStart.sh");
-    }
+    kiwix_restart();
 
     header("HTTP/1.1 200 OK");    
 

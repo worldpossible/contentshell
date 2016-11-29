@@ -638,4 +638,14 @@ function showip () {
     }
 }
 
+# restart kiwix so it sees what modules are visible/hidden
+function kiwix_restart() {
+
+    if (is_rachelpi()) {
+        exec("sudo service kiwix restart");
+    } else if (is_rachelplus()) {
+        exec("bash /root/rachel-scripts/rachelKiwixStart.sh");
+    }
+}
+
 ?>

@@ -315,6 +315,12 @@ while ($db_task_id) {
 
 }
 
+# restart kiwix so it sees what modules are visible/hidden
+# -- we could do this after each module but it seems a bit
+# much... let's try doing it after installs/updates are complete
+# and see if anyone complains
+kiwix_restart();
+
 if (EXTRA_LOGGING) { error_Log("Goodbye."); }
 exit(0);
     

@@ -211,11 +211,10 @@ function addMod() {
 // delete (i.e. rm -rf) a module
 function delMod(moddir) {
 
-/*
+
     if (!confirm("Are you sure you want to delete " + moddir + "?")) {
         return false;
     }
-*/
 
     $(sel(moddir)).css({ opacity: 0.5 });
     $(sel(moddir)).append("<img src=\"../art/spinner.gif\">");
