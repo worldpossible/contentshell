@@ -11,6 +11,7 @@ $mods_fs = getmods_fs();
 ?>
 
 <style>
+    /* existing modules list (for deleting) */
     #modlist {
         list-style: none;
         padding-left: 10px;
@@ -36,8 +37,23 @@ $mods_fs = getmods_fs();
         margin-top: -12px;
         margin-right: -32px;
     }
-    #available {
-        margin: 10px;
+
+    /* available module list */
+    #availform {
+        background: #ddd;
+        border-radius: 5px;
+        padding: 5px;
+    }
+    #availform input {
+        margin: 5px;
+        color: #ccc;
+    }
+    #availform button {
+        margin: 5px;
+    }
+    #available { /* the select box itself */
+        margin: 5px;
+        width: 20em;
     }
     #availspin {
         margin: 0; padding: 0;
@@ -46,16 +62,18 @@ $mods_fs = getmods_fs();
         left: 5px;
         display: none;
     }
+
+    /* task list */
     #tasks {
         font-family: monospace;
         list-style: none;
         padding: 5px 10px;
         margin: 0;
         background: #ddd;
-        display: inline-block;
+        /*display: inline-block; */
         border-radius: 5px;
         position: relative;
-        width: 700px;
+        /* width: 700px; */
     }
     #tasks li { border-top: 1px solid #ccc; padding: 10px 0px; }
     #tasks li:first-child { border-top: none; }
@@ -136,11 +154,37 @@ function secondsToHms(t) {
     return ((h > 0 ? h + ":" + (m < 10 ? "0" : "") : "") + m + ":" + (s < 10 ? "0" : "") + s);
 }
 
+// These functions are for managing part of the UI
+// as a unit -- the "disabled" state of the "Add Modules" section
+function setButtonState() {
+    // the "download" button should only be
+    // enabled if something is selected
+    if ($("#available").val()) {
+        $("#addmodbut").prop("disabled", false);
+    } else {
+        $("#addmodbut").prop("disabled", true);
+    }
+}
+function disableAvailUI() {
+    setButtonState();
+    $("#available").prop("disabled", true);
+    $("#livesearch").prop("disabled", true);
+}
+function enableAvailUI() {
+    setButtonState();
+    $("#available").prop("disabled", false);
+    $("#livesearch").prop("disabled", false);
+} 
+
 // add (i.e. rsync) a module
 function addMod() {
 
-    $("#addmodbut").prop("disabled", true);
+    disableAvailUI();
     var moddir = $("#available").val()
+    if (!moddir) {
+        enableAvailUI();
+        return false;
+    }
     $.ajax({
         url: "background.php?addModule=" + moddir,
         success: function(results) {
@@ -154,7 +198,7 @@ function addMod() {
             );
 */
             // re-enable the button
-            $("#addmodbut").prop("disabled", false);
+            enableAvailUI();
         },
         error: function(xhr, status, error) {
             console.log("failure");
@@ -252,19 +296,24 @@ function pollTasks() {
                 var butlabel = "cancel";
                 if (results[i].last_update < results[i].tasktime - freshtime) {
                     // we no longer add a retry button, just let them manually do it again
-                    //newHTML += " <button onclick=\"retryTask('" + results[i].task_id + "', this)\">retry</button>";
+                    //newHTML += " <button type=\"button\" onclick=\"retryTask('" + results[i].task_id + "', this)\">retry</button>";
                     butlabel = "clear"; 
                     if(results[i].completed) {
                         infoflag = " <span style=\"color: #933; font-weight: bold;\">failed</span>";
                     } else {
-                        infoflag = " <span style=\"color: #933; font-weight: bold;\">stalled</span>";
+                        if (results[i].started) {
+                            infoflag = " <span style=\"color: #933; font-weight: bold;\">stalled</span>";
+                        } else {
+                            infoflag = " <span style=\"color: #393; font-weight: bold;\">waiting</span>";
+                            results[i].data_rate = "";
+                        }
                     }
                 }
 
                 var newHTML = (
                     "<li id='task" + results[i].task_id + "'>" +
-                    "<button onclick=\"cancelTask('" + results[i].task_id + "', this)\">" + butlabel + "</button>" +
-                    "<button onclick=\"toggleDetails('#details-" + results[i].task_id + "');\">details</button>"
+                    "<button type=\"button\" onclick=\"cancelTask('" + results[i].task_id + "', this)\">" + butlabel + "</button>" +
+                    "<button type=\"button\" onclick=\"toggleDetails('#details-" + results[i].task_id + "');\">details</button>"
                 );
 
                 // get info about the size (files and data)
@@ -362,7 +411,7 @@ var remotemodlist = {};
 function populateRemoteModuleList() {
 
     // before we make changes to the list, we adjust the UI
-    $("#addmodbut").prop("disabled", true); // - disable button
+    disableAvailUI();
     $("#availspin").show();                 // - add spinner
     $("#available").empty();                // - empty the list
     $("#available").append("<option>Loading...</option>"); // add "Loading" text
@@ -420,7 +469,7 @@ function populateRemoteModuleList() {
             }
 
             // now that we've got a list we can add the button back
-            $("#addmodbut").prop("disabled", false); // disable button
+            enableAvailUI();
 
         },
         error: function(myxhr, mystatus, myerror) {
@@ -470,6 +519,8 @@ function populateLocalModuleList() {
 // onload
 $(function() {
 
+    console.log("page load");
+
     // remote list gets populated automatically the
     // first time we call this
     populateLocalModuleList();
@@ -477,15 +528,56 @@ $(function() {
     // start polling the task list
     pollTasks();
 
+    // disable enter on form
+    $("#availform").keypress(function(event) {
+        if (event.which == '13') {
+            event.preventDefault();
+        }
+    });
+
+    // set download button to enable/disable with selection
+    $("#available").change(setButtonState);
+
 });
+
+function lsfocus(i) {
+    if (i.value == i.defaultValue) { i.value = ""; i.style.color = "#000"; }
+}
+function lsblur(i) {
+    if (i.value == "") { i.value = i.defaultValue; i.style.color = "#ccc"; }
+}
+function lsinput(i) {
+    if (!i.value.match(/\w/)) {
+        // if the field is blank, show everything
+        $("#available > option").each(function(index) {
+            $(this).show();
+        });
+    } else {
+        // otherwise filter to text matches
+        var parts = i.value.split(/\s+/);
+        $("#available > option").each(function(index) {
+            for (i = 0; i < parts.length; ++i) {
+                if (parts[i].length == 0) { continue; }
+                regex = new RegExp(parts[i], 'i');
+                if (this.value.match(regex)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                    break;
+                }
+            }
+        });
+    }
+}
+
 
 </script>
 
 <h3>Add Modules</h3>
-<form style="position: relative;">
-    <select id="available">
-    </select>
-    <button id="addmodbut" onclick="addMod();" disabled>Submit</button>
+<form id="availform">
+    <input id="livesearch" onfocus="lsfocus(this)" onblur="lsblur(this)" oninput="lsinput(this)" value="Live Search" disabled><br>
+    <select id="available" size="5"></select><br>
+    <button type="button" id="addmodbut" onclick="addMod();" disabled>Download</button>
     <img src="../art/spinner.gif" id="availspin">
 </form>
 

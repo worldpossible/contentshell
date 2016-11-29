@@ -7,7 +7,42 @@ $page_nav = "version";
 include "head.php";
 ?>
 
+<style>
+    #avail_something {
+        color: #393;
+        font-size: small;
+        float: right;
+        display: none;
+        font-weight: normal;
+        margin-right: 5px;
+    }
+    .progbar {
+        width: 200px;
+        border: 1px solid #999;
+        position: relative;
+        float: right;
+        display: none;
+        margin-left: 20px;
+    }
+    .progbarin {
+        width: 0;
+        background: #999;
+        white-space: nowrap;
+        font-family: sans-serif;
+        padding: 2px;
+    }
+</style>
+
 <script>
+
+// cache of module info - we get it when we check for updates
+// and then we use it for generating the progress bar later
+var modules = {};
+
+// this function is called in two ways - depending on the
+// the contents of the button - 1) to check for available
+// updates, and 2) to actually get the update for contentshell
+// module updates are handled separately
 function selfUpdate() {
 
     var button = $("#updatebut");
@@ -15,25 +50,49 @@ function selfUpdate() {
     button.prop("disabled", true);
     $("#spinner").show();
 
-    if (button.html() == "Check") {
+    if (button.html().match(/^Check/)) {
 
+        // this checks the dev server for a list of version numbers
+        // we use this to display what updates are available
+        // XXX we've already got the info (in var modules) if there
+        // were unfinished tasks, so we should really split apart
+        // getting the info and using it so we never have to do it twice
         $.ajax({
             url: "background.php?selfUpdate=1&check=1",
             success: function(results) {
-                $("#avail_contentshell").html(results.contentshell);
+                modules = results; // save this for later
                 // check we've got a decent looking version number
                 if (results.contentshell.match(/^v\d+\.\d+\.\d+$/)) {
                     if (results.contentshell == $("#cur_contentshell").html()) {
                         button.css("color", "green");
-                        button.html("&#10004; Success");
                         button.html("&#10004; Up to date");
                     } else {
-                        button.html("Update");
+                        button.html(results.contentshell + " Available");
                         button.prop("disabled", false);
                     }
                 } else {
                     button.css("color", "#c00");
                     button.html("X Internal Error (1)");
+                }
+                var updates_available = false;
+                // now we go down the list looking for installed modules
+                // that need updating as well
+                for (var mod in results) {
+                    // being safe with hashes in javascript
+                    if (results.hasOwnProperty(mod)) {
+                        // contentshell is a special case handled above
+                        if (mod == "contentshell") { continue; }
+                        // if we've got it, and there's any difference in the version numbers, we call it an "update"
+                        if ( $("#cur_"+mod).html() && $("#cur_"+mod).html() != results[mod].version ) {
+                            $("#avail_"+mod).html(results[mod].version + " Available");
+                            $("#avail_"+mod).show();
+                            updates_available = true;
+                        }
+                    }
+                }
+                // this indicates there was at least *one* content update available
+                if (updates_available) {
+                    $("#avail_something").show();
                 }
             },
             error: function() {
@@ -45,8 +104,11 @@ function selfUpdate() {
             }
         })
 
-    } else if (button.html() == "Update") {
+    } else if (button.html().match(/ Available$/)) {
 
+        // this actually requests the update - contentshell updates
+        // are relatively small, so we just do a spinner, not a progress bar
+        // module updates are handled elsewhere
         $.ajax({
             url: "background.php?selfUpdate=1",
             success: function(results) {
@@ -70,6 +132,161 @@ function selfUpdate() {
     }
 
 }
+
+// this requests an update for a single module
+function modUpdate(moddir) {
+
+    var button = $("#avail_"+moddir);
+    var prog = $("#prog_"+moddir);
+    var progin = $("#progin_"+moddir);
+
+    button.prop("disabled", true);
+
+    $.ajax({
+        url: "background.php?modUpdate="+moddir,
+        success: function(results) {
+            button.hide();
+            prog.show();
+            progin.html('Waiting...');
+            pollTasks();
+        },
+        error: function() {
+            button.css("color", "#c00");
+            button.html("X Internal Error (3)");
+        },
+    });
+
+}
+
+// this checks the status of updates
+var polling = false;
+function pollTasks() {
+
+    if (polling) {
+        return;
+    }
+
+//console.log("Polling");
+
+    $.ajax({
+        url: "background.php?getTasks=1",
+        success: function(results) {
+
+            var in_progress = false;
+            var arrayLength = results.length;
+
+            // we go through the results (tasks) and update
+            // the view accordingly
+            for (var i = 0; i < arrayLength; i++) {
+
+                var button = $("#avail_"  + results[i].moddir);
+                var prog   = $("#prog_"   + results[i].moddir);
+                var progin = $("#progin_" + results[i].moddir);
+
+                if (results[i].retval > 0) {
+
+                    // there was a problem with the rsync -- error out
+                    button.css("color", "#c00");
+                    button.html("X Internal Error (4)");
+                    button.prop("disabled", true);
+                    prog.hide();
+                    button.show();
+
+                } else if (results[i].completed && results[i].retval == 0) {
+
+                    // the rsync completed normally
+                    button.css("color", "#c00");
+                    button.css("color", "green");
+                    button.html("&#10004; Up to date");
+                    button.prop("disabled", true);
+                    prog.hide();
+                    button.show();
+                    $("#cur_" + results[i].moddir).html(results[i].version);
+
+                } else if (results[i].started) {
+
+                    // the first time the page is viewed (before any button clicking)
+                    // the state of the button and progress bar will need to be changed
+                    // -- but to avoid having a flag, we just do it every time
+                    button.hide();
+                    prog.show();
+
+                    // this means we're downloading
+                    // get info about the size (files and data)
+                    // this is from a cached copy of the remote module list
+                    // which means it might not be there if this task is already
+                    // being displayed before it's populated
+                    if (modules[ results[i].moddir ]) {
+                        var total_data  = modules[ results[i].moddir ].ksize;
+                        var data_done   = Math.round( results[i].data_done / 1024 );
+                        // the number multiplied at the end has to match the physical
+                        // width of the progressbar as set in the css
+                        var data_perc  = Math.round((data_done / total_data) * 200);
+                    } else {
+                        $.ajax({
+                            url: "background.php?selfUpdate=1&check=1",
+                            success: function(results) { modules = results; },
+                        });
+                    }
+
+                    progin.width(data_perc);
+                    progin.html('Updating...');
+                    in_progress = true;
+
+                } else {
+                    console.log("Waiting: " + results[i].moddir);
+                    // we get here if we haven't reached any new stage yet
+                    // (shows "Waiting...") which counts as "in_progress"
+                    in_progress = true;
+                }
+            }
+            // if there's anything still happening,
+            // we need to poll again
+// we have to be smarter about when to poll - sometimes new tasks
+// don't show up but we still want to poll again until they do
+// -- perhaps have a flag that a task has been started?
+//            if (in_progress) {
+//                    console.log("Set to Poll again in 2 seconds...");
+                    // clear the mutex, and poll
+                    setTimeout("polling = false; pollTasks();", 2000);
+                    polling = true;
+//            }
+
+
+        },
+        error: function() {
+            button.css("color", "#c00");
+            button.html("X Internal Error (5)");
+            polling = false;
+        },
+    });
+
+}
+
+// this cancels a task
+/*
+function cancelTask(task_id, mybutton) {
+
+    $(mybutton).parent().css({ opacity: 0.5 });
+    $(mybutton).parent().find("button").prop("disabled", true);
+    $(mybutton).parent().find("button").blur();
+
+    $.ajax({
+        url: "background.php?cancelTask=" + task_id,
+        success: function(results) {
+            //console.log(results.task_id);
+        },
+        error: function(xhr, status, error) {
+            var results = JSON.parse(xhr.responseText);
+            console.log(error);
+        }
+    });
+}
+*/
+
+// onload - poll the tasks for what's in progress
+$(function() { pollTasks() });
+
 </script>
 
 <?php
@@ -134,23 +351,29 @@ if (file_exists("/etc/kiwix-version")) {
 <tr><td>Kiwix</td><td><?php echo $kiwix_version ?>*</td></tr>
 <tr><td>Content Shell</td><td>
 
+    <span id="cur_contentshell">v2.1.1</span>
     <div style="float: right; margin-left: 20px;">
         <div style="float: left; width: 24px; height: 24px; margin-top: 2px;">
             <img src="../art/spinner.gif" id="spinner" style="display: none;">
         </div>
-        <button id="updatebut" onclick="selfUpdate();" style="margin-left: 5px;">Check</button>
+        <button id="updatebut" onclick="selfUpdate();" style="margin-left: 5px;">Check for Updates</button>
     </div>
 
-    Current: <span id="cur_contentshell">v2.1.1</span><br>
-    Available: <span id="avail_contentshell"></span>
+
 </td></tr>
-<tr><th colspan="2">Content</th></tr>
+<tr><th colspan="2">Content<div id='avail_something'>Content Updates Available Below</div></th></tr>
 
 <?php
     # get module info
     foreach (getmods_fs() as $mod) {
-        if (empty($mod[version])) { $mod[version] = "v0.0"; }
-        echo "<tr><td>$mod[moddir]</td><td>$mod[version]</td></tr>\n";
+        echo "
+            <tr><td>$mod[moddir]</td><td>
+              <span id='cur_$mod[moddir]'>$mod[version]</span>
+              <button style='display: none; float: right; margin-left: 20px;' id='avail_$mod[moddir]' onclick=\"modUpdate('$mod[moddir]');\"></button>
+              <div class='progbar' id='prog_$mod[moddir]'><div class='progbarin' id='progin_$mod[moddir]'></div></div>
+            </td></tr>
+        ";
+        #echo "<div class='update_available' id='avail_$mod[moddir]'> Update Available</span></td></tr>\n";
     }
 ?>
 

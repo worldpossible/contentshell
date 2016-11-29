@@ -26,6 +26,9 @@ if (isset($_GET['getRemoteModuleList'])) {
 } else if (isset($_GET['selfUpdate'])) {
     selfUpdate();
 
+} else if (isset($_GET['modUpdate'])) {
+    addModule($_GET['modUpdate']);
+
 }
 
 error_log("Unknown request to background.php: " . print_r($_GET, true));
@@ -93,7 +96,8 @@ function deleteModule($moddir) {
 function addModule($moddir) {
 
     # XXX hardcoded to my mac for now
-    $host = "192.168.1.6";
+    #$host = "192.168.1.6";
+    $host = "127.0.0.1";
 
     # fire off our clever database updating rsync process
     exec("php rsync.php $host $moddir > /dev/null &", $output, $rval);
@@ -119,16 +123,17 @@ function cancelTask($task_id) {
 
     $db_task_id = $db->escapeString($task_id);
     $rv = $db->query("SELECT pid, retval, completed FROM tasks WHERE task_id = $db_task_id");
+    error_log("SELECT pid, retval, completed FROM tasks WHERE task_id = $db_task_id");
     $task = $rv->fetchArray(SQLITE3_ASSOC);
 
-    if (!$task || !$task['pid']) {
+    if (!$task) {
         header("HTTP/1.1 500 Internal Server Error");
         header("Content-Type: application/json");
         echo "{ \"error\" : \"No Such Task: $task_id\" }\n";
         exit;
     }
 
-    if (!$task['completed']) {
+    if ($task['pid'] and !$task['completed']) {
         exec("kill $task[pid]", $output, $rval);
     }
 
@@ -153,6 +158,7 @@ function getTasks() {
     $db = getdb();
     $rv = $db->query("SELECT * FROM tasks WHERE dismissed IS NULL");
     $tasks = array();
+    $modules = array();
     while ($row = $rv->fetchArray(SQLITE3_ASSOC)) {
         $row['tasktime'] = time(); // so we can calculate against server time, not browser time
         if ($row['completed'] && $row['retval'] == 0) {
@@ -162,6 +168,10 @@ function getTasks() {
             $db_dismissed = $db->escapeString($row['dismissed']);
             $db_task_id = $db->escapeString($row['task_id']);
             $db->exec("UPDATE tasks SET dismissed = '$db_dismissed' WHERE task_id = '$db_task_id'");
+            // we also get the latest version number and return it
+            // this is a bit inefficient, getting them all when we just need one
+            if (empty($modules)) { $modules = getmods_fs(); } // a bit of cacheing
+            $row['version'] = $modules[ $row['moddir'] ]['version'];
         }
         array_push($tasks, $row);
     }
@@ -231,15 +241,19 @@ $cmd = "/usr/bin/true";
         $cmd = "bash $destdir/admin/post-update-script.sh";
         exec($cmd, $output, $retval);
         if ($retval == 0) {
-            # pull the version info from the new file
-            $version = preg_replace("/.+cur_contentshell\">(.+?)<.+/s", "$1", file_get_contents("version.php"));
-            header("HTTP/1.1 200 OK");
-            header("Content-Type: application/json");
-            echo "{ \"version\" : \"$version\" }\n";
-            exit;
+            # pull the version info from the new file - if the HTML changes too much this will break
+            preg_match("/id=\"cur_contentshell\"[^>]*>(.+?)</s", file_get_contents("version.php"), $matches);
+            if ($matches[1]) {
+                $version = $matches[1];
+                header("HTTP/1.1 200 OK");
+                header("Content-Type: application/json");
+                echo "{ \"version\" : \"$version\" }\n";
+                exit;
+            }
         }
     }
 
+    error_log("selfUpdate Failed");
     header("HTTP/1.1 500 Internal Server Error");
     exit;
 

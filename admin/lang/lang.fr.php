@@ -58,8 +58,8 @@ $lang['restart'] = "Redémarrer";
 $lang['confirm_restart'] = "Êtes-vous sûr de vouloir redémarrer?";
 $lang['shutdown_blurb'] = "<p>Arrêt ici est plus sûr pour le SD / HD que de débrancher simplement le pouvoir.</p>\n"
     . "<p>Si vous arrêtez (par opposition à redémarrer), vous aurez besoin de débrancher votre système et rebranchez pour redémarrer.</p>\n";
-$lang['shutdown_ok'] = "Le serveur est en cours d'arrêt maintenant.";
-$lang['restart_ok'] = "Le serveur redémarre jusqu'à maintenant.";
+$lang['shutdown_ok'] = "Le serveur s'arrête maintenant";
+$lang['restart_ok'] = "Le serveur redémarre maintenant.";
 $lang['shutdown_failed'] = "Impossible de serveur d'arrêt.";
 $lang['restart_failed'] = "Impossible de redémarrer le serveur.";
 $lang['admin_instructions'] = "Vous pouvez afficher et masquer modules ici, ou modifier l'ordre en les faisant glisser. <br> Assurez-vous de cliquer sur \"Sauvegarder\" au bas de la page.";
