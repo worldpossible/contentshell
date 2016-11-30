@@ -26,16 +26,16 @@ function wifiShowWait() {
 
 function wifiShowOn() {
     $("#wifistat").html(
-	"<span style='color: #3a3; font-weight: bold;'><?php echo $lang[is_on] ?></span>"
+	"<span style='color: #3a3; font-weight: bold;'><?php echo $lang['is_on'] ?></span>"
     );
 }
 
 function wifiShowOff() {
     $("#wifistat").html(
-	"<span style='color: #a33; font-weight: bold;'><?php echo $lang[is_off] ?></span>"
+	"<span style='color: #a33; font-weight: bold;'><?php echo $lang['is_off'] ?></span>"
     );
 }
 
 function wifiShowError() {
-    $("#wifistat").html("<?php echo $lang[an_error_occurred] ?>");
+    $("#wifistat").html("<?php echo $lang['an_error_occurred'] ?>");
 }

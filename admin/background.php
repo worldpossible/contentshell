@@ -32,6 +32,9 @@ if (isset($_GET['getRemoteModuleList'])) {
 } else if (isset($_GET['modUpdate'])) {
     addModule($_GET['modUpdate']);
 
+} else if (isset($_GET['setLocalContent'])) {
+    setLocalContent($_GET['setLocalContent']);
+
 }
 
 error_log("Unknown request to background.php: " . print_r($_GET, true));
@@ -260,6 +263,16 @@ function selfUpdate() {
     header("HTTP/1.1 500 Internal Server Error");
     exit;
 
+}
+
+function setLocalContent($state) {
+    $db = getdb();
+    $db_state = $db->escapeString($state);
+    $db->exec("UPDATE prefs SET value = '$db_state' WHERE pref = 'show_local_content_link'");
+    header("HTTP/1.1 200 OK");
+    header("Content-Type: application/json");
+    echo "{ \"status\" : \"OK\" }\n";
+    exit;
 }
 
 ?>

@@ -14,12 +14,17 @@ $(function() {
 
     // detect changes to sorting and hiding
     $("#sortable").sortable({ change: setButtonsActive });
-    $(":checkbox").change( setButtonsActive );
+    $("#sortable :checkbox").change( setButtonsActive );
+    $("#localcontent").change(function() {
+        $.ajax({
+            url: "background.php?setLocalContent=" + (this.checked ? 1 : 0)
+        });
+    });
 
     // create language filtering options XXX optimize by using native JS?
     // first we grab each language code by going through the modules
     var langhash = {};
-    $("input[type=checkbox]").each(function () {
+    $("#sourtable :checkbox").each(function () {
         match = $(this).attr('id').match(/^(..)-/);
         if (match[0]) { langhash[ match[1] ] = true; }
     });

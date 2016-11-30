@@ -194,11 +194,20 @@ function getdb() {
     ");
     $admin = $_db->querySingle("SELECT 1 FROM users WHERE username = 'admin'");
     if (!$admin) {
+	# insert default user/pass
         $_db->exec("
             INSERT INTO users (username, password)
             VALUES ('admin', 'd54f4a435aca0ed313c2a7a0b9914d78')
         ");
     }
+    $_db->exec("
+        CREATE TABLE IF NOT EXISTS prefs (
+            pref_id INTEGER PRIMARY KEY,
+            pref VARCHAR(255),
+            value VARCHAR(255),
+            CONSTRAINT pref UNIQUE (pref)
+        )
+    ");
     $_db->exec("COMMIT");
 
     return $_db;
@@ -646,6 +655,12 @@ function kiwix_restart() {
     } else if (is_rachelplus()) {
         exec("bash /root/rachel-scripts/rachelKiwixStart.sh");
     }
+}
+
+function show_local_content_link() {
+    $db = getdb();
+    $rv = $db->querySingle("SELECT 1 FROM prefs WHERE pref = 'show_local_content_link' AND value = '1'");
+    return $rv;
 }
 
 ?>
