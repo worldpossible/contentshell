@@ -202,7 +202,6 @@ function getdb() {
     }
     $_db->exec("
         CREATE TABLE IF NOT EXISTS prefs (
-            pref_id INTEGER PRIMARY KEY,
             pref VARCHAR(255),
             value VARCHAR(255),
             CONSTRAINT pref UNIQUE (pref)

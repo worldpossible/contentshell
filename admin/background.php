@@ -268,7 +268,7 @@ function selfUpdate() {
 function setLocalContent($state) {
     $db = getdb();
     $db_state = $db->escapeString($state);
-    $db->exec("UPDATE prefs SET value = '$db_state' WHERE pref = 'show_local_content_link'");
+    $db->exec("REPLACE INTO prefs (pref, value) values ('show_local_content_link', '$db_state')");
     header("HTTP/1.1 200 OK");
     header("Content-Type: application/json");
     echo "{ \"status\" : \"OK\" }\n";
