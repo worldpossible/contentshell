@@ -6,31 +6,21 @@ if (!authorized()) { exit(); }
 # configuration
 #-------------------------------------------
 $maxlines = 10000;
-$rpi_logpath   = "/var/log/apache2/access.log";
-$osx_logpath   = "/var/log/apache2/access_log";
-$uwamp_logpath = "../bin/apache/logs/access.log";
-$plus_logpath = "/var/log/httpd/access_log";
-
-#-------------------------------------------
-# determine correct path
-#-------------------------------------------
-if (is_readable($plus_logpath)) {
-    # must do this first as the rpi_logpath will
-    # work on the plus too - except it's blank
-    $alog = $plus_logpath;
-} else if (is_readable($rpi_logpath)) {
-    $alog = $rpi_logpath;
-} else if (is_readable($osx_logpath)) {
-    $alog = $osx_logpath;
-} else if (is_readable($uwamp_logpath)) {
-    $alog = $uwamp_logpath;
+if (is_rachelplus()) {
+    $alog = "/var/log/httpd/access_log";
+} else if (is_rachelpi()) {
+    $alog = "/var/log/apache2/access.log";
+} else {
+    output_and_exit("<h1>Stats Not Supported on this System</h1>");
 }
 
 #-------------------------------------------
-# get page content
+# check if we can read the log, also handle the
+# case where they want the raw log instead of stats
 #-------------------------------------------
-if (isset($alog)) { # if we can read the access log
+if (is_readable($alog)) {
 
+    # the error log is in the same place... could be . or _
     $elog = preg_replace("/access(.)log/", "error$1log", $alog);
 
     if (isset($_GET['dl_alog'])) {
@@ -43,19 +33,22 @@ if (isset($alog)) { # if we can read the access log
             readfile($elog);
             exit;
         } else {
-            $output = "<h1>Couldn't Read Error Log</h1>";
+            output_and_exit("<h1>Couldn't Read Error Log</h1>");
         }
     } else {
         # down here is the normal case, drawing the stats 
-        $output = draw_stats();
+        output_and_exit( draw_stats() );
     }
 
 } else {
-    $output = "<h1>Couldn't Read Access Log</h1>\n";
-    $output .= "Try running the following from the command line:\n";
-    $output .= "<pre>chmod 777 /var/log/apache2\n";
-    $output .= "chmod 666 /var/log/apache2/access.log\n";
-    $output .= "chmod 666 /var/log/apache2/error.log\n</pre>";
+    $logdir = preg_replace("/\/[^\/]+$/", "", $alog);
+    output_and_exit("
+        <h1>Couldn't Read Access Log</h1>
+        Try running the following from the command line:
+        <pre>chmod 777 $logdir
+        chmod 666 $alog
+        chmod 666 $elog</pre>
+    ");
 }
 
 #-------------------------------------------
@@ -75,8 +68,10 @@ function draw_stats() {
         $module = $_GET['module'];
         $out .= "<p>Usage Stats\n";
         $dispmod = preg_replace("/\/modules\//", "", $module);
+        
     } else {
-        if (file_exists("./modules")) {
+        # i don't understand why i wrote this bit:
+        if (file_exists("../modules")) {
             $module = "/modules";
         } else {
             $module = "/";
@@ -89,60 +84,73 @@ function draw_stats() {
 
     # read in the log file
     $content = tail($alog, $maxlines);
-    
+
+    # and process
     $nestcount = 0;
+    $not_counted = 0;
+    $total_pages = 0;
     while (1) {
 
         ++$nestcount;
 
         $count = 0;
-        $errors = array();
+        $errors = 0; # array();
         $stats = array();
         $start = "";
-        foreach(preg_split("/((\r?\n)|(\r\n?))/", $content) as $line){
+        foreach(preg_split("/((\r?\n)|(\r\n?))/", $content) as $line) {
 
             # line count and limiting
+            # XXX is this needed if we're using tail()?
             if ($maxlines && $count >= $maxlines) { break; }
             ++$count;
 
-            # dates - [29/Mar/2015:06:25:15 -0700]
+            # we display the date range - [29/Mar/2015:06:25:15 -0700]
             preg_match("/\[(.+?) .+?\]/", $line, $date);
             if ($date) {
-                if (!$start) {
-                    $start = $date[1];
-                }
+                if (!$start) { $start = $date[1]; }
                 $end = $date[1];
             }
 
             # count errors
             preg_match("/\"GET.+?\" (\d\d\d) /", $line, $matches);
             if ($matches && $matches[1] >= 400) {
-                inc($errors, $matches[1]);
+                ++$errors;
+                #inc($errors, $matches[1]);
             }
 
-            # break out html only
-            preg_match("/GET (.+?\.(html?|pdf|php)?) /", $line, $matches);
+            # count pages only (not images and support files)
+            preg_match("/GET (.+?(\/|\.html?|\.pdf|\.php)) /", $line, $matches);
             if ($matches) {
                 $url = $matches[1];
+                # cout the subpages
                 preg_match("/$modmatch\/([^\/]+)/", $url, $sub);
                 if ($sub) {
                     inc($stats, $sub[1]);
+                    ++$total_pages;
+                } else if (preg_match("/$modmatch\/$/", $url)) {
+                    # if there was a hit with this directory as the
+                    # trailing component, there was probably a page there
+                    # so we count that too
+                    inc($stats, "./");
+                    ++$total_pages;
+                } else {
+                    ++$not_counted;
                 }
             } else {
-                inc($stats, "not counted (.jpg, .js, support files, etc.)");
+                ++$not_counted;
             }
 
         }
-        
+
         # auto-descend into directories if there's only one item
+        # XXX basically we redo the above over, one dir deeper each time,
+        # until we reach a break condition (multiple choices, single page, or too deep,
+        # which is pretty darn inefficient
         if (sizeof($stats) == 1) {
             # PHP 5.3 compat - can't index off a function, need a temp var
             $keys = array_keys($stats);
             # but not if the one thing is an html file
-            if (preg_match("/\.(html?|pdf|php)?/", $keys[0])) {
-                break; 
-            }
-            if (preg_match("/^not counted/", $keys[0])) {
+            if (preg_match("/(\/|\.html?|\.pdf|\.php)$/", $keys[0])) {
                 break; 
             }
             # and not if it's too deep
@@ -172,7 +180,12 @@ function draw_stats() {
     $out .= "<b>$start</b> through <b>$end</b></p>\n";
 
     # tell the user the path they're in
-    if ($dispmod) { $out .= "<h3>$dispmod</h3>\n"; }
+    if ($dispmod) {
+        $out .= "<h3 style='margin-bottom: 0;'>Looking In: $dispmod</h3>\n";
+        $out .= "<a href='stats.php' style='font-size: small;'>&larr; back to all modules</a>";
+    } else {
+        $out .= "<h3 style='margin-bottom: 0;'>Looking At: all modules</h3>\n";
+    }
 
     # stats display
     arsort($stats);
@@ -180,12 +193,10 @@ function draw_stats() {
     $out .= "<tr><th>Hits</th><th>Content</th></tr>\n";
     foreach ($stats as $mod => $hits) {
         # html pages are links to the content
-        if (preg_match("/\.(html?|pdf|php)?$/", $mod)) {
+        if (preg_match("/(\/|\.html?|\.pdf|\.php)$/", $mod)) {
             $url = "$module/$mod";
             $out .= "<tr><td>$hits</td><td>$mod ";
-            $out .= "<small>(<a href=\"$url\">view</a>)</small></td></tr>\n";
-        } else if (preg_match("/^not counted/", $mod)) {
-            $out .= "<tr><td>$hits</td><td>$mod</td></tr>\n";
+            $out .= "<small>(<a href=\"$url\" target=\"_blank\">view</a>)</small></td></tr>\n";
         # directories link to a drill-down
         } else {
             $url = "stats.php?module=" . urlencode("$module/$mod");
@@ -198,18 +209,23 @@ function draw_stats() {
     # timer readout
     $time = microtime(true) - $starttime;
     $out .= sprintf(
-        "<p><b>$count lines analyzed in %.2f seconds.</b></p>\n", $time
+        "<p><b>$count lines analyzed in %.2f seconds.</b><br>\n", $time
     );
+    $out .= "
+        <span style='font-size: small;'>
+        $total_pages content pages seen<br>
+        $not_counted items not counted (images, css, js, admin, etc)<br>
+        <!-- $errors errors -->
+        </span></p>
+    ";
 
     # download log links
-    if (!$dispmod) {
-        $out .= (
-            "<ul>\n" .
-            "<li><a href=\"stats.php?dl_alog=1\">Download Access Log</a>" .
-            "<li><a href=\"stats.php?dl_elog=1\">Download Error Log</a>" .
-            "</ul>\n"
-        );
-    }
+    $out .= ('
+        <ul>
+        <li><a href="stats.php?dl_alog=1">Download Raw Access Log</a>
+        <li><a href="stats.php?dl_elog=1">Download Raw Error Log</a>
+        </ul>
+    ');
 
     return $out;
 
@@ -280,10 +296,17 @@ function tail($filename, $lines = 10, $buffer = 4096) {
 $page_title = $lang['stats'];
 $page_script = "";
 $page_nav = "stats";
-include "head.php";
 
-echo $output;
-
-include "foot.php";
+function output_and_exit($output) {
+    # a bit sloppy, this...
+    global $lang;
+    $page_title = $lang['stats'];
+    $page_nav = "stats";
+    $page_script = "";
+    include "head.php";
+    echo $output;
+    include "foot.php";
+    exit;
+}
 
 ?>

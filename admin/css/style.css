@@ -79,6 +79,10 @@
     .error p { margin: 0 }
 
     .stats { margin-top: 20px; }
+    .stats th {
+        text-align: left;
+        padding: 5px 80px 5px 5px;
+    }
     .stats td {
         border: 1px solid #ccc;
         padding: 5px;
