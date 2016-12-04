@@ -18,7 +18,41 @@
          maybe you're on one but need to know the other. Also helps if my.content
          isn't working on some client devices. Also nice for when you need to ssh
          or rsync. It's visible in the Admin panel too, but it's more convenient here. -->
-    <div id="ip"><?php showip(); ?></div>
+    <div id="ip">
+        <?php showip();
+        # on the RACHEL-Plus we also show a battery meter
+        if (is_rachelplus()) {
+            echo '
+                <script>
+                    function getBatteryInfo() {
+                        $.ajax({
+                            url: "admin/background.php?getBatteryInfo=1",
+                            success: function(results) {
+                                //console.log(results);
+                                var vert = 0; // shows full charge (each icon down 12px)
+                                if      (results.level < 20) { vert = -48; }
+                                else if (results.level < 40) { vert = -36; }
+                                else if (results.level < 60) { vert = -24; }
+                                else if (results.level < 80) { vert = -12; }
+                                var horz = 0; // shows not plugged (40px right to show plugged)
+                                if (results.status > -20 ) { horz = 40 }
+                                $("#battery").css({
+                                    background: "url(\'art/battery-level-sprite-light.png\')",
+                                    backgroundPosition: horz+"px "+vert+"px",
+                                });
+                            },
+                            complete: function() {
+                                setTimeout(getBatteryInfo, 10000); // ten second refresh
+                            }
+                        });
+                    }
+                    $(getBatteryInfo); // onload
+                </script>
+                <br><b>Battery</b>: <div id="battery"></div><span id="perc"></span>
+            ';
+        }
+        ?>
+    </div>
     <div id="adminnav"><a href="admin/modules.php"><?php echo $lang['admin'] ?></a></div>
 </div>
 

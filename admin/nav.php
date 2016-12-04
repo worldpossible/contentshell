@@ -9,5 +9,39 @@
         <li><a href="settings.php"<?php if ($page_nav == "settings") { echo ' class="active"'; } ?>><?php echo $lang['settings'] ?></a></li>
         <li><a href="logout.php"><?php echo $lang['logout'] ?></a></li>
     </ul>
-    <div id="ip"><?php showip(); ?></div>
+    <div id="ip">
+        <?php showip();
+        # on the RACHEL-Plus we also show a battery meter
+        if (is_rachelplus()) {
+            echo '
+                <script>
+                    function getBatteryInfo() {
+                        $.ajax({
+                            url: "background.php?getBatteryInfo=1",
+                            success: function(results) {
+                                //console.log(results);
+                                var vert = 0; // shows full charge (each icon down 12px)
+                                if      (results.level < 20) { vert = -48; }
+                                else if (results.level < 40) { vert = -36; }
+                                else if (results.level < 60) { vert = -24; }
+                                else if (results.level < 80) { vert = -12; }
+                                var horz = 0; // shows not plugged (40px right to show plugged)
+                                if (results.status > -20 ) { horz = 40 }
+                                $("#battery").css({
+                                    background: "url(\'art/battery-level-sprite-dark.png\')",
+                                    backgroundPosition: horz+"px "+vert+"px",
+                                });
+                            },
+                            complete: function() {
+                                setTimeout(getBatteryInfo, 5000); // five second refresh
+                            }
+                        });
+                    }
+                    $(getBatteryInfo); // onload
+                </script>
+                <br><b>Battery</b>: <div id="battery"></div><span id="perc"></span>
+            ';
+        }
+        ?>
+    </div>
 </div>

@@ -35,6 +35,9 @@ if (isset($_GET['getRemoteModuleList'])) {
 } else if (isset($_GET['setLocalContent'])) {
     setLocalContent($_GET['setLocalContent']);
 
+} else if (isset($_GET['getBatteryInfo'])) {
+    getBatteryInfo();
+
 }
 
 error_log("Unknown request to background.php: " . print_r($_GET, true));
@@ -272,6 +275,15 @@ function setLocalContent($state) {
     header("HTTP/1.1 200 OK");
     header("Content-Type: application/json");
     echo "{ \"status\" : \"OK\" }\n";
+    exit;
+}
+
+function getBatteryInfo() {
+    $level  = rtrim(file_get_contents("/tmp/batteryLastChargeLevel"));
+    $status = rtrim(file_get_contents("/tmp/chargeStatus"));
+    header("HTTP/1.1 200 OK");
+    header("Content-Type: application/json");
+    echo "{ \"level\" : \"$level\", \"status\" : \"$status\" }\n";
     exit;
 }
 

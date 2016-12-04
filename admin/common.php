@@ -644,6 +644,7 @@ function showip () {
         preg_match("/wlan0.+?inet addr:(.+?) /", join("", $output), $match);
         if (isset($match[1])) { echo "<br><b>WIFI</b>: $match[1]\n"; }
     }
+
 }
 
 # restart kiwix so it sees what modules are visible/hidden

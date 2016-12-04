@@ -9,7 +9,13 @@
         position: relative;
         height: 2em;
     }
-    #ip { position: absolute; top: 5px; right: 10px;}
+    #ip { position: absolute; top: 5px; right: 10px; font-size: small; }
+    #battery {
+        display: inline-block;
+        margin-bottom: -2px;
+        width: 40px;
+        height: 12px;
+    }
 
     #nav {
         position: absolute;
