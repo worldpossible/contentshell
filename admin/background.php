@@ -38,6 +38,9 @@ if (isset($_GET['getRemoteModuleList'])) {
 } else if (isset($_GET['getBatteryInfo'])) {
     getBatteryInfo();
 
+} else if (isset($_GET['clearLogs'])) {
+    clearLogs();
+
 }
 
 error_log("Unknown request to background.php: " . print_r($_GET, true));
@@ -284,6 +287,42 @@ function getBatteryInfo() {
     header("HTTP/1.1 200 OK");
     header("Content-Type: application/json");
     echo "{ \"level\" : \"$level\", \"status\" : \"$status\" }\n";
+    exit;
+}
+
+function clearLogs() {
+    if (is_rachelplus()) {
+        exec("rm /var/log/httpd/access_log /var/log/httpd/error_log /media/RACHEL/filteredlog", $out, $rv);
+        $rv = 0;
+        if ($rv == 0) {
+
+            # make sure they are there (even if empty) in case someone looks)
+            exec("touch /var/log/httpd/access_log /var/log/httpd/error_log", $out, $rv);
+
+            # now we need to restart the server after clearing the logs
+            # but we need to do that after sending out our response and closing
+            # (found on stackoverflow)
+            ob_end_clean();
+            header("HTTP/1.1 200 OK");
+            header("Connection: close");
+            ignore_user_abort(true); // just to be safe
+            ob_start();
+            echo "{ \"status\" : \"OK\" }\n";
+            $size = ob_get_length();
+            header("Content-Length: $size");
+            ob_end_flush(); // Strange behaviour, will not work
+            flush(); // Unless both are called !
+            // Do post-processing here 
+
+            //echo "{ \"status\" : \"NOTOK\" }\n";
+            # client should be closed now
+            exec("killall lighttpd");
+            # shouldn't ever get here but...
+
+            exit;
+        }
+    }
+    header("HTTP/1.1 500 Internal Server Error");
     exit;
 }
 

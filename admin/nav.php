@@ -15,6 +15,7 @@
         if (is_rachelplus()) {
             echo '
                 <script>
+                    refreshRate = 1000 * 60 * 1; // one minute on admin page, be conservative
                     function getBatteryInfo() {
                         $.ajax({
                             url: "background.php?getBatteryInfo=1",
@@ -33,7 +34,7 @@
                                 });
                             },
                             complete: function() {
-                                setTimeout(getBatteryInfo, 5000); // five second refresh
+                                setTimeout(getBatteryInfo, refreshRate);
                             }
                         });
                     }

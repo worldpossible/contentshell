@@ -81,9 +81,17 @@ function draw_stats() {
     }
     $modmatch = preg_quote($module, "/");
 
+    # our log file is overrun with stuff like battery check
+    # requests -- we filter that here and create a temporary
+    # log file instead...
+    $tmpfile = "/media/RACHEL/filteredlog";
+    $lagtime = 60; # seconds to refresh the filtered log
+    if (!file_exists($tmpfile) || (filemtime($tmpfile) < (time() - $lagtime))) {
+        exec("grep -v 'GET /admin' $alog > $tmpfile");
+    }
 
     # read in the log file
-    $content = tail($alog, $maxlines);
+    $content = tail($tmpfile, $maxlines);
 
     # and process
     $nestcount = 0;
@@ -216,6 +224,7 @@ function draw_stats() {
         $total_pages content pages seen<br>
         $not_counted items not counted (images, css, js, admin, etc)<br>
         <!-- $errors errors -->
+        Stats are updated each minute, and do not include ka-lite or wiki items.
         </span></p>
     ";
 
@@ -226,6 +235,31 @@ function draw_stats() {
         <li><a href="stats.php?dl_elog=1">Download Raw Error Log</a>
         </ul>
     ');
+
+    # allow clearing logs on the plus
+    if (is_rachelplus()) {
+        $out .= ('
+            <script>
+                function clearLogs() {
+                    if (!confirm("Are you sure you want to clear the logs?")) {
+                        return false;
+                    }
+                    $.ajax({
+                        url: "background.php?clearLogs=1",
+                        success: function() {
+                            $("#clearbut").css("color", "green");
+                            $("#clearbut").html("&#10004; Logs Cleared");
+                        },
+                        error: function() {
+                            $("#clearbut").css("color", "#c00");
+                            $("#clearbut").html("X Internal Error");
+                        }
+                    });
+                }
+            </script>
+            <button type="button" id="clearbut" onclick="clearLogs();">Clear Logs</button>
+        ');
+    }
 
     return $out;
 
