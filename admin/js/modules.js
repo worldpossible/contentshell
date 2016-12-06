@@ -24,7 +24,7 @@ $(function() {
     // create language filtering options XXX optimize by using native JS?
     // first we grab each language code by going through the modules
     var langhash = {};
-    $("#sourtable :checkbox").each(function () {
+    $("#sortable :checkbox").each(function () {
         match = $(this).attr('id').match(/^(..)-/);
         if (match[0]) { langhash[ match[1] ] = true; }
     });
