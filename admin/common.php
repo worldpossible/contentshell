@@ -474,8 +474,11 @@ function getRelAdminPath() {
 # index.php is residing
 #-------------------------------------------
 function getAbsBaseUrl() {
+    # we avoid just using "/" here because in development
+    # our code is sometimes in a subdirectory of the server
     $baseurl = dirname($_SERVER['REQUEST_URI']);
-    $baseurl = preg_replace("/\/admin$/", "", $baseurl);
+    $baseurl = preg_replace("/\/admin.*/", "/", $baseurl);
+    $baseurl = preg_replace("/\/modules.*/", "/", $baseurl); // safe?
     return $baseurl;
 }
 
