@@ -10,7 +10,7 @@ en-local_content
 en-kalite
 en-wikipedia
 en-wikipedia_for_schools
-en-worldmap
+en-worldmap-10
 en-wikivoyage
 en-saylor
 en-ck12
@@ -19,7 +19,6 @@ en-TED
 en-radiolab
 en-fantastic_phonics
 en-ebooks
-en-afristory
 en-scale-of-universe
 en-hesperian_health
 en-medline_plus
@@ -38,6 +37,17 @@ en-oya
 en-law_library
 en-olpc
 en-windows_apps
+en-algebra2go
+en-boundless
+en-edison
+en-oerafrica-reading
+en-rachelcourses
+en-tanzanian_exams
+en-wassce
+en-wikihow
+hi-arvind
+multi-afristory
+
 
 # spanish modules
 es-kalite
@@ -46,6 +56,9 @@ es-wikihow
 es-ebooks
 es-ap_didact
 es-biblioteca
+es-bibliofilo
+es-GCF2015
+es-wikivoyage
 es-cnbguatemala
 es-blockly_games
 es-educalab
@@ -64,6 +77,11 @@ fr-wikivoyage
 fr-wiktionary
 fr-ebooksgratuits
 fr-haitifutur
+fr-bouquineux
+fr-gutenberg
+fr-hesperian
+fr-phet-haidi
+fr-wikibooks
 
 # justice content
 
