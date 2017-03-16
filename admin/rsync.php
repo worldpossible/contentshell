@@ -189,10 +189,12 @@ while ($db_task_id) {
 
                 # Check this most recent line to see if it indicates
                 # a completed file. If so, we count that and the data
-                # transferred.
-                if (preg_match("/^\s+(\d+) 100%\s+(\S+)/", $line, $matches)) {
+                # transferred. Note: some versions of rsync include
+                # commas in the numbers so we have to strip those out
+                if (preg_match("/^\s+([\d,]+) 100%\s+(\S+)/",
+                        $line, $matches)) {
                     ++$files_done;
-                    $data_done += $matches[1];
+                    $data_done += preg_replace("/,/", "", $matches[1]);
                     $data_rate = $matches[2];
                 }
 
