@@ -319,10 +319,24 @@ exec("dmesg 2>&1 | grep 'Machine model'", $output);
 if (isset($output[0]) && preg_match("/Machine model: (.+)/", $output[0], $matches)) {
     $hardware = $matches[1];
 } else {
+
+    # rachel plus idenitifcation
+    $plusmodel = exec("uname -n");
+    if ($plusmodel == "WRTD-303N-Server") {
+        $hardware .= "Intel CAP 1.0";
+    } else if ($plusmodel == "WAPD-235N-Server") {
+        $hardware .= "Intel CAP 2.0";
+    }
+
     exec("arch", $output);
     if ($output) {
-        $hardware = $output[0];
+	if ($hardware) {
+		$hardware .= " ($output[0])";
+	} else {
+	    $hardware = $output[0];
+	}
     }
+
 }
 
 $rachel_installer_version = "?";
@@ -330,14 +344,14 @@ if (file_exists("/etc/rachelinstaller-version")) {
     $rachel_installer_version = file_get_contents("/etc/rachelinstaller-version");
 }
 
-$kalite_version = "?";
-if (file_exists("/etc/kalite-version")) {
-    $kalite_version = file_get_contents("/etc/kalite-version");
+$kalite_version = exec("export USER=`whoami`; kalite --version;");
+if (!$kalite_version || !preg_match("/^[\d\.]+$/", $kalite_version)) {
+    $kalite_version = "?";
 }
 
-$kiwix_version = "?";
-if (file_exists("/etc/kiwix-version")) {
-    $kiwix_version = file_get_contents("/etc/kiwix-version");
+$kiwix_version = exec("cat /var/kiwix/application.ini | grep ^Version | cut -d= -f2");
+if (!$kiwix_version || !preg_match("/^[\d\.]+$/", $kiwix_version)) {
+    $kiwix_version = "?";
 }
 
 ?>
@@ -347,12 +361,12 @@ if (file_exists("/etc/kiwix-version")) {
 <tr><th colspan="2">System Sofware</th></tr>
 <tr><td>Hardware</td><td><?php echo $hardware ?></td></tr>
 <tr><td>OS</td><td><?php echo $os ?></td></tr>
-<tr><td>RACHEL Installer</td><td><?php echo $rachel_installer_version ?>*</td></tr>
-<tr><td>KA Lite</td><td><?php echo $kalite_version ?>*</tr>
-<tr><td>Kiwix</td><td><?php echo $kiwix_version ?>*</td></tr>
+<tr><td>RACHEL Installer</td><td><?php echo $rachel_installer_version ?></td></tr>
+<tr><td>KA Lite</td><td><?php echo $kalite_version ?></tr>
+<tr><td>Kiwix</td><td><?php echo $kiwix_version ?></td></tr>
 <tr><td>Content Shell</td><td>
 
-    <span id="cur_contentshell">v2.2.3</span>
+    <span id="cur_contentshell">v2.3.0-beta</span>
     <div style="float: right; margin-left: 20px;">
         <div style="float: left; width: 24px; height: 24px; margin-top: 2px;">
             <img src="../art/spinner.gif" id="spinner" style="display: none;">
@@ -383,7 +397,6 @@ if (file_exists("/etc/kiwix-version")) {
 <ul style="margin-top: 40px;">
 <li>blank indicates the item predates versioning.</li>
 <li>? indicates the version could not be determined, and perhaps the item is not actually installed</li>
-<li>* indicates the version number was recorded at installation; if you have modified your installation this info may be out of date</li>
 </ul>
 
 </div>
