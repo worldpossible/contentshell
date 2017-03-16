@@ -9,7 +9,18 @@
 <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.min.css">
 <script src="js/jquery-1.10.2.min.js"></script>
 <script src="js/jquery-ui-1.10.4.custom.min.js"></script>
-<base target="content">
+<!-- I know this is not ideal UI, but it is based on real-world issues:
+     because we can't provide navigation back to the home page (like on
+     kalite and kiwix), it is difficult for users to find the front page
+     again. This keeps it open in the background. We tried opening all
+     content in a *single* seperate window named "content" but then
+     going back to the main tab and clicking a second subject without
+     closing the first tab resulted in no apparent action (though the
+     "content" tab did in fact load the requested info in the background).
+     The end result of all this is that we decided the best choice of
+     lousy choices was to open everything in a new window/tab. Thus:
+-->
+<base target="_blank">
 </head>
 
 <body>
