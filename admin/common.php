@@ -535,7 +535,10 @@ function syncmods_fs2db() {
 # one per line. Lines starting with a "#" are ignored,
 # and lines starting with a "." are hidden.
 #-------------------------------------------
-function sortmods($file) {
+# um, now it installs too, if you want... let's
+# refactor this someday, okay?
+#-------------------------------------------
+function sortmods($file, $install_server) {
 
     # we're going to read in the .modules file here and
     # if successful, use it to update the order and visibility
@@ -565,6 +568,25 @@ function sortmods($file) {
             }
             # put all items in an ordered array
             array_push($sorted, $line);
+        }
+
+        # XXX for the CAP2 build process, I stuck the
+        # actual download and install script done here
+        # we need to refactor a bit, but no time now... must ship!
+        if ($install_server) {
+            $destdir = dirname(dirname(__FILE__)) . "/modules/";
+            foreach ($sorted as $moddir) {
+                echo "rsync -Pav rsync://$install_server/rachelmods/$moddir $destdir\n";
+                passthru("rsync -Pav rsync://$install_server/rachelmods/$moddir $destdir\n");
+                $script = "$destdir/$moddir/finish_install.sh";
+                if (file_exists($script)) {
+                    echo "Running: $script\n";
+                    passthru("bash $script 2>&1", $rval);
+                    if ($rval != 0) {
+                        exit($rval);
+                    }
+                }
+            }
         }
 
         # when run during install, there is no data in the db to update,
