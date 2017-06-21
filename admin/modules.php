@@ -36,6 +36,8 @@ if ($fsmods) {
     # will try to actually read/write to the DB and we
     # will need to check this before doing those
     $db = getdb();
+    # XXX this testing should be moved to common.php and
+    # show the error on all pages (include as part of head.php or nav.php)
     if (!$db) {
         echo "<div class=\"error\">
               <h2>Couldn't Open Database</h2>

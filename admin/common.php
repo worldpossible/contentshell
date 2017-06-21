@@ -149,9 +149,9 @@ function getdb() {
         return null;
     }
 
-    # allow blocking for 5 seconds while other
+    # allow blocking for 10 seconds while other
     # processes are writing to the db
-    $_db->busyTimeout(5000);
+    $_db->busyTimeout(10000);
 
     # It seems a bit wasteful to do this every time we grab a db connection.
     # However it's probably better than trying to detect if each table
@@ -529,110 +529,192 @@ function syncmods_fs2db() {
 }
 
 #-------------------------------------------
-# This function takes a .modules file and sorts,
-# shows, and hides all the modules accordingly.
+# Read in a .modules file and return a sorted arrray 
+# of the modules that should be installed and an
+# associative array of modules that should be hidden.
+# So use it like this:
+#
+#     list($sorted, $hidden) = parseModulesFile($file);
+#
 # The file format is just a list of module names,
-# one per line. Lines starting with a "#" are ignored,
-# and lines starting with a "." are hidden.
+# one per line, in the order you want them to appear.
+# Blank lines and lines starting with a "#" are ignored;
+# lines starting with a "." are installed but hidden.
+#
+# We just die on any error: can't read file, malformed file
 #-------------------------------------------
-# um, now it installs too, if you want... let's
-# refactor this someday, okay?
-#-------------------------------------------
-function sortmods($file, $install_server) {
+function parseModulesFile($file) {
 
-    # we're going to read in the .modules file here and
-    # if successful, use it to update the order and visibility
-    # of all the modules in the filesystem
     $fh = fopen($file, "r");
-    if ($fh) {
-
-        $hidden = array();
-        $sorted = array();
-        while (($line = fgets($fh)) !== false) {
-            # remove all whitespace
-            $line = preg_replace("/\s+/", "", $line);
-            # skip comments and blank lines
-            if (preg_match("/^#/", $line) || !preg_match("/\S/", $line)) {
-                continue;
-            }
-            # detect screwy files and bail
-            # (module names can only be letters, numbers, underscore, hyphen, and dot)
-            if (preg_match("/[^\w\.\-]/", $line)) {
-                error_log("$file does not look like a valid .modules file");
-                exit;
-            }
-            # flag hidden items in an associative array
-            if (preg_match("/^\./", $line)) {
-                $line = preg_replace("/^\./", "", $line);
-                $hidden[$line] = 1;
-            }
-            # put all items in an ordered array
-            array_push($sorted, $line);
-        }
-
-        # XXX for the CAP2 build process, I stuck the
-        # actual download and install script done here
-        # we need to refactor a bit, but no time now... must ship!
-        if ($install_server) {
-            $destdir = dirname(dirname(__FILE__)) . "/modules/";
-            foreach ($sorted as $moddir) {
-                echo "rsync -Pav rsync://$install_server/rachelmods/$moddir $destdir\n";
-                passthru("rsync -Pav rsync://$install_server/rachelmods/$moddir $destdir\n");
-                $script = "$destdir/$moddir/finish_install.sh";
-                if (file_exists($script)) {
-                    echo "Running: $script\n";
-                    passthru("bash $script 2>&1", $rval);
-                    if ($rval != 0) {
-                        exit($rval);
-                    }
-                }
-            }
-        }
-
-        # when run during install, there is no data in the db to update,
-        # so it's important that we sync the database to match the filesystem first
-        syncmods_fs2db();
-
-        try {
-
-            $db = getdb();
-            if (!$db) { throw new Exception($db->lastErrorMsg); }
-            $db->exec("BEGIN");
-
-            # boink everything to the bottom and hide it
-            $rv = $db->query("SELECT * FROM modules ORDER BY moddir");
-            if (!$rv) { throw new Exception($db->lastErrorMsg()); }
-            $position = 1000;
-            while ($row = $rv->fetchArray()) {
-                $res = $db->exec("UPDATE modules SET position = '$position', hidden = '1' WHERE moddir = '$row[moddir]'");
-                #error_log("UPDATE modules SET position = '$position', hidden = '1' WHERE moddir = '$row[moddir]'");
-                if (!$res) { throw new Exception($db->lastErrorMsg()); }
-                ++$position;
-            }
-
-            # go to the DB and set the new order and new hidden state
-            $position = 1;
-            foreach ($sorted as $moddir) {
-                $moddir = $db->escapeString($moddir);
-                if (isset($hidden[$moddir])) { $is_hidden = 1; } else { $is_hidden = 0; }
-                $rv = $db->exec(
-                    "UPDATE modules SET position = '$position', hidden = '$is_hidden'" .
-                    " WHERE moddir = '$moddir'"
-                );
-                #error_log("UPDATE modules SET position = '$position', hidden = '$is_hidden' WHERE moddir = '$moddir'");
-                if (!$rv) { throw new Exception($db->lastErrorMsg()); }
-                ++$position;
-            }
-
-        } catch (Exception $ex) {
-            $db->exec("ROLLBACK");
-            error_log($ex);
-        }
-        $db->exec("COMMIT");
-
-    } else {
-        error_log("modulesort() Couldn't Open File: $file");
+    if (!$fh) {
+        error_log("$file could not be opened");
+        exit(1);
     }
+
+    $hidden = array();
+    $sorted = array();
+    while (($line = fgets($fh)) !== false) {
+        # remove all whitespace
+        $line = preg_replace("/\s+/", "", $line);
+        # skip comments and blank lines
+        if (preg_match("/^#/", $line) || !preg_match("/\S/", $line)) {
+            continue;
+        }
+        # detect screwy files and bail
+        # (module names can only be letters, numbers, underscore, hyphen, and dot)
+        if (preg_match("/[^\w\.\-]/", $line)) {
+            error_log("$file does not look like a valid .modules file");
+            exit(1);
+        }
+        # flag hidden items in an associative array
+        if (preg_match("/^\./", $line)) {
+            $line = preg_replace("/^\./", "", $line);
+            $hidden[$line] = 1;
+        }
+        # put all items in an ordered array, even
+        # hidden items, because we will still want to
+        # install and sort them
+        array_push($sorted, $line);
+    }
+
+    return array($sorted, $hidden);
+
+}
+
+#------------------------------------------- 
+# Installs sorts, and sets visibility based on a
+# .modules file -- must work from the command line
+# or the html admin interface
+#------------------------------------------- 
+function installmods($file, $install_server) {
+
+    list($sorted, $hidden) = parseModulesFile($file);
+
+    if (!$install_server) {
+        error_log("Missing install_server argument to installmods() in common.php");
+        exit(1);
+    }
+
+    # where are we putting the installed modules?
+    # (should we use getRelModDir instead? should we
+    # replace the code there with this? testing needed
+    # under different dirs, http, command line, etc.)
+    $destdir = dirname(dirname(__FILE__)) . "/modules/";
+
+    # use rsync -z for remote hosts, not for LAN
+    # (the CPU overhead of zip actually slows it down on a fast network)
+    $zip = "z";
+    if (preg_match("/^[\d\.]+$/", $install_server)) {
+        $zip = "";
+    }
+
+    try {
+
+        $db = getdb();
+        if (!$db) { throw new Exception($db->lastErrorMsg); }
+
+        # this is a performance enhancing command, more than for safety
+        $db->exec("BEGIN");
+
+        foreach ($sorted as $moddir) {
+
+            $cmd = "rsync -Pav$zip rsync://$install_server/rachelmods/$moddir $destdir";
+
+            # insert a task into the DB
+            $db_cmd    = $db->escapeString($cmd);
+            $db_moddir = $db->escapeString($moddir);
+            $db->exec("
+                INSERT INTO tasks (moddir, command)
+                VALUES ('$db_moddir', '$db_cmd')
+            ");
+
+        }
+
+        # after all the modules are in the task queue to be installed,
+        # we add a call to the sort script -- since this may not run
+        # for a while we copy the file to a tmp file for later...
+
+        # get unique name
+        $mfile = uniqid("/tmp/sortmods-", true);
+        # copy the .modules file to that unique name
+        copy($file, $mfile);
+
+        $sortscript = dirname(getAbsModPath()) . "/sortmods.php";
+        $db_cmd = $db->escapeString("$sortscript $mfile");
+
+        # insert a sort task into the DB
+        $db->exec("
+            INSERT INTO tasks (moddir, command)
+            VALUES ('.modules sort', '$db_cmd')
+        ");
+
+    } catch (Exception $ex) {
+        $db->exec("ROLLBACK");
+        error_log($ex);
+        exit(1);
+    }
+
+    $db->exec("COMMIT");
+
+    # finally, we fire off our clever database updating rsync process
+    $script = dirname(__FILE__) . "/do_tasks.php";
+    exec("php $script > /dev/null 2>&1 &");
+
+}
+
+#-------------------------------------------
+# Call this to sort modules based on a .modules file
+#-------------------------------------------
+function sortmods($file) {
+    list($sorted, $hidden) = parseModulesFile($file);
+    _sortmods($sorted, $hidden);
+}
+
+#-------------------------------------------
+# Internal use - actually does the sorting/hiding work.
+# The instructions come from a .modules file
+# as parsed by parseModulesFile() -- modules that aren't 
+# seen at all are hidden and sorted last, but not removed.
+#-------------------------------------------
+function _sortmods($sorted, $hidden) {
+
+    # before we sort anything, let's make sure all the modules
+    # are actually recorded in the DB
+
+    syncmods_fs2db();
+
+    try {
+
+        $db = getdb();
+        if (!$db) { throw new Exception($db->lastErrorMsg); }
+        $db->exec("BEGIN");
+
+        # boink everything to the bottom and hide it
+        $res = $db->exec("UPDATE modules SET position = '9999', hidden = '1'");
+        if (!$res) { throw new Exception($db->lastErrorMsg()); }
+
+        # set the new order and new hidden state
+        $db_position = 1;
+        foreach ($sorted as $moddir) {
+            $db_moddir = $db->escapeString($moddir);
+            if (isset($hidden[$moddir])) { $db_is_hidden = 1; } else { $db_is_hidden = 0; }
+            $rv = $db->exec("
+                UPDATE modules
+                   SET position = '$db_position',
+                       hidden   = '$db_is_hidden'
+                 WHERE moddir = '$db_moddir'
+            ");
+            if (!$rv) { throw new Exception($db->lastErrorMsg()); }
+            ++$db_position;
+        }
+
+    } catch (Exception $ex) {
+        $db->exec("ROLLBACK");
+        error_log($ex);
+        exit(1);
+    }
+
+    $db->exec("COMMIT");
 
 }
 

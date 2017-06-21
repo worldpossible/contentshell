@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 
     # script to sort/hide modules from the command line

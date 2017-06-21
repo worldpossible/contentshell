@@ -54,6 +54,12 @@ echo "
     </style>
 ";
 
+if (file_exists("/root/rachel-scripts/checker.php")
+        || file_exists("/root/rachel-scripts/esp-checker.php") {
+    $id = strtoupper(exec("ifconfig | grep eth0 | awk '{ print $5 }' | sed s/://g | grep -o '.\{6\}$'"));
+    echo "<h3 style='float: right;'>Device ID: $id</h3>";
+}
+
 #-------------------------------------------
 # get the disk usage and format it as best we can
 #-------------------------------------------

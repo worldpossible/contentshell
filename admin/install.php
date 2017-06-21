@@ -8,6 +8,58 @@ include "head.php";
 
 $mods_fs = getmods_fs();
 
+# here is where we handle the "advanced" installation options,
+# because of the file upload option, there's compatibility issues
+# doing it in ajax through our background.php script, so we do it the
+# old fashioned way here:
+
+if (isset($_POST['advanced_install'])) {
+
+    $error = false;
+
+    # figure out which server we're using
+    if (isset($_POST['server_custom']) && preg_match("/\w/", $_POST['server_custom'])) {
+
+       $server = $_POST['server_custom'];
+
+    } else if (isset($_POST['server'])) {
+
+        $known_servers = array(
+            "jeremy" => "192.168.1.74",
+            "jfield" => "192.168.1.6",
+        );
+
+        if (isset($known_servers[ $_POST['server'] ])) {
+            $server = $known_servers[ $_POST['server'] ];
+        } else {
+            $server = $_POST['server'];
+        }
+
+    } else {
+        $error = true;
+    }
+    $server = preg_replace("/[^a-zA-Z0-9\-\.\_]+/", "", $server);
+
+    # figure out which .modules file we're using
+    if (isset($_FILES['mfile_upload'])) {
+        $mfile = $_FILES['mfile_upload']['tmp_name']; 
+    } else if (isset($_POST['mfile'])) {
+        $mfile = preg_replace("/[^a-zA-Z0-9\-\.\_]+/", "", $_POST['mfile']);
+        $mfile = "../scripts/" . $mfile . ".modules";
+    } else {
+        $error = true;
+    }
+
+    if (!$error) {
+        installmods($mfile, $server);
+    }
+
+    # we redirect to ourseles avoid a reload calling another installation
+    header("Location: http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]");
+    exit;
+
+}
+
 ?>
 
 <style>
@@ -37,12 +89,13 @@ $mods_fs = getmods_fs();
         margin-right: -32px;
     }
 
-    /* available module list */
-    #availform {
+    #availformbox {
         background: #ddd;
         border-radius: 5px;
         padding: 5px;
     }
+
+    /* available module list */
     #availform input {
         margin: 5px;
         color: #ccc;
@@ -60,6 +113,22 @@ $mods_fs = getmods_fs();
         top: 8px;
         left: 5px;
         display: none;
+    }
+
+    /* advanced install */
+    #advancedbut{
+        font-size: x-small;
+        background: #eee;
+        border: 1px solid #ccc;
+        float: right;
+    }
+    #advanced {
+        xclear: right;
+        xfloat: right;
+        display: none;
+    }
+    #advanced input, #advanced select {
+        margin: 5px;
     }
 
     /* task list */
@@ -133,10 +202,10 @@ function sel (text) {
 // the languages with the most modules first
 var langCount = {};
 function compare(a,b) {
-    var alang = langCount[a.lang];
-    var blang = langCount[b.lang];
-    var aname = a.moddir.toLowerCase();
-    var bname = b.moddir.toLowerCase();
+    var alang = langCount[a.substring(0,2)];
+    var blang = langCount[b.substring(0,2)];
+    var aname = a.toLowerCase();
+    var bname = b.toLowerCase();
     if (alang > blang) return -1; 
     if (alang < blang) return 1; 
     if (aname < bname) return -1; 
@@ -179,25 +248,30 @@ function enableAvailUI() {
 function addMod() {
 
     disableAvailUI();
-    var moddir = $("#available").val()
-    if (!moddir) {
+    var moddirs = $("#available").val();
+    if (!moddirs) {
         enableAvailUI();
         return false;
     }
+    moddirs = moddirs.join();
+
     $.ajax({
-        url: "background.php?addModule=" + moddir,
+        url: "background.php?addModules=" + moddirs,
         success: function(results) {
-            // take the added item out of the available list
-            $("#available option[value=\"" + sel(results.moddir).substring(1)  + "\"]").remove();
-            // add the added item to the deleteable list
-/*
-            $("#modlist").prepend(
-                "<li id=\"" + results.moddir + "\">" + results.moddir +
-                "<a href=\"javascript:void(0)\" onclick=\"delMod('" + results.moddir + "')\">del</a></li>\n"
-            );
-*/
-            // re-enable the button
-            enableAvailUI();
+
+            // honestly I'm not clear on why moddirs is available
+            // inside the callback, but it is, so until I see weird
+            // behavior I won't bother passing it in a more explicit way
+
+            // take the added item out of the available list by adding
+            // them to "current tasks"
+            moddirs = moddirs.split(",");
+            for (var i = 0; i < moddirs.length; ++i) {
+                current_task_moddirs[ moddirs[i] ] = 1;;
+            }
+
+            // update the list to reflect this module is already added
+            drawRemoteModuleList();
         },
         error: function(xhr, status, error) {
             console.log("failure");
@@ -223,7 +297,7 @@ function delMod(moddir) {
         url: "background.php?deleteModule=" + moddir,
         success: function(results) {
             $(sel(results.moddir)).remove();
-            populateRemoteModuleList();
+            drawRemoteModuleList();
         },
         error: function(xhr, status, error) {
             var results = JSON.parse(xhr.responseText);
@@ -242,7 +316,7 @@ function delMod(moddir) {
 
 }
 
-function cancelTask(task_id, mybutton) {
+function cancelTask(task_id, moddir, mybutton) {
 
     $(mybutton).parent().css({ opacity: 0.5 });
     // $(mybutton).parent().append("<img src=\"../art/spinner.gif\">");
@@ -252,7 +326,8 @@ function cancelTask(task_id, mybutton) {
     $.ajax({
         url: "background.php?cancelTask=" + task_id,
         success: function(results) {
-            //console.log(results.task_id);
+            delete current_task_moddirs[moddir];
+            drawRemoteModuleList();
         },
         error: function(xhr, status, error) {
             var results = JSON.parse(xhr.responseText);
@@ -262,9 +337,10 @@ function cancelTask(task_id, mybutton) {
 }
 
 // check if we have any background tasks running
+var current_task_moddirs = {};
 function pollTasks() {
 
-    var freshtime = 5; // number of seconds after which we consider a task "stale"
+    var freshtime = 10; // number of seconds after which we consider a task "stale"
 
     $.ajax({
         url: "background.php?getTasks=1",
@@ -282,7 +358,7 @@ function pollTasks() {
 
                 // for completed tasks we get a task with a "dismissed" time set
                 if (results[i].dismissed) {
-                    reloadLocal = true;
+                    addToLocal(results[i].moddir);
                     continue;
                 }
 
@@ -310,7 +386,9 @@ function pollTasks() {
 
                 var newHTML = (
                     "<li id='task" + results[i].task_id + "'>" +
-                    "<button type=\"button\" onclick=\"cancelTask('" + results[i].task_id + "', this)\">" + butlabel + "</button>" +
+                    "<button type=\"button\" onclick=\"cancelTask('"
+                        + results[i].task_id + "', '"
+                        + results[i].moddir + "', this)\">" + butlabel + "</button>" +
                     "<button type=\"button\" onclick=\"toggleDetails('#details-" + results[i].task_id + "');\">details</button>"
                 );
 
@@ -318,9 +396,9 @@ function pollTasks() {
                 // this is from a cached copy of the remote module list
                 // which means it might not be there if this task is already
                 // being displayed before it's populated
-                if (remotemodlist[ results[i].moddir ]) {
-                    var total_files = remotemodlist[ results[i].moddir ].file_count;
-                    var total_data  = remotemodlist[ results[i].moddir ].ksize;
+                if (remotemod_hash[ results[i].moddir ]) {
+                    var total_files = remotemod_hash[ results[i].moddir ].file_count;
+                    var total_data  = remotemod_hash[ results[i].moddir ].ksize;
                     var files_done  = results[i].files_done;
                     var data_done   = Math.round( results[i].data_done / 1024 );
                     var files_perc = Math.round((files_done / total_files) * 100);
@@ -401,83 +479,114 @@ function toggleDetails(id) {
     }
 }
 
-// populate the remote module list (downloadable)
-// -- this is called once the local module list is known
-//
-// store a copy so we know how big these things are for our progress meter
-var remotemodlist = {};
-function populateRemoteModuleList() {
+// gets data about the remote modules from the central server
+var remotemod_hash = {};
+var remotemod_arr  = [];
+function getRemoteModuleInfo(drawCallback) {
 
-    // before we make changes to the list, we adjust the UI
-    disableAvailUI();
-    $("#availspin").show();                 // - add spinner
-    $("#available").empty();                // - empty the list
-    $("#available").append("<option>Loading...</option>"); // add "Loading" text
-
-    // now we make our ajax call to get the latest list
     $.ajax({
         url: "background.php?getRemoteModuleList=1",
         success: function(results) {
 
-            // this will allow us to sort stuff with the
-            // most popular module languages first
-            var arrayLength = results.length;
-            for (var i = 0; i < arrayLength; i++) {
-                if (results[i].lang in langCount) {
-                    ++langCount[ results[i].lang ];
-                } else {
-                    langCount[ results[i].lang ] = 1;
+            // remove contentshell - should background.php do it for us?
+            delete results['contentshell'];
+
+            // do some processing and copy from hash to array
+            remotemod_arr = [];
+            for (var key in results) {
+                if (results.hasOwnProperty(key)) {
+
+                    // determine language from the moddir name (two leading chars)
+                    results[key]['lang'] = results[key]['moddir'].substring(0,2);
+
+                    // we calculate the size in gb for legibility
+                    var gbsize = ((results[key]['ksize']/1024)/1024).toFixed(1);
+                    if (gbsize <  0.1) { gbsize = "0.1"; }
+                    results[key]['gbsize'] = gbsize;
+
+                    // figure out which languages have the most modules
+                    if (results[key]['lang'] in langCount) {
+                        ++langCount[ results[key]['lang'] ];
+                    } else {
+                        langCount[ results[key]['lang'] ] = 1;
+                    }
+
+                    // put it into the sortable array
+                    remotemod_arr.push( results[key]['moddir'] );
+
                 }
             }
-            // now do the sort
-            results.sort(compare);
 
-            // clear the existing list and spinner
-            $("#availspin").hide();
-            $("#available").empty();
-
-            // now we can populate the list
-            var lastLang = false;
-            for (var i = 0; i < arrayLength; i++) {
-
-                // store it for later (by moddir)
-                remotemodlist[results[i].moddir] = results[i];
-
-                // skip if it already appears locally
-                if ( $('#modlist').find(sel(results[i].moddir)).length ) {
-                    continue;
-                }
-
-                // put a separator if it's a different language
-                if (lastLang && lastLang != results[i].moddir.substring(0,2)) {
-                    $("#available").append("<option disabled>──────────</option>\n");
-                }
-                lastLang = results[i].moddir.substring(0,2);
-
-                // calc size in GB
-                var gbsize = ((results[i].ksize/1024)/1024).toFixed(1)
-                if (gbsize <  0.1) { gbsize = "0.1"; }
-
-                // finally, add the entry for this module
-                $("#available").append(
-                    "<option value=\"" + results[i].moddir + "\">"
-                    + results[i].moddir + " -- "
-                    + gbsize + " GB</option>"
-                );
-            }
-
-            // now that we've got a list we can add the button back
-            enableAvailUI();
-
+            // store the result hash for later
+            remotemod_hash = results;
+            // sort the array
+            remotemod_arr.sort(compare);
         },
-        error: function(myxhr, mystatus, myerror) {
-            $("#availspin").hide();
-            $("#available").empty();
-            $("#available").append("<option>Internal Error</option>");
-        },
+
+        // in case of error, the remotemod_hash will be empty
+        complete: drawCallback,
+
         timeout: ajaxTimeout
     });
 
+}
+
+function drawRemoteModuleList() {
+
+    $("#available").empty();
+
+    if (!remotemod_arr.length) {
+        $("#available").append("<option>Internal Error</option>");
+    }
+
+    // now we can populate the list
+    var lastLang = false;
+    var arrayLength = remotemod_arr.length;
+    for (var i = 0; i < arrayLength; i++) {
+
+        // the array is just for order, the module data is in the hash
+        var module = remotemod_hash[ remotemod_arr[i] ];
+
+        // we skip modules that are already installed (in the local list, via DOM)
+        // and also those that are currently installing (tracked in current_task_moddir)
+        if ( $('#modlist').find(sel(module['moddir'])).length
+                || current_task_moddirs[module['moddir']]) {
+            continue;
+        }
+
+        // put a separator if it's a different language
+        if (lastLang && lastLang != module['lang']) {
+            $("#available").append("<option disabled>──────────</option>\n");
+        }
+        lastLang = module['lang'];
+
+        // finally, add the entry for this module
+        $("#available").append(
+            "<option value=\"" + module['moddir'] + "\">"
+            + module['moddir'] + " -- "
+            + module['gbsize'] + " GB</option>"
+        );
+    }
+
+    // on the initial run we have to do these
+    // and it doesn't really hurt the rest of the time
+    $("#availspin").hide();
+    enableAvailUI();
+
+}
+
+// populate the remote module list (downloadable)
+// -- this is called once the local module list is known
+//
+// store a copy so we know how big these things are for our progress meter
+function initialRemoteModuleList() {
+
+    // before we make changes to the list, we adjust the UI
+    disableAvailUI();
+    $("#availspin").show();  // - add spinner
+    $("#available").append("<option>Loading...</option>"); // add "Loading" text
+    getRemoteModuleInfo(drawRemoteModuleList);
+    
 }
 
 var firstCall = true;
@@ -490,10 +599,7 @@ function populateLocalModuleList() {
             $("#modlist").empty();
             var arrayLength = results.length;
             for (var i = 0; i < arrayLength; i++) {
-                $("#modlist").append(
-                    "<li id=\"" + results[i].moddir + "\">" + results[i].moddir +
-                    "<button type=\"button\" onclick=\"delMod('" + results[i].moddir + "')\">delete</button></li>\n"
-                );
+                addToLocal(results[i].moddir);
             }
         },
         error: function(myxhr, mystatus, myerror) {
@@ -505,7 +611,7 @@ function populateLocalModuleList() {
             // we don't fire this off until after we've heard back
             // because we need to know what's local to filter the remote list
             if (firstCall) {
-                populateRemoteModuleList();
+                initialRemoteModuleList();
                 firstCall = false;
             }
         },
@@ -514,10 +620,19 @@ function populateLocalModuleList() {
 
 }
 
+function addToLocal (moddir) {
+    $("#modlist").append(
+        "<li id=\"" + moddir + "\">" + moddir +
+        "<button type=\"button\" onclick=\"delMod('" + moddir +
+        "')\">delete</button></li>\n"
+    );
+    delete current_task_moddirs[ moddir ];
+}
+
 // onload
 $(function() {
 
-    console.log("page load");
+    //console.log("page load");
 
     // remote list gets populated automatically the
     // first time we call this
@@ -568,16 +683,74 @@ function lsinput(i) {
     }
 }
 
+function toggleAdvanced() {
+    $('#advanced').toggle();
+    $('#availdiv').toggle();
+    if ($('#advancedbut').html() == "advanced") {
+        $('#advancedbut').html("standard");
+    } else {
+        $('#advancedbut').html("advanced");
+    }
+}
 
 </script>
 
 <h3>Add Modules</h3>
-<form id="availform">
-    <input id="livesearch" onfocus="lsfocus(this)" onblur="lsblur(this)" oninput="lsinput(this)" value="Live Search" disabled><br>
-    <select id="available" size="5"></select><br>
-    <button type="button" id="addmodbut" onclick="addMod();" disabled>Download</button>
-    <img src="../art/spinner.gif" id="availspin">
-</form>
+<div id="availformbox">
+
+    <button id="advancedbut" type="button" onclick="toggleAdvanced();">advanced</button>
+
+    <form id="advanced" method="post" enctype="multipart/form-data">
+        <b>.modules:</b>
+        <select name="mfile">
+<?php
+        # are we reliably in the admin directory
+        # to just do it like this?
+        $handle = opendir("../scripts");
+        $mfiles = array();
+        $has_full = false;
+        while ($mfile = readdir($handle)) {
+            if (preg_match("/^\./", $mfile)) { continue; }
+            if (!preg_match("/\.modules$/", $mfile)) { continue; }
+            if ($mfile == "full.modules") { $has_full = true; continue; }
+            $mfile = preg_replace("/\.modules$/","", $mfile);
+            array_push($mfiles, $mfile);
+        }
+        natcasesort($mfiles);
+        if ($has_full) {
+            echo "<option>full</option>\n";
+        }
+        foreach ($mfiles as $mfile) {
+            echo "<option>$mfile</option>\n";
+        }
+?>
+        </select>
+           <input type="hidden" name="MAX_FILE_SIZE" value="4096" />
+        or <input type="file" name="mfile_upload">
+        <br>
+        <b>server:</b>
+        <select name="server">
+            <option>dev.worldpossible.org</option>
+            <option>jeremy</option>
+            <option>jfield</option>
+        </select>
+        or specify<input type="text" name="server_custom" value="">
+        <br>
+        <!--button type="button" onclick="addModAdvanced();">Install</button-->
+        <input type="submit" name="advanced_install" value="Install">
+    </form>
+
+    <form id="availform"><!-- submitted via ajax -->
+        <div id="availdiv">
+        <input id="livesearch" onfocus="lsfocus(this)" onblur="lsblur(this)" oninput="lsinput(this)" value="Live Search" disabled><br>
+        <select id="available" size="10" multiple></select><br>
+        <button type="button" id="addmodbut" onclick="addMod();" disabled>Download</button>
+        <img src="../art/spinner.gif" id="availspin">
+        </div>
+
+        <div style="clear: both;"></div>
+    </form>
+</div>
 
 <h3>Currently Adding</h3>
 <ul id="tasks">

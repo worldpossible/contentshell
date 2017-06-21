@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 
 # This script installs, then sorts & hides modules
@@ -27,7 +28,7 @@ if (isset($argv[1]) && isset($argv[2])) {
         }
 
         require_once("admin/common.php");
-        sortmods($file, $server);
+        installmods($file, $server);
         exit(0);
 
     }
@@ -36,9 +37,5 @@ if (isset($argv[1]) && isset($argv[2])) {
 
 echo "Usage: php installmods.php modulesfile server\n";
 exit(1);
-
-function installmods() {
-    
-}
 
 ?>

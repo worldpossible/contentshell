@@ -32,6 +32,7 @@
     <div id="ip">
         <?php showip();
         # on the RACHEL-Plus we also show a battery meter
+        # XXX abstract this and the admin one into one piece of code
         if (is_rachelplus()) {
             echo '
                 <script>

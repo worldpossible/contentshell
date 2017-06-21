@@ -170,7 +170,7 @@ function pollTasks() {
 //console.log("Polling");
 
     $.ajax({
-        url: "background.php?getTasks=1",
+        url: "background.php?getTasks=1&includeVersion=1",
         success: function(results) {
 
             var in_progress = false;
@@ -224,6 +224,8 @@ function pollTasks() {
                         // width of the progressbar as set in the css
                         var data_perc  = Math.round((data_done / total_data) * 200);
                     } else {
+// XXX why do we do another check here? is this to do with visiting the
+// XXX page when updates are already underway?
                         $.ajax({
                             url: "background.php?selfUpdate=1&check=1",
                             success: function(results) { modules = results; },

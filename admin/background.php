@@ -3,7 +3,9 @@
 require_once("common.php");
 
 define("APIHOST",   "dev.worldpossible.org");
-define("RSYNCHOST", "dev.worldpossible.org");
+#define("RSYNCHOST", "dev.worldpossible.org");
+define("RSYNCHOST", "192.168.1.6");
+# XXX be sure to test with a bad host and see how it behaves
 
 if (isset($_GET['getRemoteModuleList'])) {
     getRemoteModuleList();
@@ -11,8 +13,8 @@ if (isset($_GET['getRemoteModuleList'])) {
 } else if (isset($_GET['getLocalModuleList'])) {
     getLocalModuleList();
 
-} else if (isset($_GET['addModule'])) {
-    addModule($_GET['addModule']);
+} else if (isset($_GET['addModules'])) {
+    addModules($_GET['addModules']);
 
 } else if (isset($_GET['deleteModule'])) {
     deleteModule($_GET['deleteModule']);
@@ -30,7 +32,7 @@ if (isset($_GET['getRemoteModuleList'])) {
     selfUpdate();
 
 } else if (isset($_GET['modUpdate'])) {
-    addModule($_GET['modUpdate']);
+    addModules($_GET['modUpdate']);
 
 } else if (isset($_GET['setLocalContent'])) {
     setLocalContent($_GET['setLocalContent']);
@@ -52,7 +54,9 @@ exit;
 #-------------------------------------------
 
 function getRemoteModuleList() {
-    $json = file_get_contents("http://" . APIHOST . "/cgi/json_api_v1.pl");
+    #$json = file_get_contents("http://" . APIHOST . "/cgi/json_api_v1.pl");
+    # using this call takes about 1/4 the time
+    $json = file_get_contents("http://" . APIHOST . "/cgi/updatecheck.pl");
     header('Content-Type: application/json');
     echo $json;
     exit;
@@ -107,21 +111,49 @@ function deleteModule($moddir) {
 
 }
 
-function addModule($moddir) {
+# takes a comma separated list of moddirs and install them
+# in the background
+function addModules($moddirs) {
 
+    $host = RSYNCHOST;
+    $relmodpath = getrelmodpath();
+
+    $moddirs = explode(",", $moddirs);
+
+    $zip = "z";
+    if (preg_match("/^[\d\.]+$/", $host)) {
+        $zip = "";
+    }
+
+    foreach ($moddirs as $moddir) {
+
+        # use rsync -z for remote hosts, not for LAN
+        # (the CPU overhead of zip actually slows it down on a fast network)
+        $cmd = "rsync -Pav$zip rsync://$host/rachelmods/$moddir $relmodpath/";
+
+        # insert a task into the DB
+        $db        = getdb();
+        $db_cmd    = $db->escapeString($cmd);
+        $db_moddir = $db->escapeString($moddir);
+        $db->exec("
+            INSERT INTO tasks (moddir, command)
+            VALUES ('$db_moddir', '$db_cmd')
+        ");
+
+    }
 
     # fire off our clever database updating rsync process
-    exec("php rsync.php " . RSYNCHOST . " $moddir > /dev/null &", $output, $rval);
+    exec("php do_tasks.php > /dev/null &", $output, $rval);
 
     if ($rval == 0) {
         header("HTTP/1.1 200 OK");
         header("Content-Type: application/json");
-        echo "{ \"moddir\" : \"$moddir\" }\n";
+        echo "{ \"status\" : \"OK\" }\n";
     } else {
         $output = implode(", ", $output);
         header("HTTP/1.1 500 Internal Server Error");
         header("Content-Type: application/json");
-        echo "{ \"error\" : \"$output\", \"moddir\" : \"$moddir\" }\n";
+        echo "{ \"error\" : \"$output\" }\n";
     }
 
     exit;
@@ -134,7 +166,7 @@ function cancelTask($task_id) {
 
     $db_task_id = $db->escapeString($task_id);
     $rv = $db->query("SELECT pid, retval, completed FROM tasks WHERE task_id = $db_task_id");
-    error_log("SELECT pid, retval, completed FROM tasks WHERE task_id = $db_task_id");
+    #error_log("SELECT pid, retval, completed FROM tasks WHERE task_id = $db_task_id");
     $task = $rv->fetchArray(SQLITE3_ASSOC);
 
     if (!$task) {
@@ -145,7 +177,12 @@ function cancelTask($task_id) {
     }
 
     if ($task['pid'] and !$task['completed']) {
-        exec("kill $task[pid]", $output, $rval);
+        # the process will be a subprocess of a shell (sh -c rsync)
+        # so we have to use pkill -P, which kills children of a given process
+        exec("pkill -P $task[pid]", $output, $rval);
+        error_log("pkill -P $task[pid]");
+        error_log("killing output: " . implode($output));
+        error_log("killing rval: $rval");
     }
 
     $db_dismissed = $db->escapeString(time());
@@ -179,10 +216,13 @@ function getTasks() {
             $db_dismissed = $db->escapeString($row['dismissed']);
             $db_task_id = $db->escapeString($row['task_id']);
             $db->exec("UPDATE tasks SET dismissed = '$db_dismissed' WHERE task_id = '$db_task_id'");
-            // we also get the latest version number and return it
-            // this is a bit inefficient, getting them all when we just need one
-            if (empty($modules)) { $modules = getmods_fs(); } // a bit of cacheing
-            $row['version'] = $modules[ $row['moddir'] ]['version'];
+            if (!empty($_GET['includeVersion'])) {
+                // if requested, we also get the latest version number and return it
+                // this is so when an update task completes it can update the UI with the new version number
+                // it's a bit inefficeint as it gets all version numbers when we just need one
+                if (empty($modules)) { $modules = getmods_fs(); } // a bit of caching 
+                $row['version'] = $modules[ $row['moddir'] ]['version'];
+            }
         }
         array_push($tasks, $row);
     }
@@ -227,17 +267,17 @@ function wifiStatus() {
 
 function selfUpdate() {
 
-    if (!empty($_GET['check'])) {
-        $json = file_get_contents("http://" . APIHOST . "/cgi/updatecheck.pl");
-        if (empty($json)) {
-	    error_log("selfUpdate failed: no JSON at http://" . APIHOST . "/cgi/updatecheck.pl");
-            header("HTTP/1.1 500 Internal Server Error");
-            exit;
-        }
-        header('Content-Type: application/json');
-        echo $json;
-        exit;
-    }
+#    if (!empty($_GET['check'])) {
+#        $json = file_get_contents("http://" . APIHOST . "/cgi/updatecheck.pl");
+#        if (empty($json)) {
+#	    error_log("selfUpdate failed: no JSON at http://" . APIHOST . "/cgi/updatecheck.pl");
+#            header("HTTP/1.1 500 Internal Server Error");
+#            exit;
+#        }
+#        header('Content-Type: application/json');
+#        echo $json;
+#        exit;
+#    }
 
     # we install two directories up from here
     $destdir = dirname(dirname(__FILE__));
@@ -246,11 +286,12 @@ function selfUpdate() {
     # lastly - it's important that we keep the trailing "/" on the source because we're
     # putting the contents into a directory of a different name, and don't want to
     # create a directory called "contentshell" in there
-    $cmd = "rsync -Pavz --exclude modules --exclude /admin/admin.sqlite --exclude '.*' --del rsync://" . RSYNCHOST . "/rachelmods/contentshell/ $destdir";
+#    $cmd = "rsync -Pavz --exclude modules --exclude /admin/admin.sqlite --exclude '.*' --del rsync://" . RSYNCHOST . "/rachelmods/contentshell/ $destdir";
 
-    exec($cmd, $output, $retval);
-    if ($retval == 0) {
-        $cmd = "bash $destdir/admin/post-update-script.sh";
+#    exec($cmd, $output, $retval);
+
+#    if ($retval == 0) {
+        $cmd = "bash $destdir/admin/post-update.sh";
         exec($cmd, $output, $retval);
         if ($retval == 0) {
             # pull the version info from the new file - if the HTML changes too much this will break
@@ -263,7 +304,7 @@ function selfUpdate() {
                 exit;
             }
         }
-    }
+#    }
 
     error_log("selfUpdate Failed: cmd returned $retval, " . implode(", ", $output));
     header("HTTP/1.1 500 Internal Server Error");
