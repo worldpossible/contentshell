@@ -31,6 +31,9 @@ include "head.php";
         font-family: sans-serif;
         padding: 2px;
     }
+    th {
+        background: #ddd;
+    }
 </style>
 
 <script>
@@ -94,6 +97,7 @@ function selfUpdate() {
                 // this indicates there was at least *one* content update available
                 if (updates_available) {
                     $("#avail_something").show();
+                    $("#update_all_button").show();
                 }
             },
             error: function() {
@@ -159,6 +163,54 @@ function modUpdate(moddir) {
 
 }
 
+function updateAllMods() {
+
+    $("#update_all_button").prop("disabled", true);
+    $("#update_all_spinner").show();
+
+    // You should know this is the strangest
+    // jquery selector I've ever used! - Flynn Code Rider
+    // (find all buttons, id starting with "avail_", and visible)
+    var updates =  $('button[id^="avail_"]:visible');
+
+    // go through and get the moddir of each module with
+    // an update available  and udpate the interface
+    var moddirs = [];
+    for (var i = 0; i < updates.length; ++i) {
+        var moddir = updates[i].id.substring(6); // remove the "avail_" to get the moddir
+        $("#avail_" +moddir).hide(); // hide the module's update button
+        $("#prog_"  +moddir).show(); // show the module's progress bar
+        $("#progin_"+moddir).html('Waiting...'); // add this inside the progress bar
+        moddirs.push(moddir);
+    }
+
+    // make it a comma-separated list
+    moddir_list = moddirs.join();
+
+    $.ajax({
+        url: "background.php?addModules=" + moddir_list,
+        success: function(results) {
+            // start polling (are we already polling?)
+            pollTasks();
+
+            // update button UI
+            $("#update_all_spinner").hide();
+            $("#update_all_button").css("color", "green");
+            $("#update_all_button").html("&#10004; Update Process Started");
+
+        },
+        error: function(xhr, status, error) {
+            // notify via button
+            $("#update_all_spinner").hide();
+            $("#update_all_button").css("color", "#c00");
+            $("#update_all_button").html("X Internal Error (6)");
+        }
+    });
+
+
+
+}
+
 // this checks the status of updates
 var polling = false;
 function pollTasks() {
@@ -196,7 +248,6 @@ function pollTasks() {
                 } else if (results[i].completed && results[i].retval == 0) {
 
                     // the rsync completed normally
-                    button.css("color", "#c00");
                     button.css("color", "green");
                     button.html("&#10004; Up to date");
                     button.prop("disabled", true);
@@ -265,6 +316,7 @@ function pollTasks() {
     });
 
 }
+
 
 // this cancels a task
 /*
@@ -393,6 +445,13 @@ if (!$kiwix_version || !preg_match("/^[\d\.]+$/", $kiwix_version)) {
         #echo "<div class='update_available' id='avail_$mod[moddir]'> Update Available</span></td></tr>\n";
     }
 ?>
+
+<tr>
+<td colspan="2" style="text-align: right;">
+    <img src="../art/spinner.gif" id="update_all_spinner" style="display: none; vertical-align: text-bottom;">
+    <button id="update_all_button" onclick="updateAllMods();"  style="display: none;">Update All Modules</button>
+</td>
+</tr>
 
 </table>
 
