@@ -3,8 +3,8 @@
 require_once("common.php");
 
 define("APIHOST",   "dev.worldpossible.org");
-#define("RSYNCHOST", "dev.worldpossible.org");
-define("RSYNCHOST", "192.168.1.6");
+define("RSYNCHOST", "dev.worldpossible.org");
+#define("RSYNCHOST", "192.168.1.6");
 # XXX be sure to test with a bad host and see how it behaves
 
 if (isset($_GET['getRemoteModuleList'])) {
@@ -267,17 +267,17 @@ function wifiStatus() {
 
 function selfUpdate() {
 
-#    if (!empty($_GET['check'])) {
-#        $json = file_get_contents("http://" . APIHOST . "/cgi/updatecheck.pl");
-#        if (empty($json)) {
-#	    error_log("selfUpdate failed: no JSON at http://" . APIHOST . "/cgi/updatecheck.pl");
-#            header("HTTP/1.1 500 Internal Server Error");
-#            exit;
-#        }
-#        header('Content-Type: application/json');
-#        echo $json;
-#        exit;
-#    }
+    if (!empty($_GET['check'])) {
+        $json = file_get_contents("http://" . APIHOST . "/cgi/updatecheck.pl");
+        if (empty($json)) {
+	    error_log("selfUpdate failed: no JSON at http://" . APIHOST . "/cgi/updatecheck.pl");
+            header("HTTP/1.1 500 Internal Server Error");
+            exit;
+        }
+        header('Content-Type: application/json');
+        echo $json;
+        exit;
+    }
 
     # we install two directories up from here
     $destdir = dirname(dirname(__FILE__));
@@ -286,11 +286,11 @@ function selfUpdate() {
     # lastly - it's important that we keep the trailing "/" on the source because we're
     # putting the contents into a directory of a different name, and don't want to
     # create a directory called "contentshell" in there
-#    $cmd = "rsync -Pavz --exclude modules --exclude /admin/admin.sqlite --exclude '.*' --del rsync://" . RSYNCHOST . "/rachelmods/contentshell/ $destdir";
+    $cmd = "rsync -Pavz --exclude modules --exclude /admin/admin.sqlite --exclude '.*' --del rsync://" . RSYNCHOST . "/rachelmods/contentshell/ $destdir";
 
-#    exec($cmd, $output, $retval);
+    exec($cmd, $output, $retval);
 
-#    if ($retval == 0) {
+    if ($retval == 0) {
         $cmd = "bash $destdir/admin/post-update.sh";
         exec($cmd, $output, $retval);
         if ($retval == 0) {
@@ -304,7 +304,7 @@ function selfUpdate() {
                 exit;
             }
         }
-#    }
+    }
 
     error_log("selfUpdate Failed: cmd returned $retval, " . implode(", ", $output));
     header("HTTP/1.1 500 Internal Server Error");
