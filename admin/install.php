@@ -41,7 +41,7 @@ if (isset($_POST['advanced_install'])) {
     $server = preg_replace("/[^a-zA-Z0-9\-\.\_]+/", "", $server);
 
     # figure out which .modules file we're using
-    if (isset($_FILES['mfile_upload'])) {
+    if (!empty($_FILES['mfile_upload']['tmp_name'])) {
         $mfile = $_FILES['mfile_upload']['tmp_name']; 
     } else if (isset($_POST['mfile'])) {
         $mfile = preg_replace("/[^a-zA-Z0-9\-\.\_]+/", "", $_POST['mfile']);
@@ -129,6 +129,11 @@ if (isset($_POST['advanced_install'])) {
     }
     #advanced input, #advanced select {
         margin: 5px;
+    }
+    #advanced select { min-width: 15em; }
+    /* make submit look like button in our style.css */
+    #advanced input[type=submit] {
+        margin: 3px; padding: .25em 1em;
     }
 
     /* task list */
@@ -245,14 +250,25 @@ function enableAvailUI() {
 } 
 
 // add (i.e. rsync) a module
-function addMod() {
+function addMods(moddirs) {
 
     disableAvailUI();
-    var moddirs = $("#available").val();
+
+    // we take an optional array of moddirs as an argument
+    // (used by advanced install's checkReinstall()) but
+    // if it's omitted, we use what's selected in the selection
+    // box (normal behavior)
+    if (!moddirs) {
+        moddirs = $("#available").val();
+    }
+
+    // nothing selected - nothing to do
     if (!moddirs) {
         enableAvailUI();
         return false;
     }
+
+    // turn it into a comma-separated list
     moddirs = moddirs.join();
 
     $.ajax({
@@ -621,11 +637,16 @@ function populateLocalModuleList() {
 }
 
 function addToLocal (moddir) {
-    $("#modlist").append(
-        "<li id=\"" + moddir + "\">" + moddir +
-        "<button type=\"button\" onclick=\"delMod('" + moddir +
-        "')\">delete</button></li>\n"
-    );
+    // we have to check if it's already there first
+    if (!$(sel(moddir)).length
+            // and that it's not just a sort command
+            && moddir != ".modules sort") {
+        $("#modlist").append(
+            "<li id=\"" + moddir + "\">" + moddir +
+            "<button type=\"button\" onclick=\"delMod('" + moddir +
+            "')\">delete</button></li>\n"
+        );
+    }
     delete current_task_moddirs[ moddir ];
 }
 
@@ -693,6 +714,21 @@ function toggleAdvanced() {
     }
 }
 
+function checkReinstall() {
+    // if we're reinstalling the current set we don't need to do
+    // a real form submit (no filesystem interaction) so we can
+    // intercept and use the ajax methods here
+    if ( $('select[name="mfile"]').val() == "reinstall existing set" ) {
+        modlist = [];
+        $("#modlist li").each( function(idx, li) {
+            modlist.push(li.id);
+        });
+        addMods(modlist);
+        toggleAdvanced();
+        return false;
+    }
+}
+
 </script>
 
 <h3>Add Modules</h3>
@@ -700,9 +736,16 @@ function toggleAdvanced() {
 
     <button id="advancedbut" type="button" onclick="toggleAdvanced();">advanced</button>
 
-    <form id="advanced" method="post" enctype="multipart/form-data">
-        <b>.modules:</b>
+    <form id="advanced" method="post" onsubmit="return checkReinstall();" enctype="multipart/form-data">
+        <table>
+        <tr>
+        <th>.modules:</th>
+        <td>
         <select name="mfile">
+        <!-- when this is internationalized, the value will be different -->
+        <!-- than the contents of the <option> tag -->
+        <option value="reinstall existing set">reinstall existing set</option>
+        <option disabled>──────────</option>
 <?php
         # are we reliably in the admin directory
         # to just do it like this?
@@ -725,18 +768,25 @@ function toggleAdvanced() {
         }
 ?>
         </select>
+        </td>
+        <td>
            <input type="hidden" name="MAX_FILE_SIZE" value="4096" />
-        or <input type="file" name="mfile_upload">
-        <br>
-        <b>server:</b>
+        <i>&mdash; or &mdash;</i> upload <input type="file" name="mfile_upload">
+        </td>
+        </tr>
+        <tr>
+        <th>server:</th>
+        <td>
         <select name="server">
             <option>dev.worldpossible.org</option>
             <option>jeremy</option>
             <option>jfield</option>
         </select>
-        or specify<input type="text" name="server_custom" value="">
-        <br>
-        <!--button type="button" onclick="addModAdvanced();">Install</button-->
+        </td>
+        <td>
+        <i>&mdash; or &mdash;</i> specify host <input type="text" name="server_custom" value="">
+        </td>
+        </table>
         <input type="submit" name="advanced_install" value="Install">
     </form>
 
@@ -744,7 +794,7 @@ function toggleAdvanced() {
         <div id="availdiv">
         <input id="livesearch" onfocus="lsfocus(this)" onblur="lsblur(this)" oninput="lsinput(this)" value="Live Search" disabled><br>
         <select id="available" size="10" multiple></select><br>
-        <button type="button" id="addmodbut" onclick="addMod();" disabled>Download</button>
+        <button type="button" id="addmodbut" onclick="addMods();" disabled>Download</button>
         <img src="../art/spinner.gif" id="availspin">
         </div>
 
