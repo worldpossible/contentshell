@@ -430,7 +430,7 @@ if (!$kiwix_version || !preg_match("/^[\d\.]+$/", $kiwix_version)) {
 
 
 </td></tr>
-<tr><th colspan="2">Content<div id='avail_something'>Content Updates Available Below</div></th></tr>
+<tr><th colspan="2">Module<div id='avail_something'>Module Updates Available Below</div></th></tr>
 
 <?php
     # get module info
@@ -449,7 +449,7 @@ if (!$kiwix_version || !preg_match("/^[\d\.]+$/", $kiwix_version)) {
 <tr>
 <td colspan="2" style="text-align: right;">
     <img src="../art/spinner.gif" id="update_all_spinner" style="display: none; vertical-align: text-bottom;">
-    <button id="update_all_button" onclick="updateAllMods();"  style="display: none;">Update All Modules</button>
+    <button id="update_all_button" onclick="updateAllMods();" style="display: none;">Update All Modules</button>
 </td>
 </tr>
 
