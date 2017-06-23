@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#-------------------------------------------
 # This script is always run after doing a contentshell update,
 # which means you must consider the following:
 #
@@ -7,11 +8,15 @@
 #   2. The script should work on any version of RACHEL
 #   3. The script should complete quickly and exit cleanly
 #
-# This takes some doing, but it's important
+# This takes some doing, but it's important. Modify this
+# script carefully and always test, test, test the results
+# on a few platforms.
+#-------------------------------------------
+
 main() {
 
     setVariables
-    checkVariables
+    #checkVariables
     installESP
 
 }
@@ -73,7 +78,7 @@ installESP() {
         uninstallWeaved
         # remove weaved from startup
         sed -i '/Weaved/ s/^#*/#/' $startScript
-        # add esp to startup
+        # add esp to startup, right before Kiwix
         sed -i '/Updating the Kiwix library/ i # Start esp - inserted by post-update.sh' $startScript
         sed -i '/Updating the Kiwix library/ i echo $(date) - Start esp check process' $startScript
         sed -i '/Updating the Kiwix library/ i php /root/rachel-scripts/esp-checker.php &' $startScript
@@ -86,19 +91,19 @@ installESP() {
         sed -i 's/\/checker.php/\/esp-checker.php/' $startScript
         # could rm, but this is slightly safer if the cp later fails
         mv $scriptDir/checker.php $scriptDir/esp-checker.php
-	# we only want to kill on this broader name if we're sure we
-	# haven't updated to the new name yet
+        # we only want to kill on this broader name if we're sure we
+        # haven't updated to the new name yet
         pkill -f checker.php
     fi
 
     # on any version of the Plus, we update the script and restart it
     if [[ $isPlus ]]; then
         # install contentshell's esp over previous versions
-        cp checker.php /root/rachel-scripts/esp-checker.php
-        chmod 744 /root/rachel-scripts/esp-checker.php
+        cp $adminDir/esp-checker.php $scriptDir/esp-checker.php
+        chmod 744 $scriptDir/esp-checker.php
         # restart esp
         pkill -f esp-checker.php
-        php /root/rachel-scripts/esp-checker.php > /dev/null 2>&1 &
+        php $scriptDir/esp-checker.php > /dev/null 2>&1 &
     fi
 
 }
