@@ -640,7 +640,7 @@ function installmods($file, $install_server) {
         copy($file, $mfile);
 
         $sortscript = dirname(getAbsModPath()) . "/sortmods.php";
-        $db_cmd = $db->escapeString("$sortscript $mfile");
+        $db_cmd = $db->escapeString("php $sortscript $mfile");
 
         # insert a sort task into the DB
         $db->exec("
