@@ -25,7 +25,7 @@ if (isset($_GET['wifi'])) {
 }
 
 if (isset($_POST['shutdown'])) {
-    exec("sudo /sbin/shutdown now", $exec_out, $exec_err);
+    exec("sudo /sbin/poweroff", $exec_out, $exec_err);
     if ($exec_err) {
         echo $lang['shutdown_failed'];
     } else {
@@ -33,7 +33,7 @@ if (isset($_POST['shutdown'])) {
     }
     exit;
 } else if (isset($_POST['reboot'])) {
-    exec("sudo /sbin/shutdown -r now", $exec_out, $exec_err);
+    exec("sudo /sbin/reboot", $exec_out, $exec_err);
     if ($exec_err) {
         echo $lang['restart_failed'];
     } else {
