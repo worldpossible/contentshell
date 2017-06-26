@@ -32,6 +32,7 @@
                                     background: "url(\'art/battery-level-sprite-dark.png\')",
                                     backgroundPosition: horz+"px "+vert+"px",
                                 });
+                                $("#battery").prop("title", results.level + "%");
                             },
                             complete: function() {
                                 setTimeout(getBatteryInfo, refreshRate);
