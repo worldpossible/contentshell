@@ -371,11 +371,11 @@ function pollTasks() {
             for (var i = 0; i < arrayLength; i++) {
 
                 // for completed tasks we get a task with a "dismissed" time set
-		// XXX known bug: if there are other windows open reading tasks
-		// we'll miss the "dismissed" flag (the other window will get it)
-		// so either we need send background.php more info (like a list
-		// of the tasks we're monitoring) or we need to keep track ourselves.
-		// but it all gets fixed when all the tasks complete anyway...
+                // XXX known bug: if there are other windows open reading tasks
+                // we'll miss the "dismissed" flag (the other window will get it)
+                // so either we need send background.php more info (like a list
+                // of the tasks we're monitoring) or we need to keep track ourselves.
+                // but it all gets fixed when all the tasks complete anyway...
                 if (results[i].dismissed) {
                     addToLocal(results[i].moddir);
                     continue;

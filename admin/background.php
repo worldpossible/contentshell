@@ -238,12 +238,12 @@ function wifiStatus() {
     if ($_GET['wifistat'] == "on") {
          exec("/etc/WiFi_Setting.sh > /dev/null 2>&1", $output, $retval);
     } else if ($_GET['wifistat'] == "off") {
-	exec("/sbin/ifconfig wlan0 down", $output, $retval);
+        exec("/sbin/ifconfig wlan0 down", $output, $retval);
     } else if ($_GET['wifistat'] == "check") {
-	$retval = 0;
+        $retval = 0;
     } else {
-	# unknown command
-	$retval = 1;
+        # unknown command
+        $retval = 1;
     }
 
     # there was a problem
@@ -270,7 +270,7 @@ function selfUpdate() {
     if (!empty($_GET['check'])) {
         $json = file_get_contents("http://" . APIHOST . "/cgi/updatecheck.pl");
         if (empty($json)) {
-	    error_log("selfUpdate failed: no JSON at http://" . APIHOST . "/cgi/updatecheck.pl");
+            error_log("selfUpdate failed: no JSON at http://" . APIHOST . "/cgi/updatecheck.pl");
             header("HTTP/1.1 500 Internal Server Error");
             exit;
         }

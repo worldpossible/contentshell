@@ -194,7 +194,7 @@ function getdb() {
     ");
     $admin = $_db->querySingle("SELECT 1 FROM users WHERE username = 'admin'");
     if (!$admin) {
-	# insert default user/pass
+        # insert default user/pass
         $_db->exec("
             INSERT INTO users (username, password)
             VALUES ('admin', 'd54f4a435aca0ed313c2a7a0b9914d78')

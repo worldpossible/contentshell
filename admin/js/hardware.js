@@ -9,11 +9,11 @@ function wifiStatus(status) {
     $.ajax({
         url: "background.php?wifistat=" + status,
         success: function(results) {
-	    if (results.wifistat == 1) {
-		wifiShowOn();
-	    } else {
-		wifiShowOff();
-	    }
+            if (results.wifistat == 1) {
+                wifiShowOn();
+            } else {
+                wifiShowOff();
+            }
         },
         error: function() { wifiShowError(); }
     });
@@ -26,13 +26,13 @@ function wifiShowWait() {
 
 function wifiShowOn() {
     $("#wifistat").html(
-	"<span style='color: #3a3; font-weight: bold;'><?php echo $lang['is_on'] ?></span>"
+        "<span style='color: #3a3; font-weight: bold;'><?php echo $lang['is_on'] ?></span>"
     );
 }
 
 function wifiShowOff() {
     $("#wifistat").html(
-	"<span style='color: #a33; font-weight: bold;'><?php echo $lang['is_off'] ?></span>"
+        "<span style='color: #a33; font-weight: bold;'><?php echo $lang['is_off'] ?></span>"
     );
 }
 

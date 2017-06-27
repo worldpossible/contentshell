@@ -15,11 +15,11 @@ include "head.php";
 #-------------------------------------------
 if (isset($_GET['wifi'])) {
     if ($_GET['wifi'] == "on") {
-	echo "Turning WIFI ON... ";
-	exec("/etc/WiFi_Setting.sh");
+        echo "Turning WIFI ON... ";
+        exec("/etc/WiFi_Setting.sh");
     } else if ($_GET['wifi'] == "off") {
-	echo "Turning WIFI OFF... ";
-	exec("/sbin/ifconfig wlan0 down");
+        echo "Turning WIFI OFF... ";
+        exec("/sbin/ifconfig wlan0 down");
     }
     echo "Done.";
 }
@@ -159,16 +159,16 @@ if ($usage_supported) {
 if (is_rachelplus()) {
 
     echo "
-	<h2>$lang[wifi_control]</h3>
-	<div style='height: 24px;'>
-	<div style='float: left; height: 24px; margin-right: 10px;'>$lang[current_status]:</div> 
-        <div id='wifistat' style='height: 24px;'>&nbsp;</div>
-	</div>
-	<div style='margin-top: 10px;'>
-        <button onclick=\"wifiStatus('on');\">$lang[turn_on]</button>
-        <button onclick=\"wifiStatus('off');\">$lang[turn_off]</button>
-	</div>
-	<p>$lang[wifi_warning]</p>
+        <h2>$lang[wifi_control]</h3>
+        <div style='height: 24px;'>
+        <div style='float: left; height: 24px; margin-right: 10px;'>$lang[current_status]:</div> 
+            <div id='wifistat' style='height: 24px;'>&nbsp;</div>
+        </div>
+        <div style='margin-top: 10px;'>
+            <button onclick=\"wifiStatus('on');\">$lang[turn_on]</button>
+            <button onclick=\"wifiStatus('off');\">$lang[turn_off]</button>
+        </div>
+        <p>$lang[wifi_warning]</p>
     ";
 
 }

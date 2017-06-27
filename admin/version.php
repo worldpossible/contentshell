@@ -384,11 +384,11 @@ if (isset($output[0]) && preg_match("/Machine model: (.+)/", $output[0], $matche
 
     exec("arch", $output);
     if ($output) {
-	if ($hardware) {
-		$hardware .= " ($output[0])";
-	} else {
-	    $hardware = $output[0];
-	}
+        if ($hardware) {
+            $hardware .= " ($output[0])";
+        } else {
+            $hardware = $output[0];
+        }
     }
 
 }
