@@ -141,8 +141,12 @@ installAWStats() {
     # we only install on the plus, and only if it's not there yet
     # -- in the future we'll want to check a version number or just
     # always copy the lastest version over
+    # -- early on there was an installer error where we didn't
+    # create the data directory, so we check for that
     awstatsDir=/media/RACHEL/awstats
-    if [[ $isPlus && ! -d $awstatsDir ]]; then
+    if [[ $isPlus && ! -d $awstatsDir/data ]]; then
+        # remove any incomplete version
+        rm -rf $awstatsDir
         # copy over our version
         cp -r $adminDir/externals/awstats $awstatsDir
         # symlink the conf file
