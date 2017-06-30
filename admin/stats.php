@@ -3,6 +3,34 @@ require_once("common.php");
 if (!authorized()) { exit(); }
 
 #-------------------------------------------
+# send them to awstats if it's installed
+#-------------------------------------------
+if (file_exists("/media/RACHEL/awstats")) {
+    if (!empty($_GET['header_only'])) {
+        output_and_exit("");
+    }
+    echo <<<EOT
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>RACHEL Stats</title>
+</head>
+<frameset rows="60,*">
+<frame name="topnav" src="stats.php?header_only=1" noresize="noresize" scrolling="no" frameborder="0">
+<frameset cols="240,*">
+<frame name="mainleft" src="//$_SERVER[HTTP_HOST]:83/cgi-bin/awstats.pl?framename=mainleft" noresize="noresize" frameborder="0">
+<frame name="mainright" src="//$_SERVER[HTTP_HOST]:83/cgi-bin/awstats.pl?framename=mainright" noresize="noresize" scrolling="yes" frameborder="0">
+<noframes><body>Your browser does not support frames.<br>
+Please try a different browser.<br>
+</body></noframes>
+</frameset>
+</html>
+EOT;
+exit;
+}
+
+#-------------------------------------------
 # configuration
 #-------------------------------------------
 $maxlines = 10000;

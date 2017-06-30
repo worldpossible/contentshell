@@ -291,7 +291,7 @@ function selfUpdate() {
     exec($cmd, $output, $retval);
 
     if ($retval == 0) {
-        $cmd = "bash $destdir/admin/post-update.sh";
+        $cmd = "bash $destdir/admin/post-update-script.sh";
         exec($cmd, $output, $retval);
         if ($retval == 0) {
             # pull the version info from the new file - if the HTML changes too much this will break

@@ -473,6 +473,8 @@ function pollTasks() {
 
         },
         error: function(xhr, status, error) {
+            // XXX if we can't connect (to ourselves - background.php) the
+            // interface just stops updating (no "stalled" messsage)
             console.log("Failed to get tasks");
         },
         complete: function(xhr, status) {
@@ -724,7 +726,11 @@ function checkReinstall() {
         $("#modlist li").each( function(idx, li) {
             modlist.push(li.id);
         });
-        addMods(modlist);
+        // if we don't check that there's something there,
+        // it installs everything - and that would be bad
+        if (modlist.length) {
+            addMods(modlist);
+        }
         toggleAdvanced();
         return false;
     }
