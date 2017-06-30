@@ -13,6 +13,15 @@
 # on a few platforms.
 #-------------------------------------------
 
+# XXX currently this script might restart the webserver,
+# which will kill any currently installing modules
+# it doesn't seem to be related to signals (tried trapping
+# them) but rather the pipes in do_tasks.php that read
+# rsync getting closed (or perhaps rsync getting killed?)
+# so you'd have to start there in fixing that, or perhaps
+# just disallow selfUpdate while items are installing
+# (probably should queue the selfUpdate like a module?)
+
 main() {
 
     setVariables
@@ -157,7 +166,8 @@ installAWStats() {
             crontabFile=/etc/crontab
             if [[ -z `grep 'awstats upkeep' $crontabFile` ]]; then
                 perl -pi -e 's/ \S+ / RACHEL /' /var/log/httpd/access_log \
-                && echo "# awstats upkeep\n*/10 * * * * root $awstatsDir/tools/awstats_updateall.pl now " \
+                && printf "%s\n%s%s" "# awstats upkeep" \
+                "*/10 * * * * root $awstatsDir/tools/awstats_updateall.pl now " \
                 "-awstatsprog=$awstatsDir/wwwroot/cgi-bin/awstats.pl > /dev/null" >> $crontabFile &
             fi
         fi
@@ -167,7 +177,7 @@ installAWStats() {
 # restarts the webserver if the flag to do so has been set
 restartWebserver() {
     if [[ $isPlus ]]; then
-        killall lighttpd && /usr/bin/lighttpd -f /usr/local/etc/lighttpd.conf
+        killall -INT lighttpd && /usr/bin/lighttpd -f /usr/local/etc/lighttpd.conf
     fi
 }
 
