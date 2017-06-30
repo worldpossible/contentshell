@@ -6,9 +6,12 @@
 #
 
 en-local_content
+en-moodle
 en-saylor
 en-boundless
+en-openstax
 en-ck12
+en-coreknowledge
 en-algebra2go
 en-rachelcourses
 en-oya
@@ -35,6 +38,8 @@ en-TED
 en-radiolab
 en-ebooks
 en-afristory
+en-mustardseedbooks
+en-catdogbooks
 en-iicba
 en-powertyping
 en-olpc
@@ -42,6 +47,7 @@ en-olpc
 # spanish modules
 es-kalite
 es-ebooks
+es-mustardseedbooks
 es-ap_didact
 es-biblioteca
 es-cnbguatemala
@@ -58,3 +64,7 @@ fr-wikivoyage
 fr-wiktionary
 fr-ebooksgratuits
 fr-haitifutur
+fr-phet-haiti
+fr-bouquineux
+fr-catdogbooks
+
