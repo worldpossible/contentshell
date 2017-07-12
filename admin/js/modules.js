@@ -26,7 +26,7 @@ $(function() {
     var langhash = {};
     $("#sortable :checkbox").each(function () {
         match = $(this).attr('id').match(/^(..)-/);
-        if (match[0]) { langhash[ match[1] ] = true; }
+        if (match && match[0]) { langhash[ match[1] ] = true; }
     });
     // then we convert it to an array
     for (var lang in langhash) {
