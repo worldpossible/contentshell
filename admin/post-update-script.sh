@@ -138,19 +138,22 @@ uninstallWeaved() {
 }
 
 installAWStats() {
-    # we only install on the plus, and only if it's not there yet
-    # -- in the future we'll want to check a version number or just
-    # always copy the lastest version over
-    # -- early on there was an installer error where we didn't
-    # create the data directory, so we check for that
+    # we only install on the plus
     awstatsDir=/media/RACHEL/awstats
-    if [[ $isPlus && ! -d $awstatsDir/data ]]; then
-        # remove any incomplete version
-        rm -rf $awstatsDir
-        # copy over our version
-        cp -r $adminDir/externals/awstats $awstatsDir
-        # symlink the conf file
-        ln -s $awstatsDir/awstats.conf /etc/
+    if [[ $isPlus ]]; then
+        # and only if it's not there yet -- in the future we'll want
+        # to check a version number or just always copy the lastest
+        # version over -- early on there was an installer error
+        # where we didn't create the data directory, so we check for that
+        # instead of just the awstats directory
+        if [[ ! -d $awstatsDir/data ]]; then
+            # remove any incomplete version
+            rm -rf $awstatsDir
+            # copy over our version
+            cp -r $adminDir/externals/awstats $awstatsDir
+            # symlink the conf file
+            ln -sf $awstatsDir/awstats.conf /etc/
+        fi
         # next we update lighttpd configuration to run awstats on
         # its own port, and to use a fixed hostname in the log
         # -- be careful not to do it twice (or more!)
@@ -162,17 +165,25 @@ installAWStats() {
             # to do this once at the end, we actually need this to happen
             # before we do the log processing below, so do it now
             restartWebserver
-            # fix log & process via cron:
-            # the first time we have to filter the existing log
-            # for server hostname/ip -- this can take a few minutes
-            # so we background it -- we also don't want to put in
-            # the cron entry until it's done so...
-            crontabFile=/etc/crontab
-            if [[ -z `grep 'awstats upkeep' $crontabFile` ]]; then
-                perl -pi -e 's/ \S+ / RACHEL /' /var/log/httpd/access_log \
-                && printf "%s\n%s%s" "# awstats upkeep" \
-                "*/10 * * * * root $awstatsDir/tools/awstats_updateall.pl now " \
-                "-awstatsprog=$awstatsDir/wwwroot/cgi-bin/awstats.pl > /dev/null" >> $crontabFile &
+            # after changing the server log config we have to filter the
+            # existing log for server hostname/ip -- this can take a few
+            # minutes so we background it -- we also need to clear out
+            # any collated awstats data after we're done fixing the
+            # log because that data will be based on the unfixed log
+            perl -pi -e 's/ \S+ / RACHEL /' /var/log/httpd/access_log && rm -rf $awstatsDir/data/* &
+        fi
+        # next we need to add a line to crontab to collate the log data
+        crontabFile=/etc/crontab
+        if [[ -z `grep 'awstats upkeep' $crontabFile` ]]; then
+            # DON'T FORGET THE NEWLINE AT THE END
+            printf "%s\n%s%s\n" "# awstats upkeep" \
+            "*/10 * * * * root $awstatsDir/tools/awstats_updateall.pl now " \
+            "-awstatsprog=$awstatsDir/wwwroot/cgi-bin/awstats.pl > /dev/null" >> $crontabFile
+        else
+            # earlier scripts botched this entry by failing at include a trailing newline
+            # so we need to detect and fix that here:
+            if [[ -z `perl -ne 'print "eol\n" if m[awstats.pl > /dev/null\n]' $crontabFile` ]]; then
+                sed -i '/awstats.pl > \/dev\/null/ s/null/null\n/' $crontabFile
             fi
         fi
     fi
