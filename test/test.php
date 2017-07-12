@@ -26,7 +26,7 @@ passfail(file_exists("admin/admin.sqlite"));
 unlink("admin/admin.sqlite") or error("Couldn't remove test db file");
 
 testmsg("Testing admin/modules.php with two modules, no db");
-$html = shell_exec("PHP_CLI_TESTING=1 php admin/modules.php");
+$html = shell_exec("php admin/modules.php");
 passfail(preg_match("/<!DOCTYPE.+mod_one - Test Module 1.+mod_two - Test Module 2.+<\/html>/s", $html) == 1);
 
 testmsg("Testing admin/modules.php created db");
@@ -34,14 +34,13 @@ passfail(file_exists("admin/admin.sqlite"));
 
 testmsg("Testing admin/modules.php saving module order");
 $html = shell_exec(
-    "PHP_CLI_TESTING=1 " .
     "php -e -r '\$_GET[\"moddirs\"] = \"mod_two,mod_one\"; " .
     "include \"admin/modules.php\";'"
 );
 passfail($html == "");
 
 testmsg("Testing admin/modules.php reading saved module order");
-$html = shell_exec("PHP_CLI_TESTING=1 php admin/modules.php");
+$html = shell_exec("php admin/modules.php");
 passfail(preg_match("/<!DOCTYPE.+mod_two - Test Module 2.+mod_one - Test Module 1.+<\/html>/s", $html) == 1);
 
 testmsg("Testing index.php reading saved module order");
@@ -50,7 +49,6 @@ passfail(preg_match("/<!DOCTYPE.+Test Module 2.+Test Module 1.+<\/html>/s", $htm
 
 testmsg("Testing admin/modules.php hiding both modules");
 $html = shell_exec(
-    "PHP_CLI_TESTING=1 " .
     "php -e -r '\$_GET[\"moddirs\"] = \"mod_one,mod_two\"; " .
     "\$_GET[\"hidden\"] = \"mod_one,mod_two\"; " .
     "include \"admin/modules.php\";'"

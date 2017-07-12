@@ -338,10 +338,11 @@ function authorized() {
 
     global $lang;
 
-    # special case for test scripts
-    if (isset($_SERVER['PHP_CLI_TESTING'])) {
+    # if they're running php from the command prompt,
+    # that's considered authorized
+    if (php_sapi_name() == "cli") {
         return true;
-    }
+    }   
 
     # if we've got a good cookie, return true
     if (isset($_COOKIE['rachel-auth']) && $_COOKIE['rachel-auth'] == "admin") {
