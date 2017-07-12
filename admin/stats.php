@@ -19,8 +19,8 @@ if (file_exists("/media/RACHEL/awstats")) {
 <frameset rows="60,*">
 <frame name="topnav" src="stats.php?header_only=1" noresize="noresize" scrolling="no" frameborder="0">
 <frameset cols="240,*">
-<frame name="mainleft" src="//$_SERVER[HTTP_HOST]:83/cgi-bin/awstats.pl?framename=mainleft" noresize="noresize" frameborder="0">
-<frame name="mainright" src="//$_SERVER[HTTP_HOST]:83/cgi-bin/awstats.pl?framename=mainright" noresize="noresize" scrolling="yes" frameborder="0">
+<frame name="mainleft" src="//$_SERVER[SERVER_ADDR]:83/cgi-bin/awstats.pl?framename=mainleft" noresize="noresize" frameborder="0">
+<frame name="mainright" src="//$_SERVER[SERVER_ADDR]:83/cgi-bin/awstats.pl?framename=mainright" noresize="noresize" scrolling="yes" frameborder="0">
 <noframes><body>Your browser does not support frames.<br>
 Please try a different browser.<br>
 </body></noframes>

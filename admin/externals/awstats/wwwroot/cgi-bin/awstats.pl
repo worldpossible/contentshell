@@ -8906,7 +8906,7 @@ sub HTMLShowURLInfo {
 					$urlprot = 'https';
 				}
 # RACHEL links
-my $rachelhost = $ENV{HTTP_HOST};
+my $rachelhost = $ENV{SERVER_ADDR};
 $rachelhost =~ s/\:\d+$//;
 $nompage =~ s/%([A-Fa-f\d]{2})/chr hex $1/eg;
 $nompage =~ s/\+/ /g;
@@ -17742,7 +17742,7 @@ if ( $FrameName eq 'index' ) {
 	if ($NewLinkParams) { $NewLinkParams = "${NewLinkParams}&amp;"; }
 
 # RACHEL Admin wrapper
-my $rachelhost = $ENV{HTTP_HOST};
+my $rachelhost = $ENV{SERVER_ADDR};
 $rachelhost =~ s/\:\d+$//;
 print "<frameset rows=\"60,*\">\n";
 print "<frame name=\"topnav\" src=\"//$rachelhost/admin/stats.php?header_only=1\" noresize=\"noresize\" scrolling=\"no\" frameborder=\"0\">\n";
