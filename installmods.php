@@ -4,7 +4,7 @@
 # This script installs, then sorts & hides modules
 # according to a given .modules file
 
-$dir = dirname(__FILE__) . "/scripts/";
+$dir = dirname(__FILE__) . "/scripts";
 
 if (isset($argv[1]) && isset($argv[2])) {
 
