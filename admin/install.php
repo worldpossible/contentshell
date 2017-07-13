@@ -8,6 +8,11 @@ include "head.php";
 
 $mods_fs = getmods_fs();
 
+$known_servers = array(
+    "jeremy" => "192.168.1.74",
+    "jfield" => "192.168.1.6",
+);
+
 # here is where we handle the "advanced" installation options,
 # because of the file upload option, there's compatibility issues
 # doing it in ajax through our background.php script, so we do it the
@@ -23,11 +28,6 @@ if (isset($_POST['advanced_install'])) {
        $server = $_POST['server_custom'];
 
     } else if (isset($_POST['server'])) {
-
-        $known_servers = array(
-            "jeremy" => "192.168.1.74",
-            "jfield" => "192.168.1.6",
-        );
 
         if (isset($known_servers[ $_POST['server'] ])) {
             $server = $known_servers[ $_POST['server'] ];
@@ -107,7 +107,7 @@ if (isset($_POST['advanced_install'])) {
         margin: 5px;
         width: 20em;
     }
-    #availspin {
+    #availspin, #advspin {
         margin: 0; padding: 0;
         position: relative;
         top: 8px;
@@ -195,6 +195,8 @@ if (isset($_POST['advanced_install'])) {
 var ajaxTimeout = 10000;
 var taskRefreshRate = 2000;
 
+var knownServers = <?php echo json_encode($known_servers); ?>;
+
 // need to convert the string that comes back because
 // we need to escape "." in the selector name
 function sel (text) {
@@ -250,7 +252,7 @@ function enableAvailUI() {
 } 
 
 // add (i.e. rsync) a module
-function addMods(moddirs) {
+function addMods(moddirs, server) {
 
     disableAvailUI();
 
@@ -262,17 +264,26 @@ function addMods(moddirs) {
         moddirs = $("#available").val();
     }
 
+    // optional server argument, turn it into a query string addition
+    if (server) {
+        server = "&server=" + server;
+    } else {
+        server = "";
+    }
+
     // nothing selected - nothing to do
     if (!moddirs) {
         enableAvailUI();
         return false;
     }
 
+console.log("background.php?addModules=" + moddirs + server);
+
     // turn it into a comma-separated list
     moddirs = moddirs.join();
 
     $.ajax({
-        url: "background.php?addModules=" + moddirs,
+        url: "background.php?addModules=" + moddirs + server,
         success: function(results) {
 
             // honestly I'm not clear on why moddirs is available
@@ -291,7 +302,7 @@ function addMods(moddirs) {
         },
         error: function(xhr, status, error) {
             console.log("failure");
-            // notify via button
+            // XXX notify via button
         }
     });
 
@@ -468,6 +479,14 @@ function pollTasks() {
                 $("#tasks").append("<li>None</li>");
                 // when all the tasks are done, we get a fresh copy of
                 // the local module list, in case anything funny happened
+                // XXX unintended side effect (but maybe ok?) this makes
+                // it so that when there are no tasks (normal state)
+                // the local "modlist" gets updated every poll -- that
+                // means if you `mkdir modules/foo` then "foo" will show
+                // up here without a page load. Cool, but perhaps too
+                // much unintended server load? Also, if there are tasks
+                // then this check *doesn't* take place until they're done.
+                // Sort of weird.
                 populateLocalModuleList();
             }
 
@@ -717,22 +736,98 @@ function toggleAdvanced() {
     }
 }
 
-function checkReinstall() {
+function checkInstall() {
     // if we're reinstalling the current set we don't need to do
     // a real form submit (no filesystem interaction) so we can
     // intercept and use the ajax methods here
+    // XXX this will not work when we add lang support
     if ( $('select[name="mfile"]').val() == "reinstall existing set" ) {
+
         modlist = [];
         $("#modlist li").each( function(idx, li) {
             modlist.push(li.id);
         });
+
+        // see which server they want
+        var server = whichServer();
+
         // if we don't check that there's something there,
         // it installs everything - and that would be bad
         if (modlist.length) {
-            addMods(modlist);
+            addMods(modlist, server);
         }
         toggleAdvanced();
         return false;
+
+    // we're installing from another (RACHEL) server -- get a .modules
+    // file from that server and then 
+    // XXX this will not work when we add lang support
+    } else if ( $('select[name="mfile"]').val() == "clone from server" ) {
+
+        // they didn't enter a server -- focus and bail
+        if (! $("#server_custom").val().match(/\w/)) {
+            $("#server_custom").focus();
+            return false;
+        }
+
+        $("#advspin").show();
+        $("#advnotice").html("");
+
+        // see which server they want
+        var server = whichServer();
+
+        // the response here is not json,
+        // just a raw .modules file (i.e. text/plain)
+        $.ajax({
+            url: "background.php?cloneServer=" + server,
+            success: function(results) {
+                console.log("SUCCESS: " + results);
+                toggleAdvanced();
+            },
+            error: function(xhr, status, error) {
+                $("#advnotice").css("color", "#c00");
+                $("#advnotice").html("X " + error + " : '" + server + "'");
+            },
+            complete: function(xhr, status) {
+                $("#advspin").hide();
+            }
+        });
+        return false;
+    }
+
+}
+
+function whichServer() {
+    // see which server they want
+    var server = null;
+    if ($("#server_custom").val() && $("#server_custom").val().match(/\w/)) {
+        server = $("#server_custom").val();
+    } else if (knownServers.hasOwnProperty($("#server").val())) {
+        server = knownServers[ $("#server").val() ];
+    } else if ($("#server").val()) {
+        server = $("#server").val();
+    }
+    return server;
+}
+
+// this just disables the server dropdown if the person
+// selects cloning a server (we don't allow cloning the master servers)
+function checkClone() {
+    // XXX this will not work when we add lang support
+    if ($("#mfile").val() == "clone from server") {
+        $("#server").prop("disabled", true);
+        $("#server_custom").focus();
+    } else {
+        $("#server").prop("disabled", false);
+    }
+}
+
+// disables server dropdown if the person enters one manually
+function serverCustomInput() {
+    if ($("#server_custom").val().match(/\w/)) {
+        $("#server").prop("disabled", true);
+    } else {
+        $("#server").prop("disabled", false);
     }
 }
 
@@ -743,15 +838,16 @@ function checkReinstall() {
 
     <button id="advancedbut" type="button" onclick="toggleAdvanced();">advanced</button>
 
-    <form id="advanced" method="post" onsubmit="return checkReinstall();" enctype="multipart/form-data">
+    <form id="advanced" method="post" onsubmit="return checkInstall();" enctype="multipart/form-data">
         <table>
         <tr>
         <th>.modules:</th>
         <td>
-        <select name="mfile">
+        <select name="mfile" onchange="checkClone();" id="mfile">
         <!-- when this is internationalized, the value will be different -->
         <!-- than the contents of the <option> tag -->
         <option value="reinstall existing set">reinstall existing set</option>
+        <option value="clone from server">clone from server</option>
         <option disabled>──────────</option>
 <?php
         # are we reliably in the admin directory
@@ -784,17 +880,19 @@ function checkReinstall() {
         <tr>
         <th>server:</th>
         <td>
-        <select name="server">
+        <select name="server" id="server">
             <option>dev.worldpossible.org</option>
             <option>jeremy</option>
             <option>jfield</option>
         </select>
         </td>
         <td>
-        <i>&mdash; or &mdash;</i> specify host <input type="text" name="server_custom" value="">
+        <i>&mdash; or &mdash;</i> specify host <input type="text" name="server_custom" id="server_custom" oninput="serverCustomInput()" value="">
         </td>
         </table>
         <input type="submit" name="advanced_install" value="Install">
+        <img src="../art/spinner.gif" id="advspin">
+        <span id="advnotice"></span>
     </form>
 
     <form id="availform"><!-- submitted via ajax -->

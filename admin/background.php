@@ -43,8 +43,13 @@ if (isset($_GET['getRemoteModuleList'])) {
 } else if (isset($_GET['clearLogs'])) {
     clearLogs();
 
-}
+} else if (isset($_GET['cloneServer'])) {
+    cloneServer();
 
+} else if (isset($_GET['setRsyncDaemon'])) {
+    setRsyncDaemon($_GET['setRsyncDaemon']);
+
+}
 error_log("Unknown request to background.php: " . print_r($_GET, true));
 header("HTTP/1.1 500 Internal Server Error");
 exit;
@@ -116,6 +121,10 @@ function deleteModule($moddir) {
 function addModules($moddirs) {
 
     $host = RSYNCHOST;
+    if (!empty($_GET['server'])) {
+        $host = preg_replace("/[^\w\d\.\-\:\/]/", "", $_GET['server']);
+    }
+
     $relmodpath = getrelmodpath();
 
     $moddirs = explode(",", $moddirs);
@@ -322,6 +331,32 @@ function setLocalContent($state) {
     exit;
 }
 
+// XXX this doesn't work yet -- something weired about starting
+// an rsync process under php
+function setRsyncDaemon($state) {
+    # save the prefrence
+    $db = getdb();
+    $db_state = $db->escapeString($state);
+    $db->exec("REPLACE INTO prefs (pref, value) values ('run_rsyncd', '$db_state')");
+    # start the daemon (or stop it)
+    if ($state) {
+        error_log("starting rsyncd");
+        exec("rsync --daemon > /dev/null 2>&1", $out, $rv);
+        error_log("rv: $rv");
+        error_log("out: " . print_r($out, true));
+    } else {
+        error_log("stoping rsyncd");
+        exec("pkill -f 'rsync --daemon'", $out, $rv);
+        error_log("rv: $rv");
+        error_log("out: " . print_r($out, true));
+    }
+    header("HTTP/1.1 200 OK");
+    header("Content-Type: application/json");
+    echo "{ \"status\" : \"OK\" }\n";
+    exit;
+
+}
+
 function getBatteryInfo() {
     $level  = rtrim(file_get_contents("/tmp/batteryLastChargeLevel"));
     $status = rtrim(file_get_contents("/tmp/chargeStatus"));
@@ -365,6 +400,41 @@ function clearLogs() {
     }
     header("HTTP/1.1 500 Internal Server Error");
     exit;
+}
+
+# retrieves a .modules file from a user-supplied server
+# -- this must be another RACHEL server
+function cloneServer() {
+    # though the intent is an IP or hostname, we do
+    # accept appended port numbers and paths so that
+    # fancy-pants types can access special configurations
+    $server = preg_replace("/[^\w\d\.\-\:\/]+/", "", $_GET['cloneServer']);
+    # we have to suppress warnings here or they go to the browser
+    # and interfere with our ability to send headers
+    $contents = @file_get_contents("http://$server/export-modfile.php");
+    if ($contents === false) {
+        if ($http_response_header[0]) {
+            header($http_response_header[0]);
+        } else {
+            # probably means the server wasn't found
+            # - not officially a 404, but close enough
+            header("HTTP/1.1 404 Not Found");
+        }
+    } else {
+        
+        # XXX: alternately we could update installmods() to take
+        # a string as well as a file, but for now:
+        $tempfile = tempnam(sys_get_temp_dir(), "rachelclone");
+        file_put_contents($tempfile, $contents);
+        installmods($tempfile, $server);
+        header("HTTP/1.1 200 OK");
+        header("Content-Type: application/json");
+        echo "{ \"status\" : \"OK\" }\n";
+
+    }
+
+    exit;
+
 }
 
 ?>

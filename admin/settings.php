@@ -159,5 +159,34 @@ if ($is_cli || $_SERVER['REQUEST_METHOD'] == 'POST') {
 </table>
 </form>
 
-</body>
-</html>
+<?php
+
+if (!$is_cli) {
+
+    if ( false && is_rachelplus()) {
+        $checked = run_rsyncd() ? " checked" : "";
+        echo <<<EOT
+<hr style='margin: 20px 0;'>
+<script>
+    function rsyncToggle() {
+        if ( $("#rsyncd").prop('checked') ) {
+            $.ajax({ url: "background.php?setRsyncDaemon=1" });
+        } else {
+            $.ajax({ url: "background.php?setRsyncDaemon=0" });
+        }
+    }
+</script>
+<h2>Run Rsync Daemon</h2>
+<p style='background: #ddd; padding: 10px 5px; border-radius: 5px; font-size: small;'>
+<input type='checkbox' id='rsyncd'$checked onchange='rsyncToggle();'> Run <tt>rsyncd</tt>, so you can clone from this device &mdash;
+<strong>automatically turned off on reboot</strong>
+</p>
+EOT;
+
+    }
+
+    include "foot.php";
+
+}
+
+?>

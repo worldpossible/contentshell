@@ -28,6 +28,7 @@ main() {
     #checkVariables
     installESP
     installAWStats
+    installRsyncdConf
 
 }
 
@@ -193,6 +194,17 @@ installAWStats() {
 restartWebserver() {
     if [[ $isPlus ]]; then
         killall -INT lighttpd && /usr/bin/lighttpd -f /usr/local/etc/lighttpd.conf
+    fi
+}
+
+# doesn't run rsync, but puts a conf file in place so it
+# can be turned on if wanted
+installRsyncdConf() {
+    if [[ $isPlus ]]; then
+        if [[ -f /etc/rsyncd.conf ]]; then
+            mv /etc/rsyncd.conf /etc/rsyncd.conf.prev
+        fi
+        cp -r $adminDir/externals/rsyncd.conf /etc/
     fi
 }
 
