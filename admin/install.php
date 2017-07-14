@@ -175,7 +175,7 @@ if (isset($_POST['advanced_install'])) {
         width: 0;
         background: #999;
         white-space: nowrap;
-        padding: 4px;
+        padding: 1%;
         font-family: sans-serif;
     }
     .progbarend {
@@ -433,6 +433,8 @@ function pollTasks() {
                     var data_done   = Math.round( results[i].data_done / 1024 );
                     var files_perc = Math.round((files_done / total_files) * 100);
                     var data_perc  = Math.round((data_done / total_data) * 100);
+                    // woudl be data_perc, but there's 1% padding (on each end)
+                    var progbarin_width  = Math.round((data_done / total_data) * 98);
                 } else {
                     var total_files = "-";
                     var total_data  = "-";
@@ -449,7 +451,7 @@ function pollTasks() {
 
                 // put the actual readout in there
                 newHTML += (
-                    "<div class='progbar'><div class='progbarin' style='width: " + data_perc + "%;'>" +
+                    "<div class='progbar'><div class='progbarin' style='width: " + progbarin_width + "%;'>" +
                     results[i].moddir + infoflag + "<div class='progbarend'>" + results[i].data_rate +
                     "</div></div></div>" +
                     "<div " + detailstyle + " class='details' id='details-" + results[i].task_id + "'>" +
