@@ -420,7 +420,7 @@ if (!$kiwix_version || !preg_match("/^[\d\.]+$/", $kiwix_version)) {
 <tr><td>Kiwix</td><td><?php echo $kiwix_version ?></td></tr>
 <tr><td>Content Shell</td><td>
 
-    <span id="cur_contentshell">v2.3.3</span>
+    <span id="cur_contentshell">v2.3.4</span>
     <div style="float: right; margin-left: 20px;">
         <div style="float: left; width: 24px; height: 24px; margin-top: 2px;">
             <img src="../art/spinner.gif" id="spinner" style="display: none;">
