@@ -414,7 +414,7 @@ EOT;
 # ...sadly this breaks db access, but we'll have
 # to figure that out later
 #-------------------------------------------
-define("RACHELPI_MODPATH", "/var/www/modules");
+define("RACHELPI_MODPATH", "/var/www/rachel/modules");
 function is_rachelpi() {
     return is_dir(RACHELPI_MODPATH) || file_exists("/tmp/fake-rachelpi");
 }
@@ -757,12 +757,7 @@ function showip () {
 
 # restart kiwix so it sees what modules are visible/hidden
 function kiwix_restart() {
-
-    if (is_rachelpi()) {
-        exec("sudo service kiwix restart");
-    } else if (is_rachelplus()) {
-        exec("bash /root/rachel-scripts/rachelKiwixStart.sh");
-    }
+    exec("sudo bash /root/rachel-scripts/rachelKiwixStart.sh");
 }
 
 function show_local_content_link() {
