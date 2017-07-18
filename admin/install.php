@@ -150,7 +150,7 @@ if (isset($_POST['advanced_install'])) {
     }
     #tasks li { border-top: 1px solid #ccc; padding: 10px 0px; }
     #tasks li:first-child { border-top: none; }
-    #tasks button {
+    #tasks button, #clearall {
         font-size: x-small;
         background: #eee;
         border: 1px solid #ccc;
@@ -159,6 +159,11 @@ if (isset($_POST['advanced_install'])) {
         /* height: 24px; */
         width: 5em;
         margin: 0 0 5px 5px;
+    }
+    #clearall {
+	margin: 2em 1em 0 0;
+	width: auto;
+	display: none;
     }
     #tasks img {
         position: absolute;
@@ -187,6 +192,16 @@ if (isset($_POST['advanced_install'])) {
     .details {
         clear: right;
         margin-top: 10px;
+    }
+    .multi-instructions {
+	font-size: x-small;
+	margin: 0 0 4px 6px;
+    }
+    .multi-instructions code {
+	display: inline-block;
+	border: 1px solid #999;
+	padding: 1px;
+        border-radius: 3px;
     }
 </style>
 
@@ -382,6 +397,23 @@ function retryTask(task_id, moddir, mybutton) {
     });
 }
 
+function cancelAll() {
+    $("#tasks").css({ opacity: 0.5 });	
+    $("#tasks").find("button").prop("disabled", true);
+    $("#tasks").find("button").blur();
+    $.ajax({
+        url: "background.php?cancelAll=1",
+        success: function(results) {
+            current_task_moddirs = [];
+            drawRemoteModuleList();
+        },
+        error: function(xhr, status, error) {
+            console.log(error);
+            $("#tasks").css({ opacity: 1.0 });	
+            $("#tasks").find("button").prop("disabled", false);
+        }
+    });
+}
 
 // check if we have any background tasks running
 var current_task_moddirs = {};
@@ -500,22 +532,30 @@ function pollTasks() {
                 $("#tasks").append(newHTML);
 
                 hadtasks = true;
+		$("#clearall").show();
 
             }
 
             if (!hadtasks) {
                 $("#tasks").append("<li>None</li>");
+
+		// remove the 'clear all' button if there's nothing to clear
+		$("#clearall").hide();
+                // perhaps the reason there is nothing is because someone
+                // just did a 'clear all', in which case we should reset
+                // the opacity so that future tasks will be opaque
+                $("#tasks").css({ opacity: 1.0 });
                 // when all the tasks are done, we get a fresh copy of
                 // the local module list, in case anything funny happened
+                populateLocalModuleList();
                 // XXX unintended side effect (but maybe ok?) this makes
                 // it so that when there are no tasks (normal state)
                 // the local "modlist" gets updated every poll -- that
                 // means if you `mkdir modules/foo` then "foo" will show
                 // up here without a page load. Cool, but perhaps too
                 // much unintended server load? Also, if there are tasks
-                // then this check *doesn't* take place until they're done.
+                // then it *doesn't* update the modlist until they're done.
                 // Sort of weird.
-                populateLocalModuleList();
             }
 
         },
@@ -926,7 +966,8 @@ function serverCustomInput() {
     <form id="availform"><!-- submitted via ajax -->
         <div id="availdiv">
         <input id="livesearch" onfocus="lsfocus(this)" onblur="lsblur(this)" oninput="lsinput(this)" value="Live Search" disabled><br>
-        <select id="available" size="10" multiple></select><br>
+        <select id="available" size="10" multiple></select>
+	<div class="multi-instructions"><code>shift</code> or <code>ctrl</code> click to select multiple modules</div>
         <button type="button" id="addmodbut" onclick="addMods();" disabled>Download</button>
         <img src="../art/spinner.gif" id="availspin">
         </div>
@@ -935,6 +976,7 @@ function serverCustomInput() {
     </form>
 </div>
 
+<button id="clearall" onclick="cancelAll();">cancel all</button>
 <h3>Currently Adding</h3>
 <ul id="tasks">
 </ul>

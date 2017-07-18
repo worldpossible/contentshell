@@ -22,6 +22,9 @@ if (isset($_GET['getRemoteModuleList'])) {
 } else if (isset($_GET['cancelTask'])) {
     cancelTask($_GET['cancelTask']);
 
+} else if (isset($_GET['cancelAll'])) {
+    cancelAll();
+
 } else if (isset($_GET['retryTask'])) {
     retryTask( $_GET['retryTask']);
 
@@ -209,6 +212,52 @@ function cancelTask($task_id) {
     header("HTTP/1.1 200 OK");
     header("Content-Type: application/json");
     echo "{ \"task_id\" : \"$task_id\" }\n";
+    exit;
+
+}
+
+# too much copied from cancelTask() and getTasks -- XXX abstraction needed
+function cancelAll() {
+
+    $db = getdb();
+
+    # get tasks that will need to be killed
+    $rv = $db->query("
+        SELECT pid FROM tasks
+         WHERE pid IS NOT NULL
+           AND completed IS NULL
+           AND dismissed IS NULL
+    ");
+    $running = array();
+    while ($task = $rv->fetchArray(SQLITE3_ASSOC)) {
+	array_push($running, $task);
+    }
+
+
+    # mark everything as "dismissed" - we have to do this
+    # before killing processes or do_tasks.php will pick up
+    # the next one before we mark it
+    $db_dismissed = $db->escapeString(time());
+    # i think using a transaction lets us release the file lock sooner XXX test that
+    $db->exec("BEGIN");
+    $db->exec("
+        UPDATE tasks SET
+               dismissed = '$db_dismissed'
+         WHERE dismissed IS NULL
+    ");
+    $db->exec("COMMIT");
+
+    # now we go back and kill any processes that were actually running
+    # -- there's probably only one, but we loop it just in case
+    foreach ($running as $task) {
+        # the process will be a subprocess of a shell (sh -c rsync)
+        # so we have to use pkill -P, which kills children of a given process
+        exec("pkill -P $task[pid]", $output, $rval);
+    }
+
+    header("HTTP/1.1 200 OK");
+    header("Content-Type: application/json");
+    echo "{ \"status\" : \"OK\" }\n";
     exit;
 
 }
