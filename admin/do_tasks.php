@@ -14,7 +14,7 @@ require_once("common.php");
 
 define("VERBOSE", false);
 ini_set("error_log", "syslog"); # should this go to the apache log?
-$relmodpath = getrelmodpath(); # needed to run finish_install.sh
+$absmodpath = getAbsModPath(); # needed to run finish_install.sh
 
 error_log("starting tasks");
 
@@ -264,13 +264,14 @@ while (true) {
 
     # run any installation script, if present
     # XXX this needs better error checking and feedback
-    $path = "$relmodpath/$moddir";
+    $path = "$absmodpath/$moddir";
     $finscript = "finish_install.sh";
+    if (VERBOSE) { error_log("checking for $path/$finscript"); }
     if (file_exists("$path/$finscript")) {
         error_Log("running $path/$finscript");
         $db->exec("
             UPDATE tasks SET
-                stdout_tail = 'Starting: $path/$finscript',
+                stdout_tail = 'Running: $path/$finscript',
                 last_update = '$db_last_update'
             WHERE task_id = '$db_task_id'
         ");
