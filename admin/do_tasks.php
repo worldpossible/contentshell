@@ -191,8 +191,8 @@ while (true) {
                 # file progress. If so, we count that and the data
                 # transferred. Note: some versions of rsync include
                 # commas in the numbers so we have to strip those out
-                if (preg_match("/^\s+([\d,]+)\s+(\d+)%\s+(\S+)/",
-                        $line, $matches)) {
+                if (!preg_match("/0\s+0%\s+0\.00.B\/s\s+0:00:00/", $line) # file starting -- ignore
+                        && preg_match("/^\s+([\d,]+)\s+(\d+)%\s+(\S+)/", $line, $matches)) { # file progress -- read
                     if ($matches[2] == "100") {
                         # completed file, add it to the total
                         $data_done += preg_replace("/,/", "", $matches[1]);
