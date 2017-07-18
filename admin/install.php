@@ -363,6 +363,26 @@ function cancelTask(task_id, moddir, mybutton) {
     });
 }
 
+function retryTask(task_id, moddir, mybutton) {
+
+    $(mybutton).parent().css({ opacity: 0.5 });
+    $(mybutton).parent().find("button").prop("disabled", true);
+    $(mybutton).parent().find("button").blur();
+
+    $.ajax({
+        url: "background.php?retryTask=" + task_id,
+        success: function(results) {
+            delete current_task_moddirs[moddir];
+            drawRemoteModuleList();
+        },
+        error: function(xhr, status, error) {
+            var results = JSON.parse(xhr.responseText);
+            console.log(error);
+        }
+    });
+}
+
+
 // check if we have any background tasks running
 var current_task_moddirs = {};
 function pollTasks() {
@@ -398,12 +418,17 @@ function pollTasks() {
                 // to background.php methinks
                 var infoflag = "";
                 var butlabel = "cancel";
+                var retryButton = "";
                 if (results[i].last_update < results[i].tasktime - freshtime) {
                     // we no longer add a retry button, just let them manually do it again
                     //newHTML += " <button type=\"button\" onclick=\"retryTask('" + results[i].task_id + "', this)\">retry</button>";
                     butlabel = "clear"; 
                     if(results[i].completed) {
                         infoflag = " <span style=\"color: #933; font-weight: bold;\">failed</span>";
+                        // add a retry button
+                        retryButton = " <button type=\"button\" onclick=\"retryTask('"
+                                + results[i].task_id + "', '"
+                                + results[i].moddir + "', this)\">retry</button>";
                     } else {
                         if (results[i].started) {
                             infoflag = " <span style=\"color: #933; font-weight: bold;\">stalled</span>";
@@ -419,6 +444,7 @@ function pollTasks() {
                     "<button type=\"button\" onclick=\"cancelTask('"
                         + results[i].task_id + "', '"
                         + results[i].moddir + "', this)\">" + butlabel + "</button>" +
+                    retryButton +
                     "<button type=\"button\" onclick=\"toggleDetails('#details-" + results[i].task_id + "');\">details</button>"
                 );
 

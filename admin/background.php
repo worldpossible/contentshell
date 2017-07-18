@@ -22,6 +22,9 @@ if (isset($_GET['getRemoteModuleList'])) {
 } else if (isset($_GET['cancelTask'])) {
     cancelTask($_GET['cancelTask']);
 
+} else if (isset($_GET['retryTask'])) {
+    retryTask( $_GET['retryTask']);
+
 } else if (isset($_GET['getTasks'])) {
     getTasks();
 
@@ -206,6 +209,68 @@ function cancelTask($task_id) {
     header("HTTP/1.1 200 OK");
     header("Content-Type: application/json");
     echo "{ \"task_id\" : \"$task_id\" }\n";
+    exit;
+
+}
+
+function retryTask($task_id) {
+
+    # XXX mostly copied from cancelTask() and addTask()
+    # -- abstract this stuff and reduce duplication
+
+    $db = getdb();
+
+    $db_task_id = $db->escapeString($task_id);
+    $rv = $db->query("SELECT pid, retval, completed, command, moddir FROM tasks WHERE task_id = $db_task_id");
+    #error_log("SELECT pid, retval, completed FROM tasks WHERE task_id = $db_task_id");
+    $task = $rv->fetchArray(SQLITE3_ASSOC);
+
+    if (!$task) {
+        header("HTTP/1.1 500 Internal Server Error");
+        header("Content-Type: application/json");
+        echo "{ \"error\" : \"No Such Task: $task_id\" }\n";
+        exit;
+    }
+
+    if ($task['pid'] and !$task['completed']) {
+        # the process will be a subprocess of a shell (sh -c rsync)
+        # so we have to use pkill -P, which kills children of a given process
+        exec("pkill -P $task[pid]", $output, $rval);
+        error_log("pkill -P $task[pid]");
+        error_log("killing output: " . implode($output));
+        error_log("killing rval: $rval");
+    }
+
+    $db_dismissed = $db->escapeString(time());
+    $db_retval = $task['retval'] ? $task['retval'] : 1;
+    $db->exec("
+        UPDATE tasks SET
+            dismissed = '$db_dismissed',
+            retval    = '$db_retval'
+        WHERE task_id = '$db_task_id'
+    ");
+
+    $db_cmd    = $db->escapeString($task['command']);
+    $db_moddir = $db->escapeString($task['moddir']);
+    $db->exec("
+        INSERT INTO tasks (moddir, command)
+        VALUES ('$db_moddir', '$db_cmd')
+    ");
+
+    # fire off our clever database updating rsync process
+    exec("php do_tasks.php > /dev/null &", $output, $rval);
+
+    if ($rval == 0) {
+        header("HTTP/1.1 200 OK");
+        header("Content-Type: application/json");
+        echo "{ \"status\" : \"OK\" }\n";
+    } else {
+        $output = implode(", ", $output);
+        header("HTTP/1.1 500 Internal Server Error");
+        header("Content-Type: application/json");
+        echo "{ \"error\" : \"$output\" }\n";
+    }
+
     exit;
 
 }
