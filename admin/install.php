@@ -9,7 +9,7 @@ include "head.php";
 $mods_fs = getmods_fs();
 
 $known_servers = array(
-    "jeremy" => "192.168.1.74",
+    "jeremy" => "192.168.1.10",
     "jfield" => "192.168.1.6",
     "sam" => "rachel.golearn.us",
 );
