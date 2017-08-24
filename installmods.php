@@ -18,10 +18,13 @@ if (isset($argv[1]) && isset($argv[2])) {
                 $server = "dev.worldpossible.org";
                 break;
             case "jeremy":
-                $server = "192.168.1.74";
+                $server = "192.168.1.10";
                 break;
             case "jfield":
                 $server = "192.168.1.6";
+                break;
+            case "sam":
+                $server = "rachel.golearn.us";
                 break;
             default:
                 $server = $argv[2];
