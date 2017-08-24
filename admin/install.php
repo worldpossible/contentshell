@@ -953,6 +953,7 @@ function serverCustomInput() {
             <option>dev.worldpossible.org</option>
             <option>jeremy</option>
             <option>jfield</option>
+            <option>sam</option>
         </select>
         </td>
         <td>
