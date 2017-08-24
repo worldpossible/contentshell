@@ -8,6 +8,7 @@
 
 en-local_content
 en-kalite
+en-blockly-games
 en-moodle
 en-wikipedia
 en-wikipedia_for_schools
@@ -62,6 +63,7 @@ hi-arvind
 
 # spanish modules
 es-kalite
+es-blockly-games
 es-wikipedia
 es-wikihow
 es-ebooks
@@ -84,11 +86,13 @@ es-windows_apps
 
 # french content
 fr-kalite
+fr-blockly-games
 fr-wikipedia
 fr-catdogbooks
 fr-wikivoyage
 fr-wiktionary
 fr-ebooksgratuits
+fr-afrique-marie-wabbes
 fr-haitifutur
 fr-bouquineux
 fr-gutenberg
