@@ -838,8 +838,22 @@ function show_module_contributions($inclusion_file) {
 
     }
 
+    # PG - is outputting an error on 0 inclusion_files the desired behavior in all situations or just rachel-index.php?  
+    # if index only, index.php could check length of returned output and present error,
+    # if everywhere, it should be left here, but the error messages and default behaviour may need to be updated.
     if ($modcount == 0) {
-	return $lang['no_mods_error'];
+	switch ($inclusion_file) {
+		case "rachel-index.php":
+		        return $lang['no_mods_error'];
+			break;
+		case "rachel-admin.php":
+		        return;
+			break;
+		case "rachel-stats.php":
+		        return;
+			break;
+		default: return;
+	}
     } else {
 	return $contribs_output;
     }
