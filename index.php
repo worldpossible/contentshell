@@ -1,3 +1,8 @@
+<?php 
+require_once(dirname(__FILE__) . "/admin/debug.php");
+// Leave this commented for system-wide debug set in debug.php, uncomment here to force override.                                          
+//$debug=1;
+?>
 <?php require_once("admin/common.php"); ?>
 <!DOCTYPE html>
 <html lang="<?php echo $lang['langcode'] ?>">
@@ -85,7 +90,7 @@
 <div id="content">
 
 <?php
-	echo show_module_contributions('rachel-index.php');
+    echo show_module_contributions("rachel-index.php");
 ?>
 
 </div>

@@ -782,6 +782,7 @@ function run_rsyncd() {
 # to use object buffering, add ob_start(); to top of index.php and ob_end_flush(); to end
 #-------------------------------------------
 function show_module_contributions($inclusion_file) {
+    global $debug;       // PG suggestion to permit debug error_log lines to stay in code. NULL is no.
     global $lang;
     if(!isset($inclusion_file)) { $inclusion_file = 'rachel-index.php'; }
 
@@ -811,6 +812,7 @@ function show_module_contributions($inclusion_file) {
         # whether or not we were able to get anything
         # from the DB, we show what we found in the filesystem
         foreach (array_values($fsmods) as $mod) {
+	    if($debug){ error_log('common.php, mod-> ' . json_encode($mod)); }
 	    if (!$mod['fragment'] || $mod['hidden']) { continue; }
             $dir  = $mod['dir'];
             $moddir  = $mod['moddir'];
