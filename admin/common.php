@@ -832,8 +832,10 @@ function show_module_contributions($inclusion_file) {
                 include $modfraginclude;
 		$modfragoutput = ob_get_clean();  // post process on this if desired, only turns off most recent object buffer.
 		$contribs_output .=  $modfragoutput;
+                ++$modcount;
             }
-            ++$modcount;
+	    # PG - I've moved the modcount up to only count the modules with the inclusion_file
+            # ++$modcount;
         }
 
     }
