@@ -776,7 +776,7 @@ function run_rsyncd() {
 # this function scans and includes per module contributions of divs to a page
 # it is used by index.php for main portal navigation but also supports 
 # admin and stats inclusion by changing the inclusion_file.
-# example usage... show_module_contributions('rachel-admin.php');
+# example usage... echo show_module_contributions('rachel-admin.php');
 # PG - consideration should be given to object buffering in any php that calls this if there is 
 # a chance that headers may be sent from an included file (admin authorization for example).
 # to use object buffering, add ob_start(); to top of index.php and ob_end_flush(); to end
@@ -785,6 +785,7 @@ function show_module_contributions($inclusion_file) {
     global $lang;
     if(!isset($inclusion_file)) { $inclusion_file = 'rachel-index.php'; }
 
+    $contribs_output = '';
     $modcount = 0;
     $fsmods = getmods_fs();
 
@@ -823,9 +824,14 @@ function show_module_contributions($inclusion_file) {
                 $modfraginclude = str_replace("rachel-index.php",$inclusion_file,$mod['fragment']);
 	    }
 
+	    # PG - I'm forcing include output into a variable in case we want to do post processing and to avoid
+	    # direct to browser output from within a function, we return $contribs_output below for the main php to echo
             if (file_exists($modfraginclude)) {
 		$modfragoutput = '';
+		ob_start();
                 include $modfraginclude;
+		$modfragoutput = ob_get_clean();  // post process on this if desired, only turns off most recent object buffer.
+		$contribs_output .=  $modfragoutput;
             }
             ++$modcount;
         }
@@ -833,7 +839,9 @@ function show_module_contributions($inclusion_file) {
     }
 
     if ($modcount == 0) {
-	echo $lang['no_mods_error'];
+	return $lang['no_mods_error'];
+    } else {
+	return $contribs_output;
     }
 
 }

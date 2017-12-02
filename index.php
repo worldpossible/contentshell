@@ -85,7 +85,7 @@
 <div id="content">
 
 <?php
-	show_module_contributions('rachel-index.php');
+	echo show_module_contributions('rachel-index.php');
 ?>
 
 </div>
