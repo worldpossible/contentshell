@@ -85,46 +85,7 @@
 <div id="content">
 
 <?php
-
-    $modcount = 0;
-
-    $fsmods = getmods_fs();
-
-    # if there were any modules found in the filesystem
-    if ($fsmods) {
-
-        # get a list from the databases (where the sorting
-        # and visibility is stored)
-        $dbmods = getmods_db();
-
-        # populate the module list from the filesystem 
-        # with the visibility/sorting info from the database
-        foreach (array_keys($dbmods) as $moddir) {
-            if (isset($fsmods[$moddir])) {
-                $fsmods[$moddir]['position'] = $dbmods[$moddir]['position'];
-                $fsmods[$moddir]['hidden'] = $dbmods[$moddir]['hidden'];
-            }
-        }
-
-        # custom sorting function in common.php
-        uasort($fsmods, 'bypos');
-
-        # whether or not we were able to get anything
-        # from the DB, we show what we found in the filesystem
-        foreach (array_values($fsmods) as $mod) {
-            if ($mod['hidden'] || !$mod['fragment']) { continue; }
-            $dir  = $mod['dir'];
-            $moddir  = $mod['moddir'];
-            include $mod['fragment'];
-            ++$modcount;
-        }
-
-    }
-
-    if ($modcount == 0) {
-        echo $lang['no_mods_error'];
-    }
-
+	show_module_contributions('rachel-index.php');
 ?>
 
 </div>

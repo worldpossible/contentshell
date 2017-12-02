@@ -772,4 +772,70 @@ function run_rsyncd() {
     return $rv;
 }
 
+#-------------------------------------------
+# this function scans and includes per module contributions of divs to a page
+# it is used by index.php for main portal navigation but also supports 
+# admin and stats inclusion by changing the inclusion_file.
+# example usage... show_module_contributions('rachel-admin.php');
+# PG - consideration should be given to object buffering in any php that calls this if there is 
+# a chance that headers may be sent from an included file (admin authorization for example).
+# to use object buffering, add ob_start(); to top of index.php and ob_end_flush(); to end
+#-------------------------------------------
+function show_module_contributions($inclusion_file) {
+    global $lang;
+    if(!isset($inclusion_file)) { $inclusion_file = 'rachel-index.php'; }
+
+    $modcount = 0;
+    $fsmods = getmods_fs();
+
+    # if there were any modules found in the filesystem
+    if ($fsmods) {
+
+        # get a list from the databases (where the sorting
+        # and visibility is stored)
+        $dbmods = getmods_db();
+
+        # populate the module list from the filesystem
+        # with the visibility/sorting info from the database
+        foreach (array_keys($dbmods) as $moddir) {
+            if (isset($fsmods[$moddir])) {
+                $fsmods[$moddir]['position'] = $dbmods[$moddir]['position'];
+                $fsmods[$moddir]['hidden'] = $dbmods[$moddir]['hidden'];
+            }
+        }
+
+        # custom sorting function in common.php
+        uasort($fsmods, 'bypos');
+
+        # whether or not we were able to get anything
+        # from the DB, we show what we found in the filesystem
+        foreach (array_values($fsmods) as $mod) {
+	    if (!$mod['fragment'] || $mod['hidden']) { continue; }
+            $dir  = $mod['dir'];
+            $moddir  = $mod['moddir'];
+            $modfragindex = $mod['fragment'];
+
+	    # PG - index.htmlf has been deprecated, but $mod['fragment'] may still contain it, so the following if is necessary
+	    # note that we assume any module with non-index inclusion_files would use the newer rachel-index.php not index.htmlf
+	    if($inclusion_file == 'rachel-index.php') {
+            	$modfraginclude = $modfragindex; 
+	    } else {
+                $modfraginclude = str_replace("rachel-index.php",$inclusion_file,$mod['fragment']);
+	    }
+
+            if (file_exists($modfraginclude)) {
+		$modfragoutput = '';
+                include $modfraginclude;
+            }
+            ++$modcount;
+        }
+
+    }
+
+    if ($modcount == 0) {
+	echo $lang['no_mods_error'];
+    }
+
+}
+
 ?>
