@@ -1,3 +1,5 @@
+#remove KA-Lite Video
+rm -r /root/.kalite/content/r_rVyt-ojpY.mp4
 #remove Art of War
 rm -r /media/RACHEL/rachel/modules/en-ebooks/books/132.txt
 #remove nude pregant picture
