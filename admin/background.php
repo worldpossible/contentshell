@@ -472,8 +472,38 @@ function setRsyncDaemon($state) {
 }
 
 function getBatteryInfo() {
-    $level  = rtrim(file_get_contents("/tmp/batteryLastChargeLevel"));
-    $status = rtrim(file_get_contents("/tmp/chargeStatus"));
+
+    # CAP1 & CAP2 (Gemtek)
+    $chargefile = "/tmp/batteryLastChargeLevel";
+    $statusfile = "/tmp/chargeStatus";
+    if (file_exists($chargefile)) {
+        $level  = rtrim(file_get_contents($chargefile));
+        $status = rtrim(file_get_contents($statusfile));
+        # status is an unsigned number that indicates the
+        # load on the battery -- it varies constantly, but
+        # we've determined that -20 indicates discharge
+        # (i.e. not plugged in)
+        if ($status <= -20) {
+            $status = "discharging";
+        } else {
+            $status = "charging";
+        }
+
+    # CAP3 (ECS CMAL100)
+    } else if (file_exists("/usr/bin/ubus")) {
+        exec("ubus call battery info", $out, $rv);
+        $ubus = json_decode(implode($out), true);
+        $level = $ubus['capacity'];
+        $status = rtrim($ubus['status']);
+        # options are "Charging", "Discharging", and "Unknown"
+        # which seems to indicate charged (so we call it charging)
+        if ($status == "Discharging") {
+            $status = "discharging";
+        } else {
+            $status = "charging";
+        }
+    }
+
     header("HTTP/1.1 200 OK");
     header("Content-Type: application/json");
     echo "{ \"level\" : \"$level\", \"status\" : \"$status\" }\n";

@@ -403,8 +403,11 @@ if (!$kalite_version || !preg_match("/^[\d\.]+$/", $kalite_version)) {
     $kalite_version = "?";
 }
 
-$kiwix_version = exec("cat /var/kiwix/application.ini | grep ^Version | cut -d= -f2");
-if (!$kiwix_version || !preg_match("/^[\d\.]+$/", $kiwix_version)) {
+$kiwix_version = exec("cat /etc/kiwix/application.ini | grep ^Version | cut -d= -f2");
+if (!$kiwix_version) {
+    $kiwix_version = exec("cat /etc/kiwix-version");
+}
+if (!$kiwix_version) {
     $kiwix_version = "?";
 }
 
@@ -420,7 +423,7 @@ if (!$kiwix_version || !preg_match("/^[\d\.]+$/", $kiwix_version)) {
 <tr><td>Kiwix</td><td><?php echo $kiwix_version ?></td></tr>
 <tr><td>Content Shell</td><td>
 
-    <span id="cur_contentshell">v2.3.5</span>
+    <span id="cur_contentshell">v2.3.6</span>
     <div style="float: right; margin-left: 20px;">
         <div style="float: left; width: 24px; height: 24px; margin-top: 2px;">
             <img src="../art/spinner.gif" id="spinner" style="display: none;">

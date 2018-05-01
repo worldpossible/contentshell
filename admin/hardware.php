@@ -25,20 +25,26 @@ if (isset($_GET['wifi'])) {
 }
 
 if (isset($_POST['shutdown'])) {
-    exec("sudo /sbin/poweroff", $exec_out, $exec_err);
+    # pause so the webserver can respond, the complexity of the the
+    # command is so that the exec() returns instantly
+    exec("sudo sh -c 'sleep 3; /sbin/poweroff;' > /dev/null 2>&1 &", $exec_out, $exec_err);
     if ($exec_err) {
         echo $lang['shutdown_failed'];
     } else {
         echo $lang['shutdown_ok'];
     }
+    include "foot.php";
     exit;
 } else if (isset($_POST['reboot'])) {
-    exec("sudo /sbin/reboot", $exec_out, $exec_err);
+    # pause so the webserver can respond, the complexity of the the
+    # command is so that the exec() returns instantly
+    exec("sudo sh -c 'sleep 3; /sbin/reboot;' > /dev/null 2>&1 &", $exec_out, $exec_err);
     if ($exec_err) {
         echo $lang['restart_failed'];
     } else {
         echo $lang['restart_ok'];
     }
+    include "foot.php";
     exit;
 }
 
@@ -55,7 +61,12 @@ echo "
 ";
 
 if (file_exists("/root/rachel-scripts/esp-checker.php")) {
-    $id = strtoupper(exec("ifconfig | grep eth0 | awk '{ print $5 }' | sed s/://g | grep -o '.\{6\}$'"));
+    if (is_rachelplusv3()) {
+        $interface = "enp2s0";
+    } else {
+        $interface = "eth0";
+    }
+    $id = strtoupper(exec("ifconfig | grep $interface | awk '{ print $5 }' | sed s/://g | grep -o '.\{6\}$'"));
     echo "<h3 style='float: right;'>Device ID: $id</h3>";
 }
 
@@ -85,11 +96,18 @@ if (is_rachelpi()) {
 
     $usage_supported = true;
 
-    $partitions = array(
-        "/media/preloaded" => "Admin (preloaded)",
-        "/media/uploaded"  => "Teacher (uploaded)",
-        "/media/RACHEL"    => "RACHEL (RACHEL modules)"
-    );
+    # v3 has different layout
+    if (file_exists("/.data/RACHEL")) {
+        $partitions = array(
+            "/.data" => "/media/RACHEL",
+        );
+    } else {
+        $partitions = array(
+            "/media/preloaded" => "Admin (preloaded)",
+            "/media/uploaded"  => "Teacher (uploaded)",
+            "/media/RACHEL"    => "RACHEL (RACHEL modules)"
+        );
+    }
 
     foreach ($output as $line) {
         list($fs, $size, $used, $avail, $perc, $name) = preg_split("/\s+/", $line);
@@ -156,10 +174,9 @@ if ($usage_supported) {
 #-------------------------------------------
 # This is the only way to turn wifi on and off on the PLUS
 #-------------------------------------------
-if (is_rachelplus()) {
-
+if (is_rachelplus() && !is_rachelplusv3()) {
     echo "
-        <h2>$lang[wifi_control]</h3>
+        <h2>$lang[wifi_control]</h2>
         <div style='height: 24px;'>
         <div style='float: left; height: 24px; margin-right: 10px;'>$lang[current_status]:</div> 
             <div id='wifistat' style='height: 24px;'>&nbsp;</div>
@@ -170,12 +187,11 @@ if (is_rachelplus()) {
         </div>
         <p>$lang[wifi_warning]</p>
     ";
-
 }
 
 #-------------------------------------------
-# We also offer a shutdown option for raspberry pi systems
-# (which otherwise might corrupt themselves when unplugged)
+# We also offer a shutdown (especially important for raspberry pi systems
+# which otherwise might corrupt themselves when unplugged)
 #-------------------------------------------
 if (is_rachelpi()) {
     echo "
@@ -187,6 +203,20 @@ if (is_rachelpi()) {
         <input type='submit' name='reboot' value='$lang[restart]' onclick=\"if (!confirm('$lang[confirm_restart]')) { return false; }\">
         </form>
         $lang[shutdown_blurb]
+        </div>
+    ";
+} else if (is_rachelplusv3()) {
+    echo "
+        <h2>$lang[system_shutdown]</h3>
+        <h3>RACHEL-Plus</h3>
+        <img src='art/ecs-cap-power-button.png' width='178' height='178'>
+        <p>You can force shut down by pressing and holding the power button for five seconds.
+        <p><b>To safely shut down or restart, use the buttons below:</b>
+        <div style='padding: 10px; border: 1px solid red; background: #fee;'>
+        <form action='hardware.php' method='post'>
+        <input type='submit' name='shutdown' value='$lang[shutdown]' onclick=\"if (!confirm('$lang[confirm_shutdown]')) { return false; }\">
+        <input type='submit' name='reboot' value='$lang[restart]' onclick=\"if (!confirm('$lang[confirm_restart]')) { return false; }\">
+        </form>
         </div>
     ";
 } else if (is_rachelplus()) {
@@ -202,14 +232,19 @@ if (is_rachelpi()) {
         </form>
         </div>
     ";
-} else {
-# decided to just not show this for unsupported systems
-#    echo "
-#        <h3>$lang[unknown_system]</h3>
-#        <p>$lang[shutdown_not_supported]</p>
-#    ";
 }
 
-include "foot.php"
+if (is_rachelplus()) {
+    echo "
+        <h2>Advanced Hardware Control</h2>
+        To modify advanced hardware settings (WiFi, DHCP, Firewall, etc.) please
+        <a href='//$_SERVER[HTTP_HOST]:8080' target='_blank'>click here</a>
+        <p><b>Note:</b> The settings in the advanced hardware control can cause your RACHEL
+        to stop working.<br>
+        Do not change unless you know what you are doing.</p>
+    ";
+}
+
+include "foot.php";
 
 ?>

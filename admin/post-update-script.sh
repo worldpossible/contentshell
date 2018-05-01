@@ -48,6 +48,8 @@ setVariables() {
             isPlusVer1=1
         elif [[ `uname -n` = "WAPD-235N-Server" ]]; then
             isPlusVer2=1
+        elif [[ `uname -n | grep CMAL` ]]; then
+            isPlusVer3=1
         fi
     elif [[ -d $piWebDir ]]; then
         # we're on a RACHEL-Pi
@@ -71,6 +73,7 @@ checkVariables() {
     echo "    isPlus: " $isPlus;
     echo "isPlusVer1: " $isPlusVer1
     echo "isPlusVer2: " $isPlusVer2
+    echo "isPlusVer3: " $isPlusVer3
     echo "    webDir: " $webDir;
     echo "  adminDir: " $adminDir;
     echo "    modDir: " $modDir;
@@ -142,37 +145,45 @@ installAWStats() {
     # we only install on the plus
     awstatsDir=/media/RACHEL/awstats
     if [[ $isPlus ]]; then
-        # and only if it's not there yet -- in the future we'll want
-        # to check a version number or just always copy the lastest
-        # version over -- early on there was an installer error
-        # where we didn't create the data directory, so we check for that
-        # instead of just the awstats directory
-        if [[ ! -d $awstatsDir/data ]]; then
-            # remove any incomplete version
-            rm -rf $awstatsDir
-            # copy over our version
-            cp -r $adminDir/externals/awstats $awstatsDir
-            # symlink the conf file
-            ln -sf $awstatsDir/awstats.conf /etc/
+
+        # copy over the latest version, but leave data intact
+        rsync -a --exclude '/data/' $adminDir/externals/awstats/ $awstatsDir/
+
+        # create data directory (should be harmless if already there)
+        mkdir -p $awstatsDir/data
+
+        # symlink the conf file (should be harmless if already there)
+        ln -sf $awstatsDir/awstats.conf /etc/
+
+        # the v3 uses nginx instead of lighttpd
+        if [[ $isPlusVer3 ]]; then
+            sed -i '/LogFile/ s/httpd\/access_log/nginx\/access.log/' $awstatsDir/awstats.conf
         fi
-        # next we update lighttpd configuration to run awstats on
-        # its own port, and to use a fixed hostname in the log
-        # -- be careful not to do it twice (or more!)
-        lighttpdConf=/usr/local/etc/lighttpd.conf
-        if [[ -z `grep 'start awstats changes' $lighttpdConf` ]]; then
-            # append the conf addtions
-            cat $awstatsDir/lighttpd.awstats.conf >> $lighttpdConf
-            # restart webserver - note that while it may be smarter
-            # to do this once at the end, we actually need this to happen
-            # before we do the log processing below, so do it now
-            restartWebserver
-            # after changing the server log config we have to filter the
-            # existing log for server hostname/ip -- this can take a few
-            # minutes so we background it -- we also need to clear out
-            # any collated awstats data after we're done fixing the
-            # log because that data will be based on the unfixed log
-            perl -pi -e 's/ \S+ / RACHEL /' /var/log/httpd/access_log && rm -rf $awstatsDir/data/* &
+
+        # everything is already taken care of on the v3 plus, but on the v1/v2:
+        if [[ $isPlus1 || $isPlus2 ]];  then
+
+            # next we update lighttpd configuration to run awstats on
+            # its own port, and to use a fixed hostname in the log
+            # -- be careful not to do it twice (or more!)
+            lighttpdConf=/usr/local/etc/lighttpd.conf
+            if [[ -z `grep 'start awstats changes' $lighttpdConf` ]]; then
+                # append the conf addtions
+                cat $awstatsDir/lighttpd.awstats.conf >> $lighttpdConf
+                # restart webserver - note that while it may be smarter
+                # to do this once at the end, we actually need this to happen
+                # before we do the log processing below, so do it now
+                restartWebserver
+                # after changing the server log config we have to filter the
+                # existing log for server hostname/ip -- this can take a few
+                # minutes so we background it -- we also need to clear out
+                # any collated awstats data after we're done fixing the
+                # log because that data will be based on the unfixed log
+                perl -pi -e 's/ \S+ / RACHEL /' /var/log/httpd/access_log && rm -rf $awstatsDir/data/* &
+            fi
         fi
+        # that's the end of the plus 1/2 code
+
         # next we need to add a line to crontab to collate the log data
         crontabFile=/etc/crontab
         if [[ -z `grep 'awstats upkeep' $crontabFile` ]]; then
@@ -187,12 +198,13 @@ installAWStats() {
                 sed -i '/awstats.pl > \/dev\/null/ s/null/null\n/' $crontabFile
             fi
         fi
+
     fi
 }
 
 # restarts the webserver if the flag to do so has been set
 restartWebserver() {
-    if [[ $isPlus ]]; then
+    if [[ $isPlus1 || $isPlus2 ]]; then
         killall -INT lighttpd && /usr/bin/lighttpd -f /usr/local/etc/lighttpd.conf
     fi
 }

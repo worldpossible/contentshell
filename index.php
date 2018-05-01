@@ -47,8 +47,8 @@
                                 else if (results.level < 40) { vert = -36; }
                                 else if (results.level < 60) { vert = -24; }
                                 else if (results.level < 80) { vert = -12; }
-                                var horz = 0; // shows not plugged (40px right to show plugged)
-                                if (results.status > -20 ) { horz = 40 }
+                                var horz = 0; // 0 shows discharging, 40px offset shows charging
+                                if (results.status == "charging" ) { horz = 40 }
                                 $("#battery").css({
                                     background: "url(\'art/battery-level-sprite-light.png\')",
                                     backgroundPosition: horz+"px "+vert+"px",

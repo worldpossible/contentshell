@@ -422,6 +422,9 @@ define("RACHELPLUS_MODPATH", "/media/RACHEL/rachel/modules");
 function is_rachelplus() {
     return is_dir(RACHELPLUS_MODPATH) || file_exists("/tmp/fake-rachelplus");
 }
+function is_rachelplusv3() {
+    return is_dir("/.data/RACHEL") || file_exists("/tmp/fake-rachelplusv3");
+}
 
 #-------------------------------------------
 # gets the absolute module path on any machine
