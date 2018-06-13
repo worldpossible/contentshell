@@ -9,20 +9,27 @@
 #
 # Usage: do_tasks.php
 #-------------------------------------------
-
 require_once("common.php");
 
+# because this runs as a seperate process, logging is a bit of a pain
+# -- syslog doesn't seem to work so we log to our own file - only used
+# for debugging, really
 define("VERBOSE", false);
-ini_set("error_log", "syslog"); # should this go to the apache log?
+function mylog ($msg) {
+    if (VERBOSE) {
+        file_put_contents("/tmp/do_tasks.log", $msg . "\n", FILE_APPEND);
+    }
+}
+
 $absmodpath = getAbsModPath(); # needed to run finish_install.sh
 
-error_log("starting tasks");
+mylog("starting tasks");
 
 #-------------------------------------------
 # input checking - there should be no input
 #-------------------------------------------
 if (!empty($argv[1])) {
-    error_log("arguments ignored... exiting.");
+    mylog("arguments ignored... exiting.");
     exit(1);
 }
 
@@ -35,11 +42,11 @@ if (file_exists($pidfile)) {
     $pid = preg_replace("/\D+/", "", file_get_contents($pidfile));
     $output = exec("ps $pid | sed 1d");
     if (!empty($output)) {
-        error_log("already running... exiting.");
+        mylog("already running... exiting.");
         exit(0);
     } else {
         # something went wrong, let's try again
-        error_log("pidfile found but no process... restarting.");
+        mylog("pidfile found but no process... restarting.");
         unlink($pidfile);
     }
 }
@@ -74,15 +81,15 @@ while (true) {
 
     # if we're done, we're done
     if (!$next) {
-        error_log("no more tasks; exiting.");
+        mylog("no more tasks; exiting.");
         break;
     }
 
-    error_log("running task $next[task_id] ($next[moddir])");
+    mylog("running task $next[task_id] ($next[moddir])");
 
     # detect looping on the same process
     if ($next['task_id'] == $last_task_id) {
-        error_log("apparently stuck on task_id $last_task_id; exiting.");
+        mylog("apparently stuck on task_id $last_task_id; exiting.");
         exit(1);
     }
     $last_task_id = $next['task_id'];
@@ -92,10 +99,14 @@ while (true) {
     $cmd        = $next['command'];
     $moddir     = $next['moddir'];
 
+    # we throttle to 25MB/s because the CAP3 will otherwise
+    # start locking up
+    $cmd = preg_replace("/^rsync /", "rsync --bwlimit=25000 ", $cmd);
+
     #-------------------------------------------
     # here we actually fire off the process and see what happens 
     #-------------------------------------------
-    if (VERBOSE) { error_log("opening process: $cmd"); }
+    mylog("opening process: $cmd");
     $db_started = $db->escapeString(time());
 
     $pipedefs = array(
@@ -122,7 +133,7 @@ while (true) {
 
     # if it failed, record and move on
     if (!$info['running']) {
-        error_log("process completed instantly - task_id $db_task_id");
+        mylog("process completed instantly - task_id $db_task_id");
         $db_stdout_tail = $db->escapeString(fread($pipes[1], 1024));
         $db_stderr_tail = $db->escapeString(fread($pipes[2], 1024));
         $db_retval      = $db->escapeString($info['exitcode']);
@@ -139,7 +150,7 @@ while (true) {
         continue;
     }
 
-    if (VERBOSE) { error_log("process opened - task_id $db_task_id - now reading"); }
+    mylog("process opened - task_id $db_task_id - now reading");
 
     #-------------------------------------------
     # We keep reading from the pipe, one char at a time
@@ -150,7 +161,7 @@ while (true) {
     $line = "";        # - the current line, built one char at a time
     $lines = array();  # - array of completed lines (limited to $tail_length)
     $tail_length = 2;  # - only keep this many lines of output in $lines
-    $frequency = 2;    # - how often can we write to the db (in seconds)?
+    $frequency = 3;    # - how often can we write to the db (in seconds)?
     $cr = false;       # - flag: did the previous line have a carriage return?
     $lastone = false;  # - flag: is this the last line of output?
     $files_done = 0;   # - how many files have been completed? (from rsync)
@@ -228,7 +239,7 @@ while (true) {
                         data_rate   = '$data_rate'
                     WHERE task_id = '$db_task_id'
                 ");
-                if (VERBOSE) { error_log("updating db with: '$db_stdout_tail'"); }
+                mylog("updating db with: '$db_stdout_tail'");
 
             }
 
@@ -241,8 +252,8 @@ while (true) {
 
     }
 
-    #error_log("in lines array: " . implode("\n", $lines));
-    #error_log("in pipe: " . fread($pipes[2], 1024));
+    #mylog("in lines array: " . implode("\n", $lines));
+    #mylog("in pipe: " . fread($pipes[2], 1024));
 
     # grab whatever is left in stderr (up to 1 kb)
     $db_stderr_tail = $db->escapeString(fread($pipes[2], 1024));
@@ -251,13 +262,13 @@ while (true) {
     # we're done reading, so now we write the final results
     # to the db, including the exitcode and any stderr output
     #-------------------------------------------
-    # error_log("finished reading, calling fclose(0)");
+    # mylog("finished reading, calling fclose(0)");
     fclose($pipes[0]);
-    # error_log("calling fclose(1)");
+    # mylog("calling fclose(1)");
     fclose($pipes[1]);
-    # error_log("calling fclose(2)");
+    # mylog("calling fclose(2)");
     fclose($pipes[2]);
-    if (VERBOSE) { error_log("pipes closed, calling proc_close()"); }
+    mylog("pipes closed, calling proc_close()");
 
     # close the process
     $db_retval = $db->escapeString(proc_close($proc));
@@ -266,9 +277,9 @@ while (true) {
     # XXX this needs better error checking and feedback
     $path = "$absmodpath/$moddir";
     $finscript = "finish_install.sh";
-    if (VERBOSE) { error_log("checking for $path/$finscript"); }
+    mylog("checking for $path/$finscript");
     if (file_exists("$path/$finscript")) {
-        error_Log("running $path/$finscript");
+        mylog("running $path/$finscript");
         $db->exec("
             UPDATE tasks SET
                 stdout_tail = 'Running: $path/$finscript',
@@ -297,7 +308,7 @@ while (true) {
         }
     }
 
-    if (VERBOSE) { error_log("updating db - task $db_task_id complete"); }
+    mylog("updating db - task $db_task_id complete");
     $db_completed = $db->escapeString(time());
     $db->exec("
         UPDATE tasks SET
@@ -315,10 +326,10 @@ while (true) {
 # much... let's try doing it after installs/updates are complete
 # and see if anyone complains. XXX the right way is to put this
 # in the the module's finish_install.sh
-if (VERBOSE) { error_Log("restarting kiwix..."); }
+mylog("restarting kiwix...");
 kiwix_restart();
 
-if (VERBOSE) { error_Log("goodbye."); }
+mylog("goodbye.");
 exit(0);
     
 ?>
