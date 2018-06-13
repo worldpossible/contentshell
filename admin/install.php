@@ -207,8 +207,8 @@ if (isset($_POST['advanced_install'])) {
 
 <script>
 
-var ajaxTimeout = 10000;
-var taskRefreshRate = 2000;
+var ajaxTimeout = 12000;
+var taskRefreshRate = 3000;
 
 var knownServers = <?php echo json_encode($known_servers); ?>;
 
@@ -419,7 +419,7 @@ function cancelAll() {
 var current_task_moddirs = {};
 function pollTasks() {
 
-    var freshtime = 10; // number of seconds after which we consider a task "stale"
+    var freshtime = 15; // number of seconds after which we consider a task "stale"
 
     $.ajax({
         url: "background.php?getTasks=1",
