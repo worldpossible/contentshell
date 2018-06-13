@@ -749,10 +749,11 @@ function showip () {
         if (isset($match[1])) { echo "<b>$lang[server_address]</b>: $match[1]\n"; }
     } else {
         # most likely linux based - so ifconfig should work
+        # eth0/wlan for Rpi, CAP1&2, enp2s0/br-lan for CAP3
         exec("/sbin/ifconfig", $output);
-        preg_match("/eth0.+?inet addr:(.+?) /", join("", $output), $match);
+        preg_match("/(?:eth0|enp2s0).+?inet addr:(.+?) /", join("", $output), $match);
         if (isset($match[1])) { echo "<b>LAN</b>: $match[1]\n"; }
-        preg_match("/wlan0.+?inet addr:(.+?) /", join("", $output), $match);
+        preg_match("/(?:wlan0|br\-lan).+?inet addr:(.+?) /", join("", $output), $match);
         if (isset($match[1])) { echo "<br><b>WIFI</b>: $match[1]\n"; }
     }
 
