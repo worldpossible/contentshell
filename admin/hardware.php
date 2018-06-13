@@ -205,25 +205,16 @@ if (is_rachelpi()) {
         $lang[shutdown_blurb]
         </div>
     ";
-} else if (is_rachelplusv3()) {
-    echo "
-        <h2>$lang[system_shutdown]</h3>
-        <h3>RACHEL-Plus</h3>
-        <img src='art/ecs-cap-power-button.png' width='178' height='178'>
-        <p>You can force shut down by pressing and holding the power button for five seconds.
-        <p><b>To safely shut down or restart, use the buttons below:</b>
-        <div style='padding: 10px; border: 1px solid red; background: #fee;'>
-        <form action='hardware.php' method='post'>
-        <input type='submit' name='shutdown' value='$lang[shutdown]' onclick=\"if (!confirm('$lang[confirm_shutdown]')) { return false; }\">
-        <input type='submit' name='reboot' value='$lang[restart]' onclick=\"if (!confirm('$lang[confirm_restart]')) { return false; }\">
-        </form>
-        </div>
-    ";
 } else if (is_rachelplus()) {
+    if (is_rachelplusv3()) {
+        $img = "<img src='art/ecs-cap-power-button.png' width='178' height='178'>";
+    } else {
+        $img = "<img src='art/intel-cap-power-button.png' width='250' height='170'>";
+    }
     echo "
         <h2>$lang[system_shutdown]</h3>
         <h3>RACHEL-Plus</h3>
-        <img src='art/intel-cap-power-button.png' width='250' height='170'>
+        $img
         $lang[rplus_safe_shutdown]
         <div style='padding: 10px; border: 1px solid red; background: #fee;'>
         <form action='hardware.php' method='post'>
