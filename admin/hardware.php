@@ -6,24 +6,6 @@ $page_script = "js/hardware.js";
 $page_nav = "hardware";
 include "head.php";
 
-#-------------------------------------------
-# We also allow shutting down the server so as to avoid
-# damaging the SD/HD. This requires that www-data has
-# sudo access to /sbin/shutdown, which should be set up
-# automatically during rachelpiOS installation
-# XXX should make this work for RACHEL-Plus too
-#-------------------------------------------
-if (isset($_GET['wifi'])) {
-    if ($_GET['wifi'] == "on") {
-        echo "Turning WIFI ON... ";
-        exec("/etc/WiFi_Setting.sh");
-    } else if ($_GET['wifi'] == "off") {
-        echo "Turning WIFI OFF... ";
-        exec("/sbin/ifconfig wlan0 down");
-    }
-    echo "Done.";
-}
-
 if (isset($_POST['shutdown'])) {
     # pause so the webserver can respond, the complexity of the the
     # command is so that the exec() returns instantly
@@ -174,7 +156,7 @@ if ($usage_supported) {
 #-------------------------------------------
 # This is the only way to turn wifi on and off on the PLUS
 #-------------------------------------------
-if (is_rachelplus() && !is_rachelplusv3()) {
+if (is_rachelplus()) {
     echo "
         <h2>$lang[wifi_control]</h2>
         <div style='height: 24px;'>

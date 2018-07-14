@@ -144,7 +144,7 @@ function addModules($moddirs) {
 
         # use rsync -z for remote hosts, not for LAN
         # (the CPU overhead of zip actually slows it down on a fast network)
-        $cmd = "rsync -Pav$zip rsync://$host/rachelmods/$moddir $relmodpath/";
+        $cmd = "rsync -Pav$zip --del rsync://$host/rachelmods/$moddir $relmodpath/";
 
         # insert a task into the DB
         $db        = getdb();
@@ -359,10 +359,25 @@ function getTasks() {
 function wifiStatus() {
 
     if ($_GET['wifistat'] == "on") {
-         exec("/etc/WiFi_Setting.sh > /dev/null 2>&1", $output, $retval);
+        if (is_rachelplusv3()) {
+            # v3 has two wifi interfaces
+            exec("/sbin/ifconfig wlan0 up", $output, $retval1); # 5G
+            exec("/sbin/ifconfig wlan1 up", $output, $retval2); # 2_4G
+            $retval = $retval1 + $retval2;
+        } else {
+            exec("/etc/WiFi_Setting.sh > /dev/null 2>&1", $output, $retval);
+        }
     } else if ($_GET['wifistat'] == "off") {
-        exec("/sbin/ifconfig wlan0 down", $output, $retval);
+        if (is_rachelplusv3()) {
+            # v3 has two wifi channels
+            exec("/sbin/ifconfig wlan0 down", $output, $retval1); # 5G
+            exec("/sbin/ifconfig wlan1 down", $output, $retval2); # 2_4G
+            $retval = $retval1 + $retval2;
+        } else {
+            exec("/sbin/ifconfig wlan0 down", $output, $retval);
+        }
     } else if ($_GET['wifistat'] == "check") {
+        # we don't do anything yet -- see below
         $retval = 0;
     } else {
         # unknown command
@@ -377,7 +392,13 @@ function wifiStatus() {
 
     # we always finish by sending back the status
     $wifistat = 0;
-    exec("ifconfig wlan0 | grep ' UP '", $output);
+    if (is_rachelplusv3()) {
+        # there are two interfaces on the v3, but
+        # if either interface is up, we count it as up
+        exec("{ ifconfig wlan1 & ifconfig wlan0; } | grep ' UP '", $output);
+    } else {
+        exec("ifconfig wlan0 | grep ' UP '", $output);
+    }
 
     if ($output) { $wifistat = 1; }
 
