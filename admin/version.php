@@ -398,6 +398,11 @@ if (file_exists("/etc/rachelinstaller-version")) {
     $rachel_installer_version = file_get_contents("/etc/rachelinstaller-version");
 }
 
+$kolibri_version = exec("export USER=`whoami`; kolibri --version;");
+if (!$kolibri_version || !preg_match("/^[\d\.]+$/", $kolibri_version)) {
+    $kolibri_version = "?";
+}
+
 $kalite_version = exec("export USER=`whoami`; kalite --version;");
 if (!$kalite_version || !preg_match("/^[\d\.]+$/", $kalite_version)) {
     $kalite_version = "?";
@@ -419,11 +424,12 @@ if (!$kiwix_version) {
 <tr><td>Hardware</td><td><?php echo $hardware ?></td></tr>
 <tr><td>OS</td><td><?php echo $os ?></td></tr>
 <tr><td>RACHEL Installer</td><td><?php echo $rachel_installer_version ?></td></tr>
+<tr><td>Kolibri</td><td><?php echo $kolibri_version ?></tr>
 <tr><td>KA Lite</td><td><?php echo $kalite_version ?></tr>
 <tr><td>Kiwix</td><td><?php echo $kiwix_version ?></td></tr>
 <tr><td>Content Shell</td><td>
 
-    <span id="cur_contentshell">v2.3.8</span>
+    <span id="cur_contentshell">v2.3.9</span>
     <div style="float: right; margin-left: 20px;">
         <div style="float: left; width: 24px; height: 24px; margin-top: 2px;">
             <img src="../art/spinner.gif" id="spinner" style="display: none;">
