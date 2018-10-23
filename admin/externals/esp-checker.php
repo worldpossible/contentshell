@@ -28,6 +28,11 @@ if ($existing_pid) {
 
 # this is the unique device ID. We use the last six of the eth0 mac address
 $id = exec("ifconfig | grep eth0 | awk '{ print $5 }' | sed s/://g | grep -o '.\{6\}$'");
+if (!$id) {
+    # CAP3 uses a different ethernet identifier
+    $id = exec("ifconfig | grep enp2s0 | awk '{ print $5 }' | sed s/://g | grep -o '.\{6\}$'");
+}
+
 if (DEBUG) { echo  "Device ID: $id\n"; }
 
 # these are the ports we want to tunnel
