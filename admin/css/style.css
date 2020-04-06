@@ -1,0 +1,101 @@
+    body {
+        background: #eee;
+        color: #333;
+    }
+    #headbar {
+        background: #ccc;
+        padding: 5px 10px 15px 10px;
+        border-bottom: 1px solid #999;
+        position: relative;
+        height: 2em;
+    }
+    #ip { position: absolute; top: 5px; right: 10px; font-size: small; }
+    #battery {
+        display: inline-block;
+        margin-bottom: -2px;
+        width: 40px;
+        height: 12px;
+    }
+
+    #nav {
+        position: absolute;
+        bottom: -1px; left: 10px;
+        text-align: center;
+        margin: 0; padding: 0;
+    }
+    #nav li {
+        display: inline;
+        margin: 0; padding: 0;
+    }
+    #nav a {
+        color: #333;
+        display: inline-block;
+        text-decoration: none;
+        background: #ccc;
+        padding: 2px 10px 2px 10px;
+        border: 1px solid #999;
+        border-radius: 5px 5px 0 0;
+    }
+    #nav a:hover { background: #ddd; }
+    #nav .active {
+        background: #eee;
+        border-bottom: 1px solid #eee;
+    }
+    #nav .active:hover { background: #eee; }
+
+    #content {
+        padding: 10px;
+    }
+
+    /* for sortable module list */
+    button { margin: 3px; padding: .25em 1em; }
+    .ui-icon { background-image: url(css/ui-lightness/images/ui-icons_ef8c08_256x240.png); }
+    #sortable { list-style-type: none; margin: 0; padding: 0; }
+    #sortable li {
+        margin: 0 3px 3px 3px;
+        padding: .25em;
+        padding-left: 1.5em;
+        height: 1em; width: 40em;
+        overflow: hidden;
+        position: relative;
+        cursor: move;
+    }
+    #sortable li span { position: absolute; margin-left: -1.3em; }
+    #sortable .checkbox { position: absolute; right: 10px; top: 5px; font-size: small; color: gray; }
+
+    #controls {
+        width: 42em;
+        text-align: right;
+        margin: 5px 0 5px 0;
+    }
+    #controls button {
+        font-size: small;
+        margin: 0 0 5px 5px;
+        padding: 1px 5px;
+        background: none;
+        color: #333;
+        border: 1px solid #ccc;
+    }
+    /* #controls button:hover {
+        background: #fff;
+    }*/
+
+    .error { border: 1px solid #c00; background: #fee; color: #c00; padding: 10px; }
+    .error h2, .error h3 { margin: 0 0 10px 0; }
+    .error p { margin: 0 }
+
+    .stats { margin-top: 20px; }
+    .stats th {
+        text-align: left;
+        padding: 5px 80px 5px 5px;
+    }
+    .stats td {
+        border: 1px solid #ccc;
+        padding: 5px;
+    }
+
+    .version { border-collapse: collapse; }
+    .version tr { border-top: 1px solid lightgray; }
+    .version td { padding: 10px; white-space: nowrap; }
+    .version th { padding: 20px 10px; white-space: nowrap; text-align: left; }
+

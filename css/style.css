@@ -1,0 +1,205 @@
+body {
+    background-color: #ccc;
+    font-family: sans-serif;
+    font-size: 100%;
+}
+
+a {
+    color: #249;
+    text-decoration: none;
+    outline: none; /* don't outline image links (ff) */
+}
+a:hover { text-decoration: underline; }
+a:visited { color: #649; }
+
+#rachel {
+    display: block;
+    width: 960px;
+    height: 120px;
+    background: #000 url('../art/rachel_banner.jpg') no-repeat 0 0;
+    border-radius: 5px;
+    margin: auto;
+    position: relative;
+}
+
+#adminnav {
+    position: absolute;
+    font-size: small;
+    bottom: 5px; right: 10px;
+}
+#adminnav a { color: #999; }
+#ip {
+    position: absolute;
+    font-size: small;
+    top: 5px; right: 10px;
+    color: white;
+}
+#battery {
+    display: inline-block;
+    margin-bottom: -2px;
+    width: 40px;
+    height: 12px;
+}
+
+#content {
+    width: 960px;
+    margin: 10px auto;
+}
+
+/* this is really just for the about page */
+.fullpage {
+    padding: 10px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #fff;
+}
+.fullpage h2 {
+    border-bottom: 1px solid #ccc;
+    padding: 0;
+    margin: 0 0 5px 0;
+}
+.fullpage p {
+    margin: 0 0 20px 0;
+}
+
+/*-------------------------------------------*/
+/* BEGIN index modules                       */
+/*-------------------------------------------*/
+.indexmodule {
+    padding: 10px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #fff;
+}
+/* clearfix rolled into indexmodule */
+.indexmodule:before { content: " "; display: table; }
+.indexmodule:after  { content: " "; display: table; clear: both; }
+.indexmodule { *zoom: 1; }
+
+.indexmodule img {
+    width: 120px;
+    margin-right: 10px;
+    border-radius: 5px;
+    float: left;
+}
+
+.indexmodule p { margin: 5px 0 0 130px; clear: right; }
+.indexmodule h2 { margin: 0; }
+
+.indexmodule form {
+    float: right;
+    background: #ccc;
+    padding: 2px;
+    border-radius: 5px;
+    margin: 0 0 5px 0;
+    font-size: small;
+}
+
+.indexmodule ul {
+    width: 808px; /* defining max available width keeps float from */
+                  /* squishing multiple columns too closely */
+    margin: 10px 0 10px 130px;
+    font-size: small; 
+    list-style-type: none;
+    padding: 0;
+}
+.indexmodule ul.double {
+    column-count: 2; -webkit-column-count: 2; -moz-column-count: 2;
+ }
+.indexmodule ul.triple {
+    column-count: 3; -webkit-column-count: 3; -moz-column-count: 3;
+ }
+.indexmodule ul.quad   {
+    column-count: 4; -webkit-column-count: 4; -moz-column-count: 4;
+ }
+.indexmodule .listhead {
+    font-weight: bold; font-size: 120%; margin: 5px 0 5px 0;
+}
+
+/* table only used for medlineplus */
+.indexmodule table {
+    width: 808px;
+    float: right;
+    font-size: small;
+    margin: 10px 0 10px 0;
+    padding: 0;
+}
+
+.indexmodule td {
+    background: #eef;
+    border: 1px solid #ccc;
+    padding: 3px 2px;
+    text-align: center;
+}
+
+.indexmodule .smallblurb {
+    font-size: x-small;
+    margin-left: 130px;
+    clear: both;
+}
+
+/*-------------------------------------------*/
+/* END for index modules                     */
+/*-------------------------------------------*/
+
+#rachel-small {
+    display: block;
+    background: #000 url('../art/rachel-banner-small.png') no-repeat 5px 0;
+    height: 28px;
+    margin-bottom: 5px;
+    text-indent: -1000em;
+}
+
+.menubar {
+    width: 956px;
+    margin: auto;
+    border-radius: 5px;
+    background: #666;
+    padding: 2px; 
+}
+
+.menubar ul {
+    font-size: small;
+    font-weight: bold;
+    list-style-type:none;
+    margin:10;
+    padding:0px;
+    margin: auto;
+}
+
+.menubar li {
+    display:inline;
+    float:left;
+    padding:5px;
+    margin-top: 2px;
+}
+
+.menubar a {
+    color:#fff;
+    margin:10px;
+    text-decoration: none;
+}
+
+.menubar a:hover {
+    color:#ff3;
+    text-decoration: underline;
+}
+
+#footer_right {
+    float:right; 
+    padding-top:5px;
+    padding-right: 15px;
+    font-size: small;
+    font-weight: bold;
+    color:#ffffff;
+}
+
+/**
+ * Nicolas Gallagher's Clearfix Hack
+ * Known support: Firefox 3.5+, Safari 4+, Chrome, Opera 9+, IE 6+
+ */
+.cf:before { content: " "; display: table; }
+.cf:after  { content: " "; display: table; clear: both; }
+.cf { *zoom: 1; }
