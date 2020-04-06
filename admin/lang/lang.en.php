@@ -73,6 +73,8 @@ $lang['available'] = "Available";
 $lang['percentage'] = "Percentage";
 $lang['advanced'] = "Advanced";
 $lang['install'] = "Install";
+$lang['upload_btn'] = "Upload";
+$lang['update_utility'] = "Update Utility";
 
 # for settings.php
 $lang['change_password'] = "Change Password";

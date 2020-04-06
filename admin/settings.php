@@ -107,10 +107,10 @@ if ($is_cli || $_SERVER['REQUEST_METHOD'] == 'POST') {
 <?php if ($show_success) { echo "<h3 class='success'>$lang[change_pass_success]</h3>"; } ?>
 
 <style>
-    td { padding: 5px; }
+    td { padding: 1px; }
     input[type="submit"] {
         margin-top: 10px;
-        padding: 5px;
+        padding: 1px;
     }
     .error {
         border: 1px solid #a33;
@@ -123,6 +123,8 @@ if ($is_cli || $_SERVER['REQUEST_METHOD'] == 'POST') {
         background: #efe;
         color: #3a3;
         padding: 10px;
+    }
+    h2 { border-bottom: 1px solid #ccc;
     }
 </style>
 
@@ -159,7 +161,39 @@ if ($is_cli || $_SERVER['REQUEST_METHOD'] == 'POST') {
 </table>
 </form>
 
+<br>
+
+<!-- Third form -->
+
+<h2><?php echo $lang['update_utility'] ?></h2>
+
+<form enctype="multipart/form-data" action="upload.php" method="post">
+   <table>
+     <tr>
+       <td>
+         &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;
+         <input type="file" name="upload_file">
+       </td>
+     </tr>
+     <tr>
+       <td>
+         &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;
+         <input type="submit" value="<?php echo $lang['upload_btn'] ?>">
+       </td>
+     </tr>
+     <tr>
+       <td>
+         <br>
+         &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;
+         <a href="log.php">Review last update log</a>
+       </td>
+     </tr>
+  </table>
+</form>
+
 <?php
+
+
 
 if (!$is_cli) {
 
@@ -176,6 +210,7 @@ if (!$is_cli) {
         }
     }
 </script>
+
 <h2>Run Rsync Daemon</h2>
 <p style='background: #ddd; padding: 10px 5px; border-radius: 5px; font-size: small;'>
 <input type='checkbox' id='rsyncd'$checked onchange='rsyncToggle();'> Run <tt>rsyncd</tt>, so you can clone from this device &mdash;

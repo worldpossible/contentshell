@@ -74,6 +74,7 @@ $lang['available'] = "Disponible";
 $lang['percentage'] = "Pourcentage";
 $lang['advanced'] = "Avancé";
 $lang['install'] = "Installer";
+$lang['update_utility'] = "Utilitaire de mise à jour";
 
 # for settings.php
 $lang['change_password'] = "Changer le mot de passe";
