@@ -1,7 +1,7 @@
 #!/bin/bash
 # ---------------------------------------------------------------------------------------------
 # Script: Rev_CntntShl.sh | Rev: 1.0
-# Author: Steve Bashford  | Email: Steve@AnalyticsOcean.Net
+# Author: Steve Bashford  | Email: Steve@WorldPossible.org
 # Action: Change the conetent shell rev in file rachel/admin/version.php
 # ---------------------------------------------------------------------------------------------
 
