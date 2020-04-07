@@ -3,6 +3,7 @@
 # Script: Rev_CntntShl.sh | Rev: 1.0
 # Author: Steve Bashford  | Email: Steve@WorldPossible.org
 # Action: Change the conetent shell rev in file rachel/admin/version.php
+# Inform: Update OER2GO on worldpossible.org svr /srv/www/oer2go/scripts/ContentShell-Update.sh
 # ---------------------------------------------------------------------------------------------
 
 # Set vars:
