@@ -6,5 +6,7 @@
 # --------------------------------------------------------------------------------------
 
 # Add key:
-  #sudo ssh-agent bash
+  eval `ssh-agent -s`
+  ssh-add
+  sudo ssh-agent bash
   ssh-add /home/wp/.ssh/id_git
