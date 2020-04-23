@@ -1,6 +1,6 @@
 #!/bin/bash
 # --------------------------------------------------------------------------------------
-# Script: Rach_Rescue.sh | Rev: 1.12 (200313)
+# Script: Rach_Rescue.sh | Rev: 1.13 (200422)
 # Author: Steve Bashford | Email: Steve@AnalyticsOcean.Net
 # Action: Executes Rachel Plus utilities upldaded via admin->setting form
 # --------------------------------------------------------------------------------------
@@ -44,9 +44,8 @@ WDIR="/.data/RACHEL/rachel/admin" # Working dir path
        exit 0;
   else MSG='"Extracting Update file";'
        ulf_f
-       #unzip -o -P RPZFP123lkj Upd_Rescue.zip
        "${WDIR}"/"${UNZP}"
-       #rm "${UPLU}".zip
+       rm "${UPLU}".zip
   fi
 
 # Run update utiliy:
