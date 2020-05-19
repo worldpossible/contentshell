@@ -1,6 +1,6 @@
 #!/bin/bash
 # ---------------------------------------------------------------------------------------------
-# Script: Rev_CntntShl.sh | Rev: 1.0
+# Script: Rev_CntntShl.sh | Rev: 1.01 (200428)
 # Author: Steve Bashford  | Email: Steve@WorldPossible.org
 # Action: Change the conetent shell rev in file rachel/admin/version.php
 # Inform: Update OER2GO on worldpossible.org svr /srv/www/oer2go/scripts/ContentShell-Update.sh
@@ -8,7 +8,7 @@
 
 # Set vars:
   REVX="$1" # New rev
-  FILE="version.php" # Target file
+  FILE="/.data/RACHEL/rachel.admin/version.php" # Target file
 
 # Test input rev:
   tir_f(){
