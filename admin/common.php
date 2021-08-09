@@ -841,8 +841,14 @@ function showip () {
 }
 
 # restart kiwix so it sees what modules are visible/hidden
-function kiwix_restart() {
-    exec("sudo bash /var/kiwix/rachelKiwixStart.sh");
+function kiwix_restart(){
+    # Run the latest Kiwix restart script if it's available
+    if(file_exists("/var/kiwix/rachelKiwixStart.sh")){
+        exec("sudo bash /var/kiwix/rachelKiwixStart.sh");
+        return;
+    }
+
+    exec("sudo bash /root/rachel-scripts/rachelKiwixStart.sh");
 }
 
 function show_local_content_link() {
