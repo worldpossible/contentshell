@@ -66,12 +66,24 @@ function selfUpdate() {
                 modules = results; // save this for later
                 // check we've got a decent looking version number
                 if (results.contentshell.match(/^v\d+\.\d+\.\d+$/)) {
-                    if (results.contentshell == $("#cur_contentshell").html()) {
+                    
+                    curShell  = $("#cur_contentshell").html()
+                    liveShell = results.contentshell;
+                    
+                    // This was put in for the transition from 3.1.1 to 3.1.2
+                    // which requires additional local packages for new features
+                    // to function
+                    if(curShell == "v2.4.1" && liveShell == "v2.4.0"){
                         button.css("color", "green");
-                        button.html("&#10004; Up to date");
-                    } else {
-                        button.html(results.contentshell + " Available");
-                        button.prop("disabled", false);
+                        button.html("&#10004; Up to date");                        
+                    } else {            
+                        if (liveShell == curShell) {
+                            button.css("color", "green");
+                            button.html("&#10004; Up to date");
+                        } else {
+                            button.html(liveShell + " Available");
+                            button.prop("disabled", false);
+                        }
                     }
                 } else {
                     button.css("color", "#c00");
@@ -398,7 +410,12 @@ if (file_exists("/etc/rachelinstaller-version")) {
     $rachel_installer_version = file_get_contents("/etc/rachelinstaller-version");
 }
 
-$kolibri_version = exec("export USER=`whoami`; kolibri --version;");
+$datapost_version = "?";
+if (file_exists("/etc/datapost-version")) {
+    $datapost_version = file_get_contents("/etc/datapost-version");
+}
+
+$kolibri_version = exec("export USER=`whoami`; sudo kolibri --version;");
 if (!$kolibri_version || !preg_match("/^[\d\.]+$/", $kolibri_version)) {
     $kolibri_version = "?";
 }
@@ -424,12 +441,13 @@ if (!$kiwix_version) {
 <tr><td>Hardware</td><td><?php echo $hardware ?></td></tr>
 <tr><td>OS</td><td><?php echo $os ?></td></tr>
 <tr><td>RACHEL Installer</td><td><?php echo $rachel_installer_version ?></td></tr>
+<tr><td>DataPost</td><td><?php echo $datapost_version ?></td></tr>
 <tr><td>Kolibri</td><td><?php echo $kolibri_version ?></tr>
 <tr><td>KA Lite</td><td><?php echo $kalite_version ?></tr>
 <tr><td>Kiwix</td><td><?php echo $kiwix_version ?></td></tr>
 <tr><td>Content Shell</td><td>
 
-    <span id="cur_contentshell">v2.4.0</span>
+    <span id="cur_contentshell">v2.4.1</span>
     <div style="float: right; margin-left: 20px;">
         <div style="float: left; width: 24px; height: 24px; margin-top: 2px;">
             <img src="../art/spinner.gif" id="spinner" style="display: none;">

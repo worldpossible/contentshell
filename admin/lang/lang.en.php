@@ -75,6 +75,7 @@ $lang['advanced'] = "Advanced";
 $lang['install'] = "Install";
 $lang['upload_btn'] = "Upload";
 $lang['update_utility'] = "Update Utility";
+$lang['upload']         = "Upload";
 
 # for settings.php
 $lang['change_password'] = "Change Password";
@@ -85,6 +86,20 @@ $lang['new_password2'] = "Repeat New";
 $lang['wrong_old_pass'] = "Wrong current password";
 $lang['missing_new_pass'] = "New password cannot be blank";
 $lang['password_mismatch'] = "New passwords do not match";
+$lang['module_upload'] = "Module Upload";
+$lang['upload_req_1']  = "* The file must be a valid zip file";
+$lang['upload_req_2']  = "* The zip must contain a single folder at it's root";
+$lang['upload_req_3']  = "* The folder must have the same name as the zip";
+$lang['upload_req_4']  = "* The folder must contain a rachel-index.php file";
+$lang['upload_paused'] = "Your upload has been Paused. Upload the same file again to resume.";
+$lang['upload_again']     = "Upload again";
+$lang['upload_another']   = "Upload another file";
+$lang['upload_error']     = "Upload Error";
+$lang['upload_canceled'] = "Upload Canceled";
+$lang['details']          = "Details";
+$lang['pause']            = "Pause";
+$lang['installed']        = "Installed";
+
 
 # for captiveportal-redirect.php
 $lang['welcome_to_rachel'] = "Welcome to RACHEL";

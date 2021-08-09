@@ -106,6 +106,9 @@ function deleteModule($moddir) {
     exec("rm -rf '$deldir' 2>&1", $output, $rval);
 
     if ($rval == 0) {
+        # sync the database so it knows a module is deleted. 
+        syncmods_fs2db();
+        
         # restart kiwix so it sees what modules are visible/hidden
         kiwix_restart();
         header("HTTP/1.1 200 OK");

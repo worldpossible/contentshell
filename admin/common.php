@@ -385,21 +385,102 @@ function authorized() {
     <meta charset="utf-8">
     <title>Login</title>
     <style>
-        body { background: #ccc; font-family: sans-serif; }
+      body { background: #363636; font-family: sans-serif; color:#fff; }
+      .content {
+        padding: 0 24px 24px 24px;
+        margin: auto;
+        width: 300px;
+        background:#fff;
+        border:1px solid #ccc;
+        height: 310px;
+	    border-radius:6px;
+        position:fixed;
+        top:0;
+        bottom:0;
+        left:0;
+        right:0;
+      }
+      .content img {
+	    display: block;
+        margin-left: auto;
+        margin-right: auto;
+	    width:117px;
+	    height:146px;
+	    padding:10px 10px 10px 0px;
+      }
+      .content h1 {
+	    font-size:16px;
+	    color:#363636;
+      }
+      .login input[type=submit] {
+        width:100%;
+        height 28px;
+        background-color: #333;
+        color: #fff;
+        padding: 8px;
+        border: none;
+        cursor: pointer;
+        font-size:14px;
+	    border-radius:6px;
+      }
+      .login input[type=submit]:hover {
+        background-color: #555;
+      }
+      .login input[type=text], input[type=password], select {
+        width: 100%;
+        height: 36px;
+        padding: 8px;
+        display: inline-block;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        margin-bottom:10px;
+      }
+      .login input:focus {
+        border: 1px solid #42dcf4;
+      }
+      .login {
+        padding-bottom:12px;
+	    width:100%;
+      }
+      .login i {
+        text-align:center;
+      }
+     .login td:last-child {
+        width: 100%;
+      }
+     .login h1 {
+       font-weight:lighter;
+       text-align:center;
+       font-size:36px;
+       color:#777;
+      }
     </style>
   </head>
   <body onload="document.getElementById('user').focus()">
-    <center>
-    <h1>$lang[admin] $lang[login]</h1>
-    <p><a href="$indexurl">&larr; $lang[back]</a></p>
-    <form method="POST">
-    <table cellpadding="10">
-    <tr><td>$lang[user]</td><td><input name="user" id="user"></td></tr>
-    <tr><td>$lang[pass]</td><td><input name="pass" type="password"></td></tr>
-    <tr><td colspan="2" align="right"><input type="submit" value="$lang[login]"></td></tr>
-    </table>
-    </center>
-    </form>
+    <div class="content">
+      <form method="POST">
+        <table class="login"><tr>
+	      <tr>
+	        <td>
+              <a href="/index.php">
+			    <img src="art/login.png">
+			  </a>
+            </td>
+	      </tr>
+	      <tr>
+	        <td><input type="text" name="user" id="user" placeholder="$lang[user]"></td>
+          </tr>
+          <tr>
+	        <td><input type="password" name="pass" placeholder="$lang[pass]"></td>
+          </tr>
+	      <tr>
+	        <td>
+	          <input type="submit" value="$lang[login]">
+	        </td>
+	      </tr>
+        </table>
+      </form>
+	</div>
   </body>
 </html>
 EOT;
@@ -761,7 +842,7 @@ function showip () {
 
 # restart kiwix so it sees what modules are visible/hidden
 function kiwix_restart() {
-    exec("sudo bash /root/rachel-scripts/rachelKiwixStart.sh");
+    exec("sudo bash /var/kiwix/rachelKiwixStart.sh");
 }
 
 function show_local_content_link() {

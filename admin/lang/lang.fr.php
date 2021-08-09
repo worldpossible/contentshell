@@ -75,6 +75,8 @@ $lang['percentage'] = "Pourcentage";
 $lang['advanced'] = "Avancé";
 $lang['install'] = "Installer";
 $lang['update_utility'] = "Utilitaire de mise à jour";
+$lang['upload_btn'] = "téléversement";
+
 
 # for settings.php
 $lang['change_password'] = "Changer le mot de passe";
@@ -85,6 +87,23 @@ $lang['new_password2'] = "Répétez Nouveau";
 $lang['wrong_old_pass'] = "Mauvais mot de passe actuel";
 $lang['missing_new_pass'] = "Nouveau mot de passe ne peut pas être vide";
 $lang['password_mismatch'] = "Nouveaux mots de passe ne correspondent pas";
+$lang['module_upload'] = "téléversement un module";
+$lang['upload_req_1']  = "* Le fichier doit être un fichier zip valide";
+$lang['upload_req_2']  = "* Le zip doit contenir un seul dossier à sa racine";
+$lang['upload_req_3']  = "* Le dossier doit avoir le même nom que le zip";
+$lang['upload_req_4']  = "* Le dossier doit contenir un fichier rachel-index.php";
+$lang['upload_paused'] = "Votre téléversement a été suspendu. Importez à nouveau le même fichier pour reprendre";
+$lang['upload_again']    = "téléversement à nouveau";
+$lang['upload_another']  = "téléversement un autre fichier";
+$lang['upload_canceled'] = "téléversement annulé";
+$lang['upload_error']    = "Erreur de téléversement";
+$lang['details']         = "Des détails";
+$lang['pause']           = "Pause";
+$lang['installed']       = "Installé";
+$lang['upload']          = "téléversement";
+
+
+
 
 # for captiveportal-redirect.php
 $lang['welcome_to_rachel'] = "Bienvenue à RACHEL";
