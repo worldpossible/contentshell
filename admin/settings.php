@@ -13,9 +13,9 @@ if ($is_cli) {
     exit();
 }
 
-$page_title = $lang['settings'];
+$page_title  = $lang['settings'];
 $page_script = "";
-$page_nav = "settings";
+$page_nav    = "settings";
 
 if (!$is_cli) {
     include "head.php";
@@ -101,7 +101,14 @@ if ($is_cli || $_SERVER['REQUEST_METHOD'] == 'POST') {
             exit(1);
         }
     }
+}
 
+# Check that the bcmath module is installed for the upload utility
+$showUpload = True;
+$bcmath     = exec("php -m | grep bcmath");
+
+if($bcmath == ""){  
+    $showUpload = false;
 }
 
 ?>
@@ -200,6 +207,8 @@ if ($is_cli || $_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <br>
 
+<?php if( $showUpload) : ?>
+
 <!-- Module upload Section -->
 <h2><?php echo $lang['module_upload'] ?></h2>
 
@@ -291,6 +300,8 @@ if ($is_cli || $_SERVER['REQUEST_METHOD'] == 'POST') {
 <script src="js/upload.js"></script>
 
 <!-- End of module upload section -->
+<!-- end of section to be hidden if system doesn't have bcmath 
+<?php endif; ?>
 
 <?php
 
