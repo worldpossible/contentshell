@@ -200,6 +200,25 @@ function getdb() {
             VALUES ('admin', 'd54f4a435aca0ed313c2a7a0b9914d78')
         ");
     }
+    
+    $_db->exec("
+            CREATE TABLE IF NOT EXISTS uploads (
+                name        VARCHAR(255) NOT NULL UNIQUE,
+                token       VARCHAR(255) NOT NULL UNIQUE PRIMARY KEY,
+                hash        VARCHAR(255) NOT NULL,
+                size        INTEGER NOT NULL,
+                dir         VARCHAR(255) NOT NULL,
+                log         VARCHAR(255) NOT NULL,
+                part_size   INTEGER NOT NULL,
+                part_total  INTEGER NOT NULL,
+                final_part  INTEGER NOT NULL,
+                last_update REAL NOT NULL,
+                message     TEXT,
+                code        INTEGER DEFAULT 0 NOT NULL,
+                resumes     INTEGER DEFAULT 0,
+                start       REAL NOT NULL,
+                status      INTEGER DEFAULT 0 NOT NULL)");
+
     $_db->exec("
         CREATE TABLE IF NOT EXISTS prefs (
             pref VARCHAR(255),
