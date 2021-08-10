@@ -415,8 +415,9 @@ if (file_exists("/etc/datapost-version")) {
     $datapost_version = file_get_contents("/etc/datapost-version");
 }
 
-$kolibri_version = exec("sudo kolibri --version");
-$kolibri_version = end(explode(" ", $kolibri_version));
+$kolibri_output  = exec("sudo kolibri --version");
+$kolibri_split   = explode(" ", $kolibri_output);
+$kolibri_version = end($kolibri_split);
 
 if (!$kolibri_version){
     $kolibri_version = "?";
