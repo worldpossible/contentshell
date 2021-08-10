@@ -9,52 +9,38 @@ define("RSYNCHOST", "dev.worldpossible.org");
 
 if (isset($_GET['getRemoteModuleList'])) {
     getRemoteModuleList();
-
 } else if (isset($_GET['getLocalModuleList'])) {
     getLocalModuleList();
-
 } else if (isset($_GET['addModules'])) {
     addModules($_GET['addModules']);
-
 } else if (isset($_GET['deleteModule'])) {
     deleteModule($_GET['deleteModule']);
-
 } else if (isset($_GET['cancelTask'])) {
     cancelTask($_GET['cancelTask']);
-
 } else if (isset($_GET['cancelAll'])) {
     cancelAll();
-
 } else if (isset($_GET['retryTask'])) {
     retryTask( $_GET['retryTask']);
-
 } else if (isset($_GET['getTasks'])) {
     getTasks();
-
 } else if (isset($_GET['wifistat'])) {
     wifiStatus();
-
 } else if (isset($_GET['selfUpdate'])) {
     selfUpdate();
-
 } else if (isset($_GET['modUpdate'])) {
     addModules($_GET['modUpdate']);
-
 } else if (isset($_GET['setLocalContent'])) {
     setLocalContent($_GET['setLocalContent']);
-
+} else if (isset($_GET['setWebmailLink'])) {
+    setWebmailLink($_GET['setWebmailLink']);
 } else if (isset($_GET['getBatteryInfo'])) {
     getBatteryInfo();
-
 } else if (isset($_GET['clearLogs'])) {
     clearLogs();
-
 } else if (isset($_GET['cloneServer'])) {
     cloneServer();
-
 } else if (isset($_GET['setRsyncDaemon'])) {
     setRsyncDaemon($_GET['setRsyncDaemon']);
-
 }
 error_log("Unknown request to background.php: " . print_r($_GET, true));
 header("HTTP/1.1 500 Internal Server Error");
@@ -409,7 +395,6 @@ function wifiStatus() {
     header("Content-Type: application/json");
     echo "{ \"wifistat\" : \"$wifistat\" }\n";
     exit;
-
 }
 
 function selfUpdate() {
@@ -456,7 +441,24 @@ function selfUpdate() {
     error_log("selfUpdate Failed: cmd returned $retval, " . implode(", ", $output));
     header("HTTP/1.1 500 Internal Server Error");
     exit;
+}
 
+function setWebmailLink($state){   
+    $db       = getdb();
+    $db_state = $db->escapeString($state);
+    $rv       = $db->exec("REPLACE INTO prefs (pref, value) values ('show_webmail_link', '$db_state')");
+    
+    if(!$rv){
+        header("HTTP/1.1 500 Internal Server Error");
+        header("Content-Type: application/json");
+        echo "{ \"responseText\" : \"Failed to set webmail link in the database\" }\n";
+        exit;             
+    }
+    
+    header("HTTP/1.1 200 OK");
+    header("Content-Type: application/json");
+    echo "{ \"status\" : \"OK\" }\n";
+    exit;
 }
 
 function setLocalContent($state) {

@@ -202,18 +202,18 @@ function updatemods () {
 
     # restart kiwix so it sees what modules are visible/hidden
     kiwix_restart();
-
     header("HTTP/1.1 200 OK");    
-
 }
 
 if (is_rachelplus()) {
-    $checked = show_local_content_link() ? " checked" : "";
+    $checked         = show_local_content_link() ? " checked" : "";
+    $webmail_checked = show_webmail_link() ? " checked" : "";
     echo "<hr style='margin: 20px 0;'>\n";
     echo "<p style='background: #ddd; padding: 10px 5px; border-radius: 5px; font-size: small;'>\n";
-    echo "<input type='checkbox' id='localcontent'$checked> Show the <b>en-local_content</b> module as <b>\"LOCAL CONTENT\"</b> link in RACHEL header</p>";
-}
-    
+    echo "<input type='checkbox' id='localcontent' $checked> Show <b>Content Hub</b> as a <b>\"LOCAL CONTENT\"</b> link in the RACHEL header<br><br>";
+    echo "<input type='checkbox' id='webmail' $webmail_checked> Show the <b>DataPost</b> <b>\"WEBMAIL\"</b> link in the RACHEL header";  
+    echo "</p>";
+}   
 
 include "foot.php";
 

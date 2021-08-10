@@ -876,6 +876,12 @@ function show_local_content_link() {
     return $rv;
 }
 
+function show_webmail_link() {
+    $db = getdb();
+    $rv = $db->querySingle("SELECT 1 FROM prefs WHERE pref = 'show_webmail_link' AND value = '1'");
+    return $rv;
+}
+
 function run_rsyncd() {
     $db = getdb();
     $rv = $db->querySingle("SELECT 1 FROM prefs WHERE pref = 'run_rsyncd' AND value = '1'");
