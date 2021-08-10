@@ -425,12 +425,15 @@ if (!$kalite_version || !preg_match("/^[\d\.]+$/", $kalite_version)) {
     $kalite_version = "?";
 }
 
-$kiwix_version = exec("cat /etc/kiwix/application.ini | grep ^Version | cut -d= -f2");
+$kiwix_version = exec("cat /etc/kiwix-version");
+
 if (!$kiwix_version) {
-    $kiwix_version = exec("cat /etc/kiwix-version");
+    $kiwix_version = "?"; 
 }
-if (!$kiwix_version) {
-    $kiwix_version = "?";
+
+$moodle_version = exec("cat /etc/moodle-version");
+if (!$moodle_version) {
+    $moodle_version = "?"; 
 }
 
 ?>
@@ -445,6 +448,7 @@ if (!$kiwix_version) {
 <tr><td>Kolibri</td><td><?php echo $kolibri_version ?></tr>
 <tr><td>KA Lite</td><td><?php echo $kalite_version ?></tr>
 <tr><td>Kiwix</td><td><?php echo $kiwix_version ?></td></tr>
+<tr><td>Moodle</td><td><?php echo $moodle_version ?></td></tr>
 <tr><td>Content Shell</td><td>
 
     <span id="cur_contentshell">v2.4.1</span>
