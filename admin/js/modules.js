@@ -20,6 +20,12 @@ $(function() {
             url: "background.php?setLocalContent=" + (this.checked ? 1 : 0)
         });
     });
+    
+    $("#webmail").change(function() {
+        $.ajax({
+            url: "background.php?setWebmailLink=" + (this.checked ? 1 : 0)
+        });
+    });
 
     // create language filtering options XXX optimize by using native JS?
     // first we grab each language code by going through the modules
