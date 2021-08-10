@@ -1,15 +1,15 @@
 <?php 
 require_once("common.php");
 
-// Path to the upload directory
-define("UPLOAD_TMP_DIR", "/.data/RACHEL/rachel/modules/upload_tmp");
+if(is_rachelplus()){
+    // Path to the upload directory
+    define("UPLOAD_TMP_DIR", "/.data/RACHEL/rachel/modules/upload_tmp");
  
-// Admin path 
-define("DB_PATH", "/.data/RACHEL/rachel/admin/admin.sqlite");
-
-if(is_rachelpi){
+    // Admin path 
+    define("DB_PATH", "/.data/RACHEL/rachel/admin/admin.sqlite");  
+} else {
     define("UPLOAD_TMP_DIR", "/var/www/modules/upload_tmp"); 
-    define("DB_PATH", "/var/www/admin/admin.sqlite");    
+    define("DB_PATH", "/var/www/admin/admin.sqlite");     
 }
 
 // Max remaining space on disk. 2% + 2% for root 
