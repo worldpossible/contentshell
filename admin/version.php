@@ -415,8 +415,10 @@ if (file_exists("/etc/datapost-version")) {
     $datapost_version = file_get_contents("/etc/datapost-version");
 }
 
-$kolibri_version = exec("export USER=`whoami`; sudo kolibri --version;");
-if (!$kolibri_version || !preg_match("/^[\d\.]+$/", $kolibri_version)) {
+$kolibri_version = exec("sudo kolibri --version");
+$kolibri_version = end(explode(" ", $kolibri_version));
+
+if (!$kolibri_version){
     $kolibri_version = "?";
 }
 
