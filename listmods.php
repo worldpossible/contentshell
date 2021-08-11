@@ -31,7 +31,7 @@ foreach($modules as $module){
     $moddir   = $module['moddir'];
 	$ksize    = get_dir_size($absPath);
 	$mod_json = array('moddir' => $moddir,
-	                  'ksize' => $ksize);
+	                  'ksize'  => $ksize);
 	$response[$moddir] = $mod_json;
 }
 
@@ -43,12 +43,14 @@ echo "{ \"responseText\" : \"Succesfully generated JSON\" }\n";
 return;
 
 function get_dir_size($directory){
-    $size = 0;
+    $size  = 0;
     $files = glob($directory.'/*');
+    
     foreach($files as $path){
         is_file($path) && $size += filesize($path);
         is_dir($path)  && $size += get_dir_size($path);
     }
+    
     return $size;
 }
 
