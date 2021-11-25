@@ -67,7 +67,7 @@ function getmods_fs() {
                 if (isset($match[1])) { $version = $match[1]; }
 
                 # save info about this module
-                $fsmods{ $moddir } = array(
+                $fsmods[$moddir] = array(
                     'dir'      => "$relModPath/$moddir",
                     'moddir'   => $moddir,
                     'title'    => $title,
@@ -80,7 +80,7 @@ function getmods_fs() {
             } else {
 
                 # save info about this incomplete module
-                $fsmods{ $moddir } = array(
+                $fsmods[$moddir] = array(
                     'dir'      => "$relModPath/$moddir",
                     'moddir'   => $moddir,
                     'title'    => $moddir,
@@ -200,7 +200,7 @@ function getdb() {
             VALUES ('admin', 'd54f4a435aca0ed313c2a7a0b9914d78')
         ");
     }
-    
+
     $_db->exec("
             CREATE TABLE IF NOT EXISTS uploads (
                 name        VARCHAR(255) NOT NULL UNIQUE,
@@ -234,7 +234,7 @@ function getdb() {
 
 #-------------------------------------------
 # If we don't do this, dangling filehandles build up
-# and after a while we can't open any more... yikes. 
+# and after a while we can't open any more... yikes.
 #-------------------------------------------
 function cleanup() {
     global $_db;
@@ -250,7 +250,7 @@ register_shutdown_function('cleanup');
 # if there's no db position put alphabetically at top
 #-------------------------------------------
 function bypos($a, $b) {
-if (!isset($a['position'])) { $a['position'] = 0; }
+    if (!isset($a['position'])) { $a['position'] = 0; }
     if (!isset($b['position'])) { $b['position'] = 0; }
     if ($a['position'] == $b['position']) {
         return strcmp(strtolower($a['moddir']), strtolower($b['moddir']));
@@ -295,7 +295,7 @@ function browser_lang() {
 
     # we want the language codes as keys, not values
     $available_langs = array_flip(available_langs());
-    $browser_langs;
+    $browser_langs = array();
 
     # now we pull the languages from header
     if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
@@ -328,7 +328,7 @@ function browser_lang() {
 
     }
 
-    # default to english if there's no match 
+    # default to english if there's no match
     if (!is_array($browser_langs)) {
         return "en";
     }
@@ -361,13 +361,13 @@ function authorized() {
     # that's considered authorized
     if (php_sapi_name() == "cli") {
         return true;
-    }   
+    }
 
     # if we've got a good cookie, return true
     if (isset($_COOKIE['rachel-auth']) && $_COOKIE['rachel-auth'] == "admin") {
         return true;
 
-    # if we've got good user/pass, issue cookie
+        # if we've got good user/pass, issue cookie
     } else if (isset($_POST['user']) && isset($_POST['pass'])) {
 
         $db = getdb();
@@ -633,7 +633,7 @@ function syncmods_fs2db() {
 }
 
 #-------------------------------------------
-# Read in a .modules file and return a sorted arrray 
+# Read in a .modules file and return a sorted arrray
 # of the modules that should be installed and an
 # associative array of modules that should be hidden.
 # So use it like this:
@@ -685,11 +685,11 @@ function parseModulesFile($file) {
 
 }
 
-#------------------------------------------- 
+#-------------------------------------------
 # Installs sorts, and sets visibility based on a
 # .modules file -- must work from the command line
 # or the html admin interface
-#------------------------------------------- 
+#-------------------------------------------
 function installmods($file, $install_server) {
 
     list($sorted, $hidden) = parseModulesFile($file);
@@ -777,7 +777,7 @@ function sortmods($file) {
 #-------------------------------------------
 # Internal use - actually does the sorting/hiding work.
 # The instructions come from a .modules file
-# as parsed by parseModulesFile() -- modules that aren't 
+# as parsed by parseModulesFile() -- modules that aren't
 # seen at all are hidden and sorted last, but not removed.
 #-------------------------------------------
 function _sortmods($sorted, $hidden) {
