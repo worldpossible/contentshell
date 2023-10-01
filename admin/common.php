@@ -19,7 +19,6 @@ date_default_timezone_set('Etc/UCT');
 # filesystem - does not check the database at all
 #-------------------------------------------
 function getmods_fs() {
-
     $absModPath = getAbsModPath();
     if (!is_dir($absModPath)) { return array(); }
     $relModPath = getRelModPath();
@@ -67,7 +66,7 @@ function getmods_fs() {
                 if (isset($match[1])) { $version = $match[1]; }
 
                 # save info about this module
-                $fsmods{ $moddir } = array(
+                $fsmods[$moddir] = array(
                     'dir'      => "$relModPath/$moddir",
                     'moddir'   => $moddir,
                     'title'    => $title,
@@ -80,7 +79,7 @@ function getmods_fs() {
             } else {
 
                 # save info about this incomplete module
-                $fsmods{ $moddir } = array(
+                $fsmods[$moddir] = array(
                     'dir'      => "$relModPath/$moddir",
                     'moddir'   => $moddir,
                     'title'    => $moddir,
