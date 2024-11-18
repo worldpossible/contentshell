@@ -4,40 +4,36 @@ The RACHEL Content Management System
 
 ## Description
 
-A set of HTML & PHP files for serving and managing RACHEL content
-modules, which are available at [our module repository](http://dev.worldpossible.org/cgi/rachelmods.pl).
+PHP for serving and managing content on [RACHEL devices](https://rachel.worldpossible.org).
+Content is available at [our module repository](https://rachel.worldpossible.org/content).
 
 ## Usage
 
-To make use of contentshell, you first must set up a system that
-includes the prerequisites. The easiest way to do this is using
-either our [rachelplus](https://github.com/rachelproject/rachelplus)
-or [rachelpiOS](https://github.com/rachelproject/rachelpiOS) repositories, which build in
-all the prerequisites on an Intel CAP or Raspberry Pi respectively.
+The `contentshell` is desiged to run on RACHEL systems. As of 2024 this is primarily
+the [RACHEL 5](https://worldpossible.org/products/rachel-5-500). 
 
-Technically, contentshell can be used on any system, but it requires the following:
+Technically, contentshell can be used on any system with PHP & SQLite, but many of the content
+modules require support software. These include:
 
-* for search to work you must have SQLite and stem-1.5.1 installed for PHP
-* to use any ZIM based modules you must have kiwix installed
-* to use the ka-lite modules you must have kalite installed
+* [ZIM](https://library.kiwix.org/) modules require that [Kiwix](https://kiwix.org/) be installed
+* The KA-Lite module requires [KA-Lite](http://kalite.learningequality.org/) software
+* The Kolibri module requires [Kolibri](https://learningequality.org/) software
+* The Moodle module requires [Moodle](https://moodle.org) software
+* Some search features require SQLite and stem-1.5.1 installed for PHP
 
-Further, there are some rules about where things are installed, so it
-gets a bit complicated. The best route is to refer to the code in
-our [rachelplus](https://github.com/rachelproject/rachelplus)
-or [rachelpiOS](https://github.com/rachelproject/rachelpiOS) repositories. Or better yet, use one of
-the pre-built images available at rachelfriends.org for free.
+Still, there are many modules that are static HTML that can be installed on any system and
+displayed by `contentshell`.
 
 ## Where is stuff
 
-Modules downloaded from [the RACHEL module repository](http://dev.worldpossible.org/cgi/rachelmods.pl)
-must be installed in the "modules" directory in the root of contentshell.
+The contentshell should be installed in /media/RACHEL/rachel. This should also be the
+document root for your webserver.
 
-* On the RACHEL Pi this will be /var/www/modules
-* On the RACHEL Plus this will be /media/RACHEL/rachel/modules
+Modules downloaded from [our module repository](https://rachel.worldpossible.org/content)
+must be installed in /media/RACHEL/rachel/modules
 
 For more information on modules, please check out [modules-template](https://github.com/rachelproject/module-template).
 
 # License
 
 Creative Commons - BY, SA, NC
->>>>>>> 71ed5547d642b488278e8f104f2fe373ccd87145
