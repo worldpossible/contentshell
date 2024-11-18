@@ -32,6 +32,8 @@ if (isset($_POST['shutdown'])) {
 
 echo "
     <style>
+    table { padding: 1px; }
+    td { padding: 1px; }
     h2 { border-bottom: 1px solid #ccc; }
     #spacetable { border-spacing: 15px; border-collapse: separate; }
     #spacetable td { border-bottom: 1px solid #ccc; padding: 5px; }
@@ -51,6 +53,115 @@ if (file_exists("/root/rachel-scripts/esp-checker.php")) {
     $id = strtoupper(exec("ifconfig | grep $interface | awk '{ print $5 }' | sed s/://g | grep -o '.\{6\}$'"));
     echo "<h3 style='float: right;'>Device ID: $id</h3>";
 }
+
+
+
+
+
+# RACHEL uptime and battery checks 
+// all of this needs to go in try/catch to not block the main page of rachel on error 
+$uptime         = null;
+$suggest_reboot = false;
+$bat_info       = null;
+$cpu_temp       = null;
+
+function getUptime(){
+    exec("uptime -p", $output, $result);
+
+    if($result == 1){
+        return "";
+    }
+    
+    if(!isset($output[0])){
+        return "";
+    }
+
+    $uptime     = $output[0];
+    $shutdown  = "no";
+
+    if (strpos($uptime, 'day') == true) {
+        $shutdown  = "yes";      
+    }
+    
+    if (strpos($uptime, 'days') == true) {
+        $shutdown  = "yes";      
+    }
+
+    if(strpos($uptime, 'week') == true){
+        $shutdown = "yes";
+    }
+    
+    if(strpos($uptime, 'weeks') == true){
+        $shutdown = "yes";
+    }
+        
+    if(strpos($uptime, 'month') == true){
+        $shutdown = "yes";
+    }    
+
+    if(strpos($uptime, 'months') == true){
+        $shutdown = "yes";
+    }   
+  
+    # will be an array 
+    return [ 'uptime'   => $uptime, 
+             'shutdown' => $shutdown ];
+}
+
+function getBatteryInfo(){
+    # options are "Charging", "Discharging", and "Unknown"
+    # which seems to indicate charged (so we call it charging)
+    exec("ubus call battery info", $output, $result);
+
+    if($output == null){
+        return null;
+    }
+
+    if(!isset($output)){
+        return null;
+    }
+    
+    $ubus    = json_decode(implode($output), true);
+    $level   = "";
+    $status  = "";
+    
+    if($ubus){
+      $level   = $ubus['capacity'];
+      $status  = rtrim($ubus['status']);           
+    }
+
+    if($status == "Unknown"){
+        $status = "Fully Charged";
+    } 
+    
+    return ['status'  => $status,
+            'level'   => $level];
+}
+
+try {
+    $uptime   = getUptime();  
+    $bat_info = getBatteryInfo();    
+} 
+catch(Exception $e) {
+  $message = $e->getMessage();
+}
+
+echo "<h2>System Info</h2>\n";
+ 
+# start the table 
+echo "<table class='version'>";
+
+if($uptime){
+    echo "<tr><td>System Uptime:</td><td>" . $uptime['uptime'] . "</td></tr>";
+}
+
+if($bat_info){
+    echo "<tr><td>Battery Status:</td><td>" . $bat_info['status'] . "</td></tr>";
+    echo "<tr><td>Battery Charge Level:</td><td>" . $bat_info['level'] . "%</td></tr>";
+}
+
+# End start the table 
+echo "</table>";
 
 #-------------------------------------------
 # get the disk usage and format it as best we can
@@ -188,7 +299,7 @@ if (is_rachelpi()) {
         </div>
     ";
 } else if (is_rachelplus()) {
-    if (is_rachelplusv3()) {
+    if (is_rachelplusv5() || is_rachelplusv3()) {
         $img = "<img src='art/ecs-cap-power-button.png' width='178' height='178'>";
     } else {
         $img = "<img src='art/intel-cap-power-button.png' width='250' height='170'>";

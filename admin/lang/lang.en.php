@@ -100,13 +100,9 @@ $lang['details']          = "Details";
 $lang['pause']            = "Pause";
 $lang['installed']        = "Installed";
 
-
-# for captiveportal-redirect.php
-$lang['welcome_to_rachel'] = "Welcome to RACHEL";
-$lang['worlds_best_edu_cont'] = "The world's best educational content";
-$lang['for_people_wo_int'] = "for people without internet";
-$lang['click_here_to_start'] = "Click here to start";
-$lang['brought_to_you_by'] = "Brought to you by";
+# for storage.php
+$lang['storage'] = "Storage";
+$lang['usb_drives'] = "USB Drives";
 
 # for hardware.php
 $lang['wifi_control'] = "WIFI Control";

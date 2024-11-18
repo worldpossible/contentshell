@@ -200,8 +200,8 @@ function getdb() {
             VALUES ('admin', 'd54f4a435aca0ed313c2a7a0b9914d78')
         ");
     }
-    
-    $_db->exec("
+	
+ $_db->exec("
             CREATE TABLE IF NOT EXISTS uploads (
                 name        VARCHAR(255) NOT NULL UNIQUE,
                 token       VARCHAR(255) NOT NULL UNIQUE PRIMARY KEY,
@@ -218,7 +218,7 @@ function getdb() {
                 resumes     INTEGER DEFAULT 0,
                 start       REAL NOT NULL,
                 status      INTEGER DEFAULT 0 NOT NULL)");
-
+	
     $_db->exec("
         CREATE TABLE IF NOT EXISTS prefs (
             pref VARCHAR(255),
@@ -523,7 +523,10 @@ function is_rachelplus() {
     return is_dir(RACHELPLUS_MODPATH) || file_exists("/tmp/fake-rachelplus");
 }
 function is_rachelplusv3() {
-    return is_dir("/.data/RACHEL") || file_exists("/tmp/fake-rachelplusv3");
+    return (is_dir("/.data/RACHEL") && !is_rachelplusv5()) || file_exists("/tmp/fake-rachelplusv3");
+}
+function is_rachelplusv5() {
+    return (is_dir("/.data/RACHEL") && exec("head -1 /etc/issue | cut -b1-7") == "CMAL150") || file_exists("/tmp/fake-rachelplusv5");
 }
 
 #-------------------------------------------
@@ -860,25 +863,13 @@ function showip () {
 }
 
 # restart kiwix so it sees what modules are visible/hidden
-function kiwix_restart(){
-    # Run the latest Kiwix restart script if it's available
-    if(file_exists("/var/kiwix/rachelKiwixStart.sh")){
-        exec("sudo bash /var/kiwix/rachelKiwixStart.sh");
-        return;
-    }
-
-    exec("sudo bash /root/rachel-scripts/rachelKiwixStart.sh");
+function kiwix_restart() {
+    exec("sudo bash /var/kiwix/rachelKiwixStart.sh");
 }
 
 function show_local_content_link() {
     $db = getdb();
     $rv = $db->querySingle("SELECT 1 FROM prefs WHERE pref = 'show_local_content_link' AND value = '1'");
-    return $rv;
-}
-
-function show_webmail_link() {
-    $db = getdb();
-    $rv = $db->querySingle("SELECT 1 FROM prefs WHERE pref = 'show_webmail_link' AND value = '1'");
     return $rv;
 }
 

@@ -99,9 +99,15 @@ while (true) {
     $cmd        = $next['command'];
     $moddir     = $next['moddir'];
 
-    # we throttle to 25MB/s because the CAP3 will otherwise
-    # start locking up
-    $cmd = preg_replace("/^rsync /", "rsync --bwlimit=25000 ", $cmd);
+    $is_hdd = exec("cat /sys/block/sda/queue/rotational");
+    if ($is_hdd == 0) {
+        # SSD can handle a bit more througput -- this seems OK
+        $cmd = preg_replace("/^rsync /", "rsync --bwlimit=500000 ", $cmd);
+    } else {
+        # we throttle to 25MB/s because the CAP3 will otherwise
+        # start locking up
+        $cmd = preg_replace("/^rsync /", "rsync --bwlimit=125000 ", $cmd);
+    }
 
     #-------------------------------------------
     # here we actually fire off the process and see what happens 

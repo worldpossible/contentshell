@@ -4,51 +4,87 @@ require_once("common.php");
 
 define("APIHOST",   "dev.worldpossible.org");
 define("RSYNCHOST", "dev.worldpossible.org");
-#define("RSYNCHOST", "192.168.1.6");
-# XXX be sure to test with a bad host and see how it behaves
 
 if (isset($_GET['getRemoteModuleList'])) {
     getRemoteModuleList();
+
 } else if (isset($_GET['getLocalModuleList'])) {
     getLocalModuleList();
+
 } else if (isset($_GET['addModules'])) {
     addModules($_GET['addModules']);
+
 } else if (isset($_GET['deleteModule'])) {
     deleteModule($_GET['deleteModule']);
+
 } else if (isset($_GET['cancelTask'])) {
     cancelTask($_GET['cancelTask']);
+
 } else if (isset($_GET['cancelAll'])) {
     cancelAll();
+
 } else if (isset($_GET['retryTask'])) {
     retryTask( $_GET['retryTask']);
+
 } else if (isset($_GET['getTasks'])) {
     getTasks();
+
 } else if (isset($_GET['wifistat'])) {
     wifiStatus();
+
 } else if (isset($_GET['selfUpdate'])) {
     selfUpdate();
+
 } else if (isset($_GET['modUpdate'])) {
     addModules($_GET['modUpdate']);
+
 } else if (isset($_GET['setLocalContent'])) {
     setLocalContent($_GET['setLocalContent']);
-} else if (isset($_GET['setWebmailLink'])) {
-    setWebmailLink($_GET['setWebmailLink']);
+
+} else if (isset($_GET['setWebmail'])) {
+    setWebmail($_GET['setWebmail']);
+
 } else if (isset($_GET['getBatteryInfo'])) {
     getBatteryInfo();
+
 } else if (isset($_GET['clearLogs'])) {
     clearLogs();
+
 } else if (isset($_GET['cloneServer'])) {
     cloneServer();
+
 } else if (isset($_GET['setRsyncDaemon'])) {
     setRsyncDaemon($_GET['setRsyncDaemon']);
+
+} else if (isset($_GET['getStats'])) {
+    getStats();
+
 }
+
 error_log("Unknown request to background.php: " . print_r($_GET, true));
 header("HTTP/1.1 500 Internal Server Error");
 exit;
 
-#-------------------------------------------
-# functions
-#-------------------------------------------
+# Generate and return goaccess statistics
+function getStats(){
+
+    exec("goaccess -f /var/log/nginx/access.log -a > /tmp/report.html", $output, $rval);
+    
+    if($rval){
+        header('HTTP/1.1 500 Internal Server');
+        header('Content-Type: application/json; charset=UTF-8');
+
+        $response = json_encode(["responseText" => "Failed to generate statistics page for Nginx Access Log" ]);
+
+        echo $response;
+        die();
+    }
+    
+    header("HTTP/1.1 200 OK");
+    header('Content-Type: text/html; charset=utf-8');
+    readfile("/tmp/report.html");
+    die(); 
+}
 
 function getRemoteModuleList() {
     #$json = file_get_contents("http://" . APIHOST . "/cgi/json_api_v1.pl");
@@ -348,7 +384,12 @@ function getTasks() {
 function wifiStatus() {
 
     if ($_GET['wifistat'] == "on") {
-        if (is_rachelplusv3()) {
+        if (is_rachelplusv5()) {
+            # v5 has two wifi interfaces
+            exec("/sbin/ifconfig wlp1s0 up", $output, $retval1); # 5G
+            exec("/sbin/ifconfig wlp3s0 up", $output, $retval2); # 2_4G
+            $retval = $retval1 + $retval2;
+        } else if (is_rachelplusv3()) {
             # v3 has two wifi interfaces
             exec("/sbin/ifconfig wlan0 up", $output, $retval1); # 5G
             exec("/sbin/ifconfig wlan1 up", $output, $retval2); # 2_4G
@@ -357,7 +398,12 @@ function wifiStatus() {
             exec("/etc/WiFi_Setting.sh > /dev/null 2>&1", $output, $retval);
         }
     } else if ($_GET['wifistat'] == "off") {
-        if (is_rachelplusv3()) {
+        if (is_rachelplusv5()) {
+            # v5 has two wifi interfaces
+            exec("/sbin/ifconfig wlp1s0 down", $output, $retval1); # 5G
+            exec("/sbin/ifconfig wlp3s0 down", $output, $retval2); # 2_4G
+            $retval = $retval1 + $retval2;
+        } else if (is_rachelplusv3()) {
             # v3 has two wifi channels
             exec("/sbin/ifconfig wlan0 down", $output, $retval1); # 5G
             exec("/sbin/ifconfig wlan1 down", $output, $retval2); # 2_4G
@@ -385,6 +431,10 @@ function wifiStatus() {
         # there are two interfaces on the v3, but
         # if either interface is up, we count it as up
         exec("{ ifconfig wlan1 & ifconfig wlan0; } | grep ' UP '", $output);
+    } else if (is_rachelplusv5()) {
+        # there are two interfaces on the v5, but
+        # if either interface is up, we count it as up
+        exec("{ ifconfig wlp1s0 & ifconfig wlp3s0; } | grep ' UP '", $output);
     } else {
         exec("ifconfig wlan0 | grep ' UP '", $output);
     }
@@ -395,6 +445,7 @@ function wifiStatus() {
     header("Content-Type: application/json");
     echo "{ \"wifistat\" : \"$wifistat\" }\n";
     exit;
+
 }
 
 function selfUpdate() {
@@ -418,24 +469,20 @@ function selfUpdate() {
     # lastly - it's important that we keep the trailing "/" on the source because we're
     # putting the contents into a directory of a different name, and don't want to
     # create a directory called "contentshell" in there
-    $cmd = "rsync -Pavz --exclude modules --exclude /admin/admin.sqlite --exclude '.*' --del rsync://" . RSYNCHOST . "/rachelmods/contentshell/ $destdir";
+    $cmd = "rsync -Pavz --exclude modules --exclude /admin/admin.sqlite --exclude '.*' --del rsync://" . RSYNCHOST . "/rachelmods/contentshell4/ $destdir";
 
     exec($cmd, $output, $retval);
 
     if ($retval == 0) {
-        $cmd = "bash $destdir/admin/post-update-script.sh";
-        exec($cmd, $output, $retval);
-        if ($retval == 0) {
-            # pull the version info from the new file - if the HTML changes too much this will break
-            preg_match("/id=\"cur_contentshell\"[^>]*>(.+?)</s", file_get_contents("version.php"), $matches);
-            if ($matches[1]) {
-                $version = $matches[1];
-                header("HTTP/1.1 200 OK");
-                header("Content-Type: application/json");
-                echo "{ \"version\" : \"$version\" }\n";
-                exit;
-            }
-        }
+		# pull the version info from the new file - if the HTML changes too much this will break
+		preg_match("/id=\"cur_contentshell\"[^>]*>(.+?)</s", file_get_contents("version.php"), $matches);
+		if ($matches[1]) {
+			$version = $matches[1];
+			header("HTTP/1.1 200 OK");
+			header("Content-Type: application/json");
+			echo "{ \"version\" : \"$version\" }\n";
+			exit;
+		}
     }
 
     error_log("selfUpdate Failed: cmd returned $retval, " . implode(", ", $output));
@@ -443,28 +490,20 @@ function selfUpdate() {
     exit;
 }
 
-function setWebmailLink($state){   
-    $db       = getdb();
+function setLocalContent($state) {
+    $db = getdb();
     $db_state = $db->escapeString($state);
-    $rv       = $db->exec("REPLACE INTO prefs (pref, value) values ('show_webmail_link', '$db_state')");
-    
-    if(!$rv){
-        header("HTTP/1.1 500 Internal Server Error");
-        header("Content-Type: application/json");
-        echo "{ \"responseText\" : \"Failed to set webmail link in the database\" }\n";
-        exit;             
-    }
-    
+    $db->exec("REPLACE INTO prefs (pref, value) values ('show_local_content_link', '$db_state')");
     header("HTTP/1.1 200 OK");
     header("Content-Type: application/json");
     echo "{ \"status\" : \"OK\" }\n";
     exit;
 }
 
-function setLocalContent($state) {
-    $db = getdb();
+function setWebmail($state) {
+    $db       = getdb();
     $db_state = $db->escapeString($state);
-    $db->exec("REPLACE INTO prefs (pref, value) values ('show_local_content_link', '$db_state')");
+    $db->exec("REPLACE INTO prefs (pref, value) values ('show_webmail_link', '$db_state')");
     header("HTTP/1.1 200 OK");
     header("Content-Type: application/json");
     echo "{ \"status\" : \"OK\" }\n";
@@ -498,37 +537,31 @@ function setRsyncDaemon($state) {
 }
 
 function getBatteryInfo() {
-
-    # CAP1 & CAP2 (Gemtek)
-    $chargefile = "/tmp/batteryLastChargeLevel";
-    $statusfile = "/tmp/chargeStatus";
-    if (file_exists($chargefile)) {
-        $level  = rtrim(file_get_contents($chargefile));
-        $status = rtrim(file_get_contents($statusfile));
-        # status is an unsigned number that indicates the
-        # load on the battery -- it varies constantly, but
-        # we've determined that -20 indicates discharge
-        # (i.e. not plugged in)
-        if ($status <= -20) {
-            $status = "discharging";
-        } else {
-            $status = "charging";
-        }
-
-    # CAP3 (ECS CMAL100)
-    } else if (file_exists("/usr/bin/ubus")) {
-        exec("ubus call battery info", $out, $rv);
-        $ubus = json_decode(implode($out), true);
-        $level = $ubus['capacity'];
-        $status = rtrim($ubus['status']);
-        # options are "Charging", "Discharging", and "Unknown"
-        # which seems to indicate charged (so we call it charging)
-        if ($status == "Discharging") {
-            $status = "discharging";
-        } else {
-            $status = "charging";
-        }
+    exec("ubus call battery info", $out, $rv);
+    
+    if(!$out){
+        header("HTTP/1.1 200 OK");
+        header("Content-Type: application/json");
+        $result = [ 'level'  => '0', 'status' => 'disconnected'];
+        $json_result = json_encode($result);
+        echo $json_result;
+        exit;        
     }
+    
+    $ubus   = json_decode(implode($out), true);
+    $level  = $ubus['capacity'];
+    $status = rtrim($ubus['status']);
+    # options are "Charging", "Discharging", and "Unknown"
+    # which seems to indicate charged (so we call it charging)
+
+
+
+    if ($status == "Discharging") {
+        $status = "discharging";
+    } else {
+        $status = "charging";
+    }
+
 
     header("HTTP/1.1 200 OK");
     header("Content-Type: application/json");

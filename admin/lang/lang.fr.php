@@ -105,12 +105,9 @@ $lang['upload']          = "téléversement";
 
 
 
-# for captiveportal-redirect.php
-$lang['welcome_to_rachel'] = "Bienvenue à RACHEL";
-$lang['worlds_best_edu_cont'] = "Meilleur contenu éducatif au monde";
-$lang['for_people_wo_int'] = "pour les personnes sans internet";
-$lang['click_here_to_start'] = "Cliquez ici pour commencer";
-$lang['brought_to_you_by'] = "Présenté par";
+# for storage.php
+$lang['storage']    = "Stockage";
+$lang['usb_drives'] = "Périphériques USB";
 
 # for hardware.php
 $lang['wifi_control'] = "Contrôle WIFI";

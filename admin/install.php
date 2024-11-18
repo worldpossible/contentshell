@@ -596,6 +596,8 @@ function getRemoteModuleInfo(drawCallback) {
 
             // remove contentshell - should background.php do it for us?
             delete results['contentshell'];
+			
+			delete results['contentshell4'];
 
             // do some processing and copy from hash to array
             remotemod_arr = [];
@@ -659,6 +661,9 @@ function drawRemoteModuleList() {
                 || current_task_moddirs[module['moddir']]) {
             continue;
         }
+
+        // we skip anything that doesn't match the livesearch field
+        if (lshide_dict[module['moddir']]) { continue; }
 
         // put a separator if it's a different language
         if (lastLang && lastLang != module['lang']) {
@@ -770,28 +775,30 @@ function lsfocus(i) {
 function lsblur(i) {
     if (i.value == "") { i.value = i.defaultValue; i.style.color = "#ccc"; }
 }
+var lshide_dict = {};
 function lsinput(i) {
-    if (!i.value.match(/\w/)) {
-        // if the field is blank, show everything
-        $("#available > option").each(function(index) {
-            $(this).show();
-        });
-    } else {
-        // otherwise filter to text matches
-        var parts = i.value.split(/\s+/);
-        $("#available > option").each(function(index) {
-            for (i = 0; i < parts.length; ++i) {
-                if (parts[i].length == 0) { continue; }
-                regex = new RegExp(parts[i], 'i');
-                if (this.value.match(regex)) {
-                    $(this).show();
-                } else {
-                    $(this).hide();
-                    break;
-                }
+    // start with a blank dictionary
+    lshide_dict = {};
+
+    // split up the search field (we allow multiple space-separated terms)
+    var parts = i.value.split(/\s+/);
+
+    // make an entry in the lshide_dict so that
+    // drawRemoteModuleList() knows to skip them
+    for (var i = 0; i < remotemod_arr.length; i++) {
+        for (var j = 0; j < parts.length; ++j) {
+            if (parts[j].length == 0) { continue; }
+            regex = new RegExp(parts[j], 'i');
+            if (!remotemod_arr[i].match(regex)) {
+                lshide_dict[remotemod_arr[i]] = 1;
+                break;
             }
-        });
+        }
     }
+
+    // redraw the list
+    drawRemoteModuleList();
+
 }
 
 function toggleAdvanced() {

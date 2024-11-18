@@ -1,9 +1,9 @@
 <?php
 require_once("common.php");
 if (!authorized()) { exit(); }
-$page_title = $lang['version'];
+$page_title  = $lang['version'];
 $page_script = "";
-$page_nav = "version";
+$page_nav    = "version";
 include "head.php";
 ?>
 
@@ -64,31 +64,32 @@ function selfUpdate() {
             url: "background.php?selfUpdate=1&check=1",
             success: function(results) {
                 modules = results; // save this for later
-                // check we've got a decent looking version number
-                if (results.contentshell.match(/^v\d+\.\d+\.\d+$/)) {
-                    
-                    curShell  = $("#cur_contentshell").html()
-                    liveShell = results.contentshell;
-                    
-                    // This was put in for the transition from 3.1.1 to 3.1.2
-                    // which requires additional local packages for new features
-                    // to function
-                    if(curShell == "v2.4.1" && liveShell == "v2.4.0"){
-                        button.css("color", "green");
-                        button.html("&#10004; Up to date");                        
-                    } else {            
-                        if (liveShell == curShell) {
-                            button.css("color", "green");
-                            button.html("&#10004; Up to date");
-                        } else {
-                            button.html(liveShell + " Available");
-                            button.prop("disabled", false);
-                        }
-                    }
-                } else {
+                
+                var curShell = $("#cur_contentshell").html()
+                
+                if(!curShell){
                     button.css("color", "#c00");
-                    button.html("X Internal Error (1)");
+                    button.html("X No curshell entry (1)");
                 }
+                
+                var cshell4  = modules['contentshell4'];
+
+                if(!cshell4){
+                    button.css("color", "#c00");
+                    button.html("X No cshell4 entry (1)");
+                }
+                
+                var liveShell = cshell4['version'];              
+                
+                if(liveShell != curShell){
+                    button.html(liveShell + " Available");
+                    button.prop("disabled", false);
+                } else {
+                    button.css("color", "green");
+                    button.html("&#10004; Up to date");   
+                }
+
+                
                 var updates_available = false;
                 // now we go down the list looking for installed modules
                 // that need updating as well
@@ -96,7 +97,7 @@ function selfUpdate() {
                     // being safe with hashes in javascript
                     if (results.hasOwnProperty(mod)) {
                         // contentshell is a special case handled above
-                        if (mod == "contentshell") { continue; }
+                        if (mod == "contentshell4" || mod == "contentshell") { continue; }
                         // if both versions exist, and there's any difference, we call it an "update"
                         if ( $("#cur_"+mod).html() && results[mod].version && $("#cur_"+mod).html() != results[mod].version ) {
                             console.log("'"+$("#cur_"+mod).html()+"' vs. '"+results[mod].version+"'");
@@ -329,7 +330,6 @@ function pollTasks() {
 
 }
 
-
 // this cancels a task
 /*
 function cancelTask(task_id, mybutton) {
@@ -394,6 +394,11 @@ if (isset($output[0]) && preg_match("/Machine model: (.+)/", $output[0], $matche
         $hardware .= "Intel CAP 2.0";
     }
 
+    # CMAL150 stores it's name here
+    if (!$hardware) {
+        $hardware .= exec("head -1 /etc/issue | cut -b1-7");
+    }
+
     exec("arch", $output);
     if ($output) {
         if ($hardware) {
@@ -405,39 +410,32 @@ if (isset($output[0]) && preg_match("/Machine model: (.+)/", $output[0], $matche
 
 }
 
-$rachel_installer_version = "?";
+$rachel_version = "?";
 if (file_exists("/etc/rachelinstaller-version")) {
-    $rachel_installer_version = file_get_contents("/etc/rachelinstaller-version");
+    $rachel_version = file_get_contents("/etc/rachelinstaller-version");
 }
 
-$datapost_version = "?";
-if (file_exists("/etc/datapost-version")) {
-    $datapost_version = file_get_contents("/etc/datapost-version");
-}
+$datapost_version = file_get_contents("/etc/datapost-version");
+if (!$datapost_version) { $datapost_version = "?"; }
 
-$kolibri_output  = exec("sudo kolibri --version");
-$kolibri_split   = explode(" ", $kolibri_output);
-$kolibri_version = end($kolibri_split);
-
-if (!$kolibri_version){
-    $kolibri_version = "?";
-}
-
-$kalite_version = exec("export USER=`whoami`; kalite --version;");
-if (!$kalite_version || !preg_match("/^[\d\.]+$/", $kalite_version)) {
-    $kalite_version = "?";
-}
-
-$kiwix_version = exec("cat /etc/kiwix-version");
-
+# this is CMAL150 way (RACHEL 5)
+$kiwix_version = exec("/var/kiwix/bin/kiwix-serve -V");
 if (!$kiwix_version) {
-    $kiwix_version = "?"; 
+    # this was CMAL100 way (RACHEL 3/4)
+    $kiwix_version = file_get_contents("/etc/kiwix-version");
 }
+if (!$kiwix_version) { $kiwix_version = "?"; }
 
-$moodle_version = exec("cat /etc/moodle-version");
-if (!$moodle_version) {
-    $moodle_version = "?"; 
-}
+# these are slow to retrieve so we just save them on build
+# you can refresh them as so:
+#    kolibri --version | cut -d " " -f 3 > /etc/kolibri-version
+#    kalite --version > /etc/kalite-version
+$kalite_version = file_get_contents("/etc/kalite-version");
+if (!$kalite_version) { $kalite_version = "?"; }
+$kolibri_version = file_get_contents("/etc/kolibri-version");
+if (!$kolibri_version) { $kolibri_version = "?"; }
+
+$mac = exec("cat /sys/class/net/enp2s0/address");
 
 ?>
 
@@ -446,15 +444,15 @@ if (!$moodle_version) {
 <tr><th colspan="2">System Sofware</th></tr>
 <tr><td>Hardware</td><td><?php echo $hardware ?></td></tr>
 <tr><td>OS</td><td><?php echo $os ?></td></tr>
-<tr><td>RACHEL Installer</td><td><?php echo $rachel_installer_version ?></td></tr>
-<tr><td>DataPost</td><td><?php echo $datapost_version ?></td></tr>
-<tr><td>Kolibri</td><td><?php echo $kolibri_version ?></tr>
-<tr><td>KA Lite</td><td><?php echo $kalite_version ?></tr>
+<tr><td>MAC</td></td><td><?php echo $mac ?></td></tr>
+<tr><td>RACHEL</td><td><?php echo $rachel_version ?></td></tr>
+<tr><td>dataPost</td><td><?php echo $datapost_version ?></td></tr>
+<tr><td>KA Lite</td><td><?php echo $kalite_version ?></td></tr>
+<tr><td>Kolibri</td><td><?php echo $kolibri_version ?></td></tr>
 <tr><td>Kiwix</td><td><?php echo $kiwix_version ?></td></tr>
-<tr><td>Moodle</td><td><?php echo $moodle_version ?></td></tr>
 <tr><td>Content Shell</td><td>
 
-    <span id="cur_contentshell">v2.4.1</span>
+    <span id="cur_contentshell">v5.0.0</span>
     <div style="float: right; margin-left: 20px;">
         <div style="float: left; width: 24px; height: 24px; margin-top: 2px;">
             <img src="../art/spinner.gif" id="spinner" style="display: none;">
