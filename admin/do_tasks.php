@@ -99,15 +99,19 @@ while (true) {
     $cmd        = $next['command'];
     $moddir     = $next['moddir'];
 
-    $is_hdd = exec("cat /sys/block/sda/queue/rotational");
-    if ($is_hdd == 0) {
-        # SSD can handle a bit more througput -- this seems OK
-        $cmd = preg_replace("/^rsync /", "rsync --bwlimit=500000 ", $cmd);
-    } else {
-        # we throttle to 25MB/s because the CAP3 will otherwise
-        # start locking up
-        $cmd = preg_replace("/^rsync /", "rsync --bwlimit=125000 ", $cmd);
-    }
+# we don't throttle here any more -- these numbers were pointlessly high
+# (500MB/sec 125MB/sec  respectively?) and we don't do production install
+# (i.e. fast LAN) here anyway -- nobody was overloading their HDD via
+# internet install
+#    $is_hdd = exec("cat /sys/block/sda/queue/rotational");
+#    if ($is_hdd == 0) {
+#        # SSD can handle a bit more througput -- this seems OK
+#        $cmd = preg_replace("/^rsync /", "rsync --bwlimit=500000 ", $cmd);
+#    } else {
+#        # we throttle to 25MB/s because the CAP3 will otherwise
+#        # start locking up
+#        $cmd = preg_replace("/^rsync /", "rsync --bwlimit=125000 ", $cmd);
+#    }
 
     #-------------------------------------------
     # here we actually fire off the process and see what happens 
