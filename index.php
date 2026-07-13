@@ -224,6 +224,7 @@ body.sidebar-always-open .sidebar-overlay {
 </head>
 
 <body>
+<?php include_once("panic-banner.php"); ?>
 
 <?php $categoryData = array('categories' => array(), 'modules' => array()); ?>
 
@@ -283,14 +284,31 @@ body.sidebar-always-open .sidebar-overlay {
             }
         } catch (Exception $e) {}
     }
+    // Only show categories that have installed modules
+    $installedMods = array();
+    $modDir = __DIR__ . '/modules';
+    if (is_dir($modDir)) {
+        foreach (scandir($modDir) as $d) {
+            if ($d !== '.' && $d !== '..') $installedMods[] = $d;
+        }
+    }
+    $activeCategories = array();
+    foreach ($installedMods as $mod) {
+        if (isset($categoryData['modules'][$mod])) {
+            foreach ($categoryData['modules'][$mod] as $cat) {
+                $activeCategories[$cat] = true;
+            }
+        }
+    }
     ?>
-    <?php if (!empty($categoryData['categories'])): ?>
+    <?php if (!empty($categoryData['categories']) && !empty($activeCategories)): ?>
     <div class="sidebar-section">
         <p class="sidebar-section-title">Filter by Category</p>
         <a href="#" class="sidebar-item sidebar-cat-btn active" data-category="all" onclick="filterByCategory('all'); return false;">
             <span class="icon">📚</span> All Modules
         </a>
         <?php foreach ($categoryData['categories'] as $catId => $catInfo):
+            if (!isset($activeCategories[$catId])) continue;
             $catIcon = is_array($catInfo) ? ($catInfo['icon'] ?? '') : '';
             $catLabel = is_array($catInfo) ? ($catInfo['label'] ?? $catId) : $catInfo;
         ?>

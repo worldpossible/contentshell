@@ -616,35 +616,28 @@ function setRsyncDaemon($state) {
 }
 
 function getBatteryInfo() {
-    exec("ubus call battery info", $out, $rv);
-    
-    if(!$out){
+    // Read battery info from sysfs (CMAL 150 hardware)
+    $bat_path = '/sys/class/power_supply/BAT1';
+    if (!is_dir($bat_path)) {
         header("HTTP/1.1 200 OK");
         header("Content-Type: application/json");
-        $result = [ 'level'  => '0', 'status' => 'disconnected'];
-        $json_result = json_encode($result);
-        echo $json_result;
-        exit;        
+        echo json_encode(['level' => '100', 'status' => 'full']);
+        exit;
     }
-    
-    $ubus   = json_decode(implode($out), true);
-    $level  = $ubus['capacity'];
-    $status = rtrim($ubus['status']);
-    # options are "Charging", "Discharging", and "Unknown"
-    # which seems to indicate charged (so we call it charging)
-
-
-
-    if ($status == "Discharging") {
-        $status = "discharging";
+    $capacity = trim(@file_get_contents("$bat_path/capacity") ?: '0');
+    $status_raw = trim(@file_get_contents("$bat_path/status") ?: 'Unknown');
+    if ($status_raw === 'Discharging') {
+        $status = 'discharging';
+    } elseif ($status_raw === 'Unknown' && $capacity == '100') {
+        $status = 'full';
+    } elseif ($status_raw === 'Full' || $status_raw === 'Not charging') {
+        $status = 'full';
     } else {
-        $status = "charging";
+        $status = 'charging';
     }
-
-
     header("HTTP/1.1 200 OK");
     header("Content-Type: application/json");
-    echo "{ \"level\" : \"$level\", \"status\" : \"$status\" }\n";
+    echo json_encode(['level' => $capacity, 'status' => $status]);
     exit;
 }
 

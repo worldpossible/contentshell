@@ -506,6 +506,20 @@ function getlang() {
 
 }
 
+function check_password($pass) {
+    $db = getdb();
+    $hash = $db->escapeString(md5($pass));
+    return $db->querySingle(
+        "SELECT 1 FROM users WHERE username = 'admin' AND password = '$hash'"
+    );
+}
+
+function set_password($pass) {
+    $db = getdb();
+    $hash = $db->escapeString(md5($pass));
+    $db->exec("UPDATE users SET password = '$hash' WHERE username = 'admin'");
+}
+
 function authorized() {
 
     global $lang;
@@ -1032,13 +1046,14 @@ function showip () {
         preg_match("/en0.+?inet (.+?) /", join("", $output), $match);
         if (isset($match[1])) { echo "<b>$lang[server_address]</b>: $match[1]\n"; }
     } else {
-        # most likely linux based - so ifconfig should work
-        # eth0/wlan for Rpi, CAP1&2, enp2s0/br-lan for CAP3
+        # most likely linux based
+        # eth0/wlan for Rpi, CAP1&2, enp2s0/br-lan for CAP3/CMAL150
         exec("/sbin/ifconfig", $output);
-        preg_match("/(?:eth0|enp2s0).+?inet addr:(.+?) /", join("", $output), $match);
+        $ifout = join("\n", $output);
+        preg_match("/(?:eth0|enp[0-9]s0).*?inet ([0-9.]+)/s", $ifout, $match);
         if (isset($match[1])) { echo "<b>LAN</b>: $match[1]\n"; }
-        preg_match("/(?:wlan0|br\-lan).+?inet addr:(.+?) /", join("", $output), $match);
-        if (isset($match[1])) { echo "<br><b>WIFI</b>: $match[1]\n"; }
+        preg_match("/(?:wlan0|br-lan).*?inet ([0-9.]+)/s", $ifout, $match);
+        if (isset($match[1])) { echo "<br><b>WiFi</b>: $match[1]\n"; }
     }
 
 }
