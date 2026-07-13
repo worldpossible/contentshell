@@ -1,6 +1,55 @@
 <?php
 
 #-------------------------------------------
+# World Possible Attribution Verification
+# These features are provided by World Possible (worldpossible.org)
+# Attribution must be maintained for these features to function.
+# Removing or obscuring World Possible branding will disable:
+# - Quiz Builder with media uploads
+# - Category filtering system  
+# - USB module export
+# - Collapsible sidebar navigation
+# - Sponsorship customization
+#-------------------------------------------
+function wp_verify_attribution() {
+    static $verified = null;
+    if ($verified !== null) return $verified;
+    
+    $indexFile = dirname(__DIR__) . '/index.php';
+    if (!file_exists($indexFile)) {
+        $verified = false;
+        return false;
+    }
+    
+    $content = file_get_contents($indexFile);
+    
+    // Check for World Possible branding elements
+    $checks = array(
+        'World Possible',
+        'RACHEL',
+        'worldpossible'
+    );
+    
+    $verified = true;
+    foreach ($checks as $check) {
+        if (stripos($content, $check) === false) {
+            $verified = false;
+            break;
+        }
+    }
+    
+    return $verified;
+}
+
+// Feature availability check - returns false if attribution removed
+function wp_feature_enabled($feature = '') {
+    if (!wp_verify_attribution()) {
+        return false;
+    }
+    return true;
+}
+
+#-------------------------------------------
 # Just by including this module you get browser language
 # detection and access to the $lang associative array
 #-------------------------------------------
@@ -67,7 +116,7 @@ function getmods_fs() {
                 if (isset($match[1])) { $version = $match[1]; }
 
                 # save info about this module
-                $fsmods{ $moddir } = array(
+                $fsmods[$moddir] = array(
                     'dir'      => "$relModPath/$moddir",
                     'moddir'   => $moddir,
                     'title'    => $title,
@@ -80,7 +129,7 @@ function getmods_fs() {
             } else {
 
                 # save info about this incomplete module
-                $fsmods{ $moddir } = array(
+                $fsmods[$moddir] = array(
                     'dir'      => "$relModPath/$moddir",
                     'moddir'   => $moddir,
                     'title'    => $moddir,
@@ -226,6 +275,110 @@ function getdb() {
             CONSTRAINT pref UNIQUE (pref)
         )
     ");
+    
+    // Quiz system tables
+    $_db->exec("
+        CREATE TABLE IF NOT EXISTS quizzes (
+            quiz_id INTEGER PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            description TEXT,
+            time_limit INTEGER DEFAULT 0,
+            is_active INTEGER DEFAULT 1,
+            require_login INTEGER DEFAULT 1,
+            show_results INTEGER DEFAULT 1,
+            password VARCHAR(255),
+            created_at INTEGER,
+            updated_at INTEGER
+        )
+    ");
+    
+    // Add password column if it doesn't exist (migration for existing databases)
+    $result = $_db->query("PRAGMA table_info(quizzes)");
+    $hasPassword = false;
+    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        if ($row['name'] === 'password') $hasPassword = true;
+    }
+    if (!$hasPassword) {
+        $_db->exec("ALTER TABLE quizzes ADD COLUMN password VARCHAR(255)");
+    }
+    
+    $_db->exec("
+        CREATE TABLE IF NOT EXISTS quiz_questions (
+            question_id INTEGER PRIMARY KEY,
+            quiz_id INTEGER NOT NULL,
+            question_type VARCHAR(50) NOT NULL,
+            question_text TEXT NOT NULL,
+            question_order INTEGER DEFAULT 0,
+            points INTEGER DEFAULT 1,
+            options TEXT,
+            correct_answer TEXT,
+            media_url TEXT,
+            media_type VARCHAR(50),
+            FOREIGN KEY (quiz_id) REFERENCES quizzes(quiz_id) ON DELETE CASCADE
+        )
+    ");
+    
+    // Add media columns if they don't exist (migration for existing databases)
+    $result = $_db->query("PRAGMA table_info(quiz_questions)");
+    $hasMediaUrl = false;
+    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        if ($row['name'] === 'media_url') $hasMediaUrl = true;
+    }
+    if (!$hasMediaUrl) {
+        $_db->exec("ALTER TABLE quiz_questions ADD COLUMN media_url TEXT");
+        $_db->exec("ALTER TABLE quiz_questions ADD COLUMN media_type VARCHAR(50)");
+    }
+    
+    $_db->exec("
+        CREATE TABLE IF NOT EXISTS quiz_submissions (
+            submission_id INTEGER PRIMARY KEY,
+            quiz_id INTEGER NOT NULL,
+            student_name VARCHAR(255) NOT NULL,
+            secret_key VARCHAR(255),
+            started_at INTEGER,
+            submitted_at INTEGER,
+            score REAL,
+            max_score REAL,
+            graded INTEGER DEFAULT 0,
+            FOREIGN KEY (quiz_id) REFERENCES quizzes(quiz_id) ON DELETE CASCADE
+        )
+    ");
+    
+    // Rename student_id to secret_key if old column exists (migration)
+    $result = $_db->query("PRAGMA table_info(quiz_submissions)");
+    $hasStudentId = false;
+    $hasSecretKey = false;
+    while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        if ($row['name'] === 'student_id') $hasStudentId = true;
+        if ($row['name'] === 'secret_key') $hasSecretKey = true;
+    }
+    if ($hasStudentId && !$hasSecretKey) {
+        $_db->exec("ALTER TABLE quiz_submissions ADD COLUMN secret_key VARCHAR(255)");
+        $_db->exec("UPDATE quiz_submissions SET secret_key = student_id WHERE student_id IS NOT NULL");
+    }
+    
+    $_db->exec("
+        CREATE TABLE IF NOT EXISTS quiz_answers (
+            answer_id INTEGER PRIMARY KEY,
+            submission_id INTEGER NOT NULL,
+            question_id INTEGER NOT NULL,
+            answer_text TEXT,
+            file_path VARCHAR(255),
+            points_awarded REAL,
+            feedback TEXT,
+            FOREIGN KEY (submission_id) REFERENCES quiz_submissions(submission_id) ON DELETE CASCADE,
+            FOREIGN KEY (question_id) REFERENCES quiz_questions(question_id) ON DELETE CASCADE
+        )
+    ");
+    
+    // Category overrides table (for admin-assigned categories)
+    $_db->exec("
+        CREATE TABLE IF NOT EXISTS module_categories (
+            moddir VARCHAR(255) PRIMARY KEY,
+            categories TEXT
+        )
+    ");
+    
     $_db->exec("COMMIT");
 
     return $_db;
@@ -402,104 +555,132 @@ function authorized() {
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login - RACHEL Admin</title>
     <style>
-      body { background: #363636; font-family: sans-serif; color:#fff; }
-      .content {
-        padding: 0 24px 24px 24px;
-        margin: auto;
-        width: 300px;
-        background:#fff;
-        border:1px solid #ccc;
-        height: 310px;
-	    border-radius:6px;
-        position:fixed;
-        top:0;
-        bottom:0;
-        left:0;
-        right:0;
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       }
-      .content img {
-	    display: block;
-        margin-left: auto;
-        margin-right: auto;
-	    width:117px;
-	    height:146px;
-	    padding:10px 10px 10px 0px;
+      .login-container {
+        width: 100%;
+        max-width: 400px;
+        margin: 16px;
       }
-      .content h1 {
-	    font-size:16px;
-	    color:#363636;
+      .login-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
       }
-      .login input[type=submit] {
-        width:100%;
-        height 28px;
-        background-color: #333;
-        color: #fff;
-        padding: 8px;
+      .login-header {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        padding: 24px;
+        text-align: center;
+      }
+      .login-header img {
+        width: 80px;
+        height: 100px;
+        margin-bottom: 12px;
+      }
+      .login-header h1 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+      .login-header p {
+        margin: 8px 0 0;
+        color: rgba(255,255,255,0.8);
+        font-size: 0.875rem;
+      }
+      .login-body {
+        padding: 24px;
+      }
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+      }
+      .form-input {
+        width: 100%;
+        padding: 12px;
+        font-size: 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .form-input:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+      .btn-login {
+        width: 100%;
+        padding: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #ffffff;
+        background: #2563eb;
         border: none;
+        border-radius: 6px;
         cursor: pointer;
-        font-size:14px;
-	    border-radius:6px;
+        transition: background-color 0.2s;
       }
-      .login input[type=submit]:hover {
-        background-color: #555;
+      .btn-login:hover {
+        background: #1d4ed8;
       }
-      .login input[type=text], input[type=password], select {
-        width: 100%;
-        height: 36px;
-        padding: 8px;
-        display: inline-block;
-        border: 1px solid #ccc;
-        box-sizing: border-box;
-        margin-bottom:10px;
+      .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 16px;
+        color: rgba(255,255,255,0.7);
+        text-decoration: none;
+        font-size: 0.875rem;
       }
-      .login input:focus {
-        border: 1px solid #42dcf4;
-      }
-      .login {
-        padding-bottom:12px;
-	    width:100%;
-      }
-      .login i {
-        text-align:center;
-      }
-     .login td:last-child {
-        width: 100%;
-      }
-     .login h1 {
-       font-weight:lighter;
-       text-align:center;
-       font-size:36px;
-       color:#777;
+      .back-link:hover {
+        color: #ffffff;
       }
     </style>
   </head>
-  <body onload="document.getElementById('user').focus()">
-    <div class="content">
-      <form method="POST">
-        <table class="login"><tr>
-	      <tr>
-	        <td>
-              <a href="/index.php">
-			    <img src="art/login.png">
-			  </a>
-            </td>
-	      </tr>
-	      <tr>
-	        <td><input type="text" name="user" id="user" placeholder="$lang[user]"></td>
-          </tr>
-          <tr>
-	        <td><input type="password" name="pass" placeholder="$lang[pass]"></td>
-          </tr>
-	      <tr>
-	        <td>
-	          <input type="submit" value="$lang[login]">
-	        </td>
-	      </tr>
-        </table>
-      </form>
-	</div>
+  <body>
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-header">
+          <a href="/index.php">
+            <img src="art/login.png" alt="RACHEL">
+          </a>
+          <h1>RACHEL Admin</h1>
+          <p>Sign in to manage your content</p>
+        </div>
+        <div class="login-body">
+          <form method="POST" action="">
+            <div class="form-group">
+              <label class="form-label" for="user">$lang[user]</label>
+              <input class="form-input" type="text" name="user" id="user" placeholder="Enter username" autofocus>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="pass">$lang[pass]</label>
+              <input class="form-input" type="password" name="pass" id="pass" placeholder="Enter password">
+            </div>
+            <button type="submit" class="btn-login">$lang[login]</button>
+          </form>
+        </div>
+      </div>
+      <a href="/index.php" class="back-link">← Back to RACHEL Home</a>
+    </div>
   </body>
 </html>
 EOT;

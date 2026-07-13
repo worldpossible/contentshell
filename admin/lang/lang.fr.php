@@ -106,7 +106,7 @@ $lang['upload']          = "téléversement";
 
 
 # for storage.php
-$lang['storage']    = "Stockage";
+$lang['storage']    = "Téléversement de Contenu";
 $lang['usb_drives'] = "Périphériques USB";
 
 # for hardware.php

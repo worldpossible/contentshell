@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RACHEL - About</title>
 <link rel="stylesheet" href="css/normalize-1.1.3.css">
 <link rel="stylesheet" href="css/style.css">
@@ -9,85 +10,151 @@
 
 <body>
 
-<div id="rachel">Rachel</div>
+<header id="rachel">
+    <div class="brand">RACHEL</div>
+    <div class="tagline">Remote Area Community Hotspot for Education and Learning</div>
+    <div id="adminnav"><a href="admin/modules.php">ADMIN</a></div>
+</header>
 
-<div class="menubar cf">
+<nav class="menubar cf">
 <ul>
 <li><a href="index.php">HOME</a></li>
-<li><a href="about.html">ABOUT</a></li>
+<li><a href="about.html" class="active">ABOUT</a></li>
+<li><a href="http://localhost:8002/roundcube" target="_blank">WEBMAIL</a></li>
 </ul>
-</div>
+</nav>
 
-<div id="content">
-<div class="fullpage">
+<main id="content">
+<article class="fullpage">
 
 <h2>What is RACHEL?</h2>
 <p>
-RACHEL, the Remote Area Community Hotspot for Education and Learning is a
-combination of freely available software and content modules that make it easy
-to bring online educational materials into places with limited or no internet
-access. The content is available in multiple languages and can be customized to
-suit local needs.
+RACHEL (Remote Area Community Hotspot for Education and Learning) is a portable, 
+offline education server that brings the world's best free educational content to 
+communities without reliable internet access. RACHEL devices create a local WiFi 
+hotspot that students, teachers, and community members can connect to with any 
+device—smartphones, tablets, laptops, or desktop computers—to access a curated 
+library of educational resources.
+</p>
+<p>
+RACHEL contains complete offline copies of websites like Wikipedia, Khan Academy, 
+OpenStreetMap, educational videos, e-books, health information, and much more. 
+The content is available in multiple languages including English, Spanish, French, 
+Portuguese, Arabic, Hindi, and many others, making quality education accessible 
+to learners around the world.
 </p>
 
 
-<h2>Who makes RACHEL?</h2>
-<p>RACHEL was originally developed by Norberto Mujica when he saw the need
-while visiting rural schools in Guatemala. It is now developed, supported, and
-installed by the non-profit
-<a href="http://worldpossible.org/">World Possible</a>
-as part of their ongoing efforts to improve education in underserved schools.
+<h2>About World Possible</h2>
+<p>
+<a href="https://worldpossible.org/">World Possible</a> is a U.S.-based 501(c)(3) 
+non-profit organization founded with the mission of connecting offline learners 
+to the world's free educational knowledge. World Possible develops and distributes 
+RACHEL devices to schools, libraries, community centers, refugee camps, prisons, 
+and other locations where internet connectivity is limited, unreliable, or unaffordable.
+</p>
+<p>
+Since its founding, World Possible has deployed RACHEL devices in over 90 countries, 
+reaching millions of learners. The organization works with partner NGOs, governments, 
+educational institutions, and volunteers to ensure that every learner, regardless of 
+their location or economic circumstances, can access quality educational resources.
+</p>
+<p>
+World Possible also provides training for teachers and administrators on how to 
+effectively integrate RACHEL into their educational programs, maximizing the 
+impact of offline learning resources.
 </p>
 
 
-<h2>Who uses RACHEL?</h2>
-<p>You, right now! Also, tens of thousands of learners around the world, in
-schools or communities that lack sufficient internet access. There are
-RACHEL users in countries on just about every continent, with more getting
-access every day.</p>
+<h2>Datapost: Offline Data Collection</h2>
+<p>
+Datapost is a feature integrated into RACHEL that enables offline data collection 
+and synchronization. In environments without internet connectivity, gathering 
+feedback, conducting surveys, tracking student progress, and collecting usage 
+statistics can be challenging. Datapost solves this by allowing data to be 
+collected locally on the RACHEL device and then synchronized when connectivity 
+becomes available.
+</p>
+<p>
+Key features of Datapost include:
+</p>
+<ul>
+<li><strong>Offline Forms:</strong> Create and distribute surveys, assessments, and feedback forms that work without internet</li>
+<li><strong>Usage Analytics:</strong> Track which educational modules are being accessed and how often</li>
+<li><strong>Student Progress:</strong> Monitor learning outcomes and engagement metrics</li>
+<li><strong>Sync When Connected:</strong> Automatically upload collected data when the device connects to the internet</li>
+<li><strong>Webmail Integration:</strong> Local email system for communication within the RACHEL network</li>
+</ul>
 
 
-<h2>Where can I get RACHEL?</h2>
-<p>RACHEL can be built from scratch using free software and off-the-shelf
-hardware. You can learn more about it online at:
-<a href="http://rachelfriends.org/">rachelfriends.org</a>.
-You can also purchase pre-configured RACHEL servers from our online store
-at: <a href="https://racheloffline.org/">racheloffline.org</a>.
-All proceeds go back into the non-profit World Possible, which develops,
-supports, and installs RACHEL.</p>
+<h2>RACHEL Hardware</h2>
+<p>
+RACHEL runs on various hardware platforms designed for different deployment scenarios:
+</p>
+<ul>
+<li><strong>RACHEL-Plus:</strong> A ruggedized, battery-powered device ideal for mobile deployments and areas with unreliable electricity</li>
+<li><strong>RACHEL-Pi:</strong> A cost-effective solution built on Raspberry Pi hardware, perfect for permanent installations</li>
+<li><strong>USB RACHEL:</strong> A portable USB drive version that can run on any computer</li>
+<li><strong>Custom Servers:</strong> Larger installations using standard server hardware for schools and institutions</li>
+</ul>
+<p>
+All RACHEL devices run on Ubuntu Linux and use open-source software, making them 
+easy to maintain, update, and customize for local needs.
+</p>
 
 
-<h2>What browsers can be used with RACHEL?</h2>
-<p>Our goal is to make RACHEL as compatible as possible, so it should work with
-most browsers in common use, including many older ones. If you are looking to
-install a new browser, Chrome is a popular choice because it is fast,
-lightweight, and includes robust support for video and flash content. You can
-download Chrome from Google at:
-<a href="https://www.google.com/chrome/browser/">www.google.com/chrome/browser</a>.</p>
+<h2>Educational Content</h2>
+<p>
+RACHEL includes a growing library of free educational content modules covering:
+</p>
+<ul>
+<li><strong>Core Academics:</strong> Mathematics, science, reading, and language arts from Khan Academy, CK-12, and other sources</li>
+<li><strong>Reference:</strong> Complete offline Wikipedia, dictionaries, and encyclopedias</li>
+<li><strong>Health:</strong> Medical information, first aid, maternal health, and disease prevention resources</li>
+<li><strong>Practical Skills:</strong> Agriculture, construction, business, and vocational training materials</li>
+<li><strong>Literature:</strong> Thousands of free e-books from Project Gutenberg and other sources</li>
+<li><strong>Maps:</strong> Offline OpenStreetMap for geography and navigation</li>
+<li><strong>Videos:</strong> Educational video content on science, history, and more</li>
+</ul>
 
 
-<h2>Is RACHEL under any license?</h2>
-<p>Yes. The core RACHEL package is licensed under a
+<h2>Get Involved</h2>
+<p>
+There are many ways to support RACHEL and World Possible's mission:
+</p>
+<ul>
+<li><strong>Donate:</strong> Financial contributions help deploy more RACHEL devices worldwide</li>
+<li><strong>Volunteer:</strong> Help with content curation, translation, software development, or field deployments</li>
+<li><strong>Partner:</strong> Organizations can partner with World Possible to bring RACHEL to their communities</li>
+<li><strong>Purchase:</strong> Buy pre-configured RACHEL devices at <a href="https://racheloffline.org/">racheloffline.org</a></li>
+</ul>
+<p>
+Learn more at <a href="https://worldpossible.org/">worldpossible.org</a> or 
+join the community at <a href="https://community.worldpossible.org/">community.worldpossible.org</a>.
+</p>
+
+
+<h2>License</h2>
+<p>The core RACHEL software is licensed under a
 <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/">Creative Commons
 Attribution-NonCommercial-ShareAlike 3.0 Unported License</a>. This means you
-can use and distribute this offline version except for any commercial purpose,
-like selling it in any way. You can only distribute it for free, and you must
-keep the attribution and the "About" section (about.html).</p>
-<p><a href="http://creativecommons.org/licenses/by-nc-sa/3.0/"><img src="art/cc3.gif" alt="cc3"></a></p>
-<p>The educational content included in RACHEL are available under a variety
-of licenses that allow free usage under a variety of terms. Please check each
-individual module for details. All content is available for free online.</p>
+can use and distribute this offline version for any non-commercial purpose.
+You must keep the attribution and this About page intact.</p>
+<p><a href="http://creativecommons.org/licenses/by-nc-sa/3.0/"><img src="art/cc3.gif" alt="Creative Commons License"></a></p>
+<p>The educational content modules included in RACHEL are available under various 
+open licenses that allow free usage. Please check each individual module for 
+specific licensing details. All content is available for free online from its 
+original sources.</p>
 
-</div>
-</div>
+</article>
+</main>
 
-
-<div class="menubar cf">
+<footer class="menubar cf" style="margin-bottom: 80px;">
 <ul>
 <li><a href="index.php">HOME</a></li>
 <li><a href="about.html">ABOUT</a></li>
 </ul>
-</div>
+</footer>
 
 </body>
 </html>

@@ -93,6 +93,69 @@ function saveModState() {
     });
 }
 
+// reset modules to default alphabetical order
+function resetToDefault() {
+    if (!confirm("This will reset all modules to alphabetical order and make them all visible. Continue?")) {
+        return;
+    }
+    $("#defaultbut").html("Resetting...");
+    $("#defaultbut").prop("disabled", true);
+    
+    $.ajax({
+        url: "modules.php?resetdefault=1",
+        success: function() {
+            $("#defaultbut").css("background", "#d1fae5");
+            $("#defaultbut").css("border-color", "#10b981");
+            $("#defaultbut").css("color", "#065f46");
+            $("#defaultbut").html("&#10004; Reset Complete");
+            // Reload the page after a short delay to show the new order
+            setTimeout(function() {
+                location.reload();
+            }, 1000);
+        },
+        error: function() {
+            $("#defaultbut").css("background", "#fee2e2");
+            $("#defaultbut").css("border-color", "#ef4444");
+            $("#defaultbut").css("color", "#991b1b");
+            $("#defaultbut").html("X Reset Failed");
+            $("#defaultbut").prop("disabled", false);
+        }
+    });
+}
+
+// backup current order as default
+function backupAsDefault() {
+    if (!confirm("This will save the current module order as the new default. Continue?")) {
+        return;
+    }
+    $("#backupbut").html("Saving...");
+    $("#backupbut").prop("disabled", true);
+    
+    $.ajax({
+        url: "modules.php?backupdefault=1",
+        success: function() {
+            $("#backupbut").css("background", "#d1fae5");
+            $("#backupbut").css("border-color", "#10b981");
+            $("#backupbut").css("color", "#065f46");
+            $("#backupbut").html("&#10004; Saved as Default");
+            setTimeout(function() {
+                $("#backupbut").css("background", "#dbeafe");
+                $("#backupbut").css("border-color", "#2563eb");
+                $("#backupbut").css("color", "#1e40af");
+                $("#backupbut").html("Save Current as Default");
+                $("#backupbut").prop("disabled", false);
+            }, 2000);
+        },
+        error: function() {
+            $("#backupbut").css("background", "#fee2e2");
+            $("#backupbut").css("border-color", "#ef4444");
+            $("#backupbut").css("color", "#991b1b");
+            $("#backupbut").html("X Save Failed");
+            $("#backupbut").prop("disabled", false);
+        }
+    });
+}
+
 // mark all hide boxes on or off
 function changeall(myself, value) {
     $("input[type=checkbox]").each(function () {

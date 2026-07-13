@@ -101,8 +101,11 @@ $lang['pause']            = "Pause";
 $lang['installed']        = "Installed";
 
 # for storage.php
-$lang['storage'] = "Storage";
+$lang['storage'] = "Content";
 $lang['usb_drives'] = "USB Drives";
+
+# for device.php
+$lang['device'] = "Device";
 
 # for hardware.php
 $lang['wifi_control'] = "WIFI Control";

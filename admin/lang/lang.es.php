@@ -101,7 +101,7 @@ $lang['installed']       = "instalado";
 $lang['upload']          = "carga";
 
 # for storage.php
-$lang['storage']    = "Almacenamiento";
+$lang['storage']    = "Carga de Contenido";
 $lang['usb_drives'] = "Dispositivos USB";
 
 # for hardware.php

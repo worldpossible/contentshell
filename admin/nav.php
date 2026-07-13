@@ -1,15 +1,14 @@
-<div id="headbar">
-  <b>RACHEL Admin - <?php echo $lang['admin']; ?></b>
-  <ul id="nav">
-    <li><a href="modules.php" <?php if ($page_nav == "modules")  { echo ' class="active"'; } ?> target="_top"><?php echo $lang['modules']  ?></a></li>
-    <li><a href="hardware.php"<?php if ($page_nav == "hardware") { echo ' class="active"'; } ?> target="_top"><?php echo $lang['hardware'] ?></a></li>
-    <li><a href="storage.php" <?php if ($page_nav == "storage")  { echo ' class="active"'; } ?> target="_top"><?php echo $lang['storage']  ?></a></li>
-    <li><a href="version.php" <?php if ($page_nav == "version")  { echo ' class="active"'; } ?> target="_top"><?php echo $lang['version']  ?></a></li>
-    <li><a href="install.php" <?php if ($page_nav == "install")  { echo ' class="active"'; } ?> target="_top"><?php echo $lang['install']  ?></a></li>
-    <li><a href="stats.php"   <?php if ($page_nav == "stats")    { echo ' class="active"'; } ?> target="_top"><?php echo $lang['stats']    ?></a></li>
-    <li><a href="settings.php"<?php if ($page_nav == "settings") { echo ' class="active"'; } ?> target="_top"><?php echo $lang['settings'] ?></a></li>
-    <li><a href="logout.php"> <?php echo $lang['logout'] ?></a></li>
-  </ul>
+<header id="headbar">
+  <b>RACHEL Admin</b>
+  <nav>
+    <ul id="nav">
+      <li><a href="storage.php" <?php if ($page_nav == "storage")  { echo ' class="active"'; } ?> target="_top">Content Management</a></li>
+      <li><a href="device.php" <?php if ($page_nav == "device")  { echo ' class="active"'; } ?> target="_top">Device Settings</a></li>
+      <li><a href="stats.php"   <?php if ($page_nav == "stats")    { echo ' class="active"'; } ?> target="_top">DataPost</a></li>
+      <li><a href="logout.php"><?php echo $lang['logout'] ?></a></li>
+      <li><a href="../index.php" target="_top" style="opacity: 0.7;">← <?php echo $lang['home'] ?></a></li>
+    </ul>
+  </nav>
   <div id="ip">
     <?php showip();
     # on the RACHEL-Plus we also show a battery meter
@@ -47,4 +46,4 @@
     }
     ?>
   </div>
-</div>
+</header>

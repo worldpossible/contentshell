@@ -2,7 +2,8 @@
 <html lang="<?php echo $lang['langcode']; ?>">
   <head>
     <meta charset="utf-8">
-    <title>RACHEL<?php if ($page_title) { echo " $page_title"; } ?></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RACHEL<?php if ($page_title) { echo " - $page_title"; } ?></title>
     <link rel="stylesheet" href="../css/normalize-1.1.3.css">
     <link rel="stylesheet" href="../css/ui-lightness/jquery-ui-1.10.4.custom.min.css">
     <link rel="stylesheet" href="css/style.css">
@@ -18,4 +19,4 @@
 
 <?php include "nav.php" ?>
 
-<div id="content">
+<main id="content">
